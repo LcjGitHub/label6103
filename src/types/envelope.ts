@@ -55,6 +55,22 @@ export const ENVELOPE_SIZES: EnvelopeSize[] = [
 
 export const STORAGE_KEY = 'envelope-preview-data'
 export const ADDRESS_LIST_KEY = 'envelope-address-list'
+export const TEMPLATE_LIST_KEY = 'envelope-template-list'
+
+export interface EnvelopeTemplate {
+  id: string
+  name: string
+  createdAt: number
+  updatedAt: number
+  data: EnvelopeData
+  layout: LayoutStyle
+  sizeId: string
+  side: EnvelopeSide
+}
+
+export function generateTemplateId(): string {
+  return `tmpl_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+}
 
 export function createEmptyAddress(): Address {
   return {

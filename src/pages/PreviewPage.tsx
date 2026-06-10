@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import EnvelopePreview from '../components/EnvelopePreview'
 import ExportButton from '../components/ExportButton'
 import LanguageSwitcher from '../components/LanguageSwitcher'
+import SaveTemplateDialog from '../components/SaveTemplateDialog'
+import TemplateList from '../components/TemplateList'
 import { useEnvelope } from '../context/EnvelopeContext'
 import { useLanguage } from '../context/LanguageContext'
 import { ENVELOPE_SIZES } from '../types/envelope'
@@ -9,11 +12,30 @@ import { ENVELOPE_SIZES } from '../types/envelope'
 export default function PreviewPage() {
   const { data, layout, size, side, setLayout, setSizeId, setSide } = useEnvelope()
   const { t } = useLanguage()
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false)
+  const [toast, setToast] = useState<string | null>(null)
+
+  const showToast = (msg: string) => {
+    setToast(msg)
+    setTimeout(() => setToast(null), 2000)
+  }
 
   const hasRecipient = Boolean(data.recipient.name || data.recipient.street)
 
   return (
     <div className="min-h-screen">
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-stone-900 px-4 py-2 text-sm text-white shadow-lg">
+          {toast}
+        </div>
+      )}
+
+      <SaveTemplateDialog
+        open={saveDialogOpen}
+        onClose={() => setSaveDialogOpen(false)}
+        onSaved={() => showToast(t('template.saveSuccess'))}
+      />
+
       <header className="border-b border-stone-200 bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4">
           <div className="flex items-center gap-4">
@@ -32,6 +54,16 @@ export default function PreviewPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setSaveDialogOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-sm font-medium text-violet-800 transition hover:bg-violet-100"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+              {t('template.saveTemplate')}
+            </button>
             <LanguageSwitcher />
             <ExportButton />
           </div>
@@ -156,6 +188,9 @@ export default function PreviewPage() {
                 </p>
               )}
             </section>
+
+            {/* 模板列表 */}
+            <TemplateList compact />
           </aside>
 
           {/* 预览区 */}

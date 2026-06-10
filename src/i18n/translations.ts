@@ -39,6 +39,32 @@ export interface Translations {
     clearList: string
     noAddressInfo: string
     operation: string
+    rename: string
+    save: string
+    cancel: string
+    confirm: string
+  }
+  template: {
+    title: string
+    subtitle: string
+    saveTemplate: string
+    templateList: string
+    saveAsTemplate: string
+    templateName: string
+    templateNamePlaceholder: string
+    emptyNameError: string
+    duplicateNameError: string
+    loadTemplate: string
+    deleteTemplate: string
+    renameTemplate: string
+    deleteConfirm: string
+    noTemplates: string
+    created: string
+    updated: string
+    applySuccess: string
+    saveSuccess: string
+    deleteSuccess: string
+    renameSuccess: string
   }
   form: {
     placeholders: {
@@ -170,6 +196,32 @@ export const translations: Record<Language, Translations> = {
       clearList: '清空列表',
       noAddressInfo: '暂无地址信息',
       operation: '操作',
+      rename: '重命名',
+      save: '保存',
+      cancel: '取消',
+      confirm: '确认',
+    },
+    template: {
+      title: '信封模板',
+      subtitle: '收藏和管理常用的信封样式模板',
+      saveTemplate: '保存模板',
+      templateList: '模板列表',
+      saveAsTemplate: '另存为模板',
+      templateName: '模板名称',
+      templateNamePlaceholder: '请输入模板名称',
+      emptyNameError: '模板名称不能为空',
+      duplicateNameError: '该模板名称已存在',
+      loadTemplate: '应用此模板',
+      deleteTemplate: '删除模板',
+      renameTemplate: '重命名模板',
+      deleteConfirm: '确定要删除此模板吗？此操作不可撤销。',
+      noTemplates: '暂无已保存的模板，快去创建一个吧！',
+      created: '创建时间',
+      updated: '更新时间',
+      applySuccess: '模板已成功应用',
+      saveSuccess: '模板已成功保存',
+      deleteSuccess: '模板已成功删除',
+      renameSuccess: '模板已成功重命名',
     },
     form: {
       placeholders: {
@@ -300,6 +352,32 @@ export const translations: Record<Language, Translations> = {
       clearList: 'Clear List',
       noAddressInfo: 'No address info',
       operation: 'Actions',
+      rename: 'Rename',
+      save: 'Save',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
+    },
+    template: {
+      title: 'Envelope Templates',
+      subtitle: 'Save and manage your favorite envelope style templates',
+      saveTemplate: 'Save Template',
+      templateList: 'Template List',
+      saveAsTemplate: 'Save as Template',
+      templateName: 'Template Name',
+      templateNamePlaceholder: 'Enter template name',
+      emptyNameError: 'Template name cannot be empty',
+      duplicateNameError: 'Template name already exists',
+      loadTemplate: 'Apply This Template',
+      deleteTemplate: 'Delete Template',
+      renameTemplate: 'Rename Template',
+      deleteConfirm: 'Are you sure you want to delete this template? This action cannot be undone.',
+      noTemplates: 'No saved templates yet. Create one now!',
+      created: 'Created',
+      updated: 'Updated',
+      applySuccess: 'Template applied successfully',
+      saveSuccess: 'Template saved successfully',
+      deleteSuccess: 'Template deleted successfully',
+      renameSuccess: 'Template renamed successfully',
     },
     form: {
       placeholders: {

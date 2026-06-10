@@ -12,12 +12,15 @@ import {
   createEmptyAddress,
   ENVELOPE_SIZES,
   generateAddressId,
+  generateTemplateId,
   STORAGE_KEY,
+  TEMPLATE_LIST_KEY,
   toSavedAddress,
   type Address,
   type EnvelopeData,
   type EnvelopeSide,
   type EnvelopeSize,
+  type EnvelopeTemplate,
   type LayoutStyle,
   type SavedAddress,
 } from '../types/envelope'
@@ -29,6 +32,7 @@ interface EnvelopeContextValue {
   size: EnvelopeSize
   side: EnvelopeSide
   addressList: SavedAddress[]
+  templateList: EnvelopeTemplate[]
   setData: (data: EnvelopeData) => void
   updateSender: (field: keyof EnvelopeData['sender'], value: string) => void
   updateRecipient: (field: keyof EnvelopeData['recipient'], value: string) => void
@@ -43,6 +47,11 @@ interface EnvelopeContextValue {
   removeAddress: (id: string) => void
   clearAddressList: () => void
   setRecipientFromList: (id: string) => void
+  saveTemplate: (name: string) => EnvelopeTemplate
+  updateTemplate: (id: string, name: string) => void
+  deleteTemplate: (id: string) => void
+  applyTemplate: (id: string) => void
+  isTemplateNameDuplicate: (name: string, excludeId?: string) => boolean
 }
 
 const EnvelopeContext = createContext<EnvelopeContextValue | null>(null)
@@ -76,6 +85,18 @@ function loadAddressListFromStorage(): SavedAddress[] {
   return []
 }
 
+function loadTemplateListFromStorage(): EnvelopeTemplate[] {
+  try {
+    const raw = localStorage.getItem(TEMPLATE_LIST_KEY)
+    if (raw) {
+      return JSON.parse(raw) as EnvelopeTemplate[]
+    }
+  } catch {
+    /* ignore */
+  }
+  return []
+}
+
 function saveToStorage(data: EnvelopeData) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
 }
@@ -86,10 +107,15 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
   const [sizeId, setSizeId] = useState(ENVELOPE_SIZES[1].id)
   const [side, setSide] = useState<EnvelopeSide>('front')
   const [addressList, setAddressList] = useState<SavedAddress[]>(loadAddressListFromStorage)
+  const [templateList, setTemplateList] = useState<EnvelopeTemplate[]>(loadTemplateListFromStorage)
 
   useEffect(() => {
     localStorage.setItem(ADDRESS_LIST_KEY, JSON.stringify(addressList))
   }, [addressList])
+
+  useEffect(() => {
+    localStorage.setItem(TEMPLATE_LIST_KEY, JSON.stringify(templateList))
+  }, [templateList])
 
   const size = useMemo(
     () => ENVELOPE_SIZES.find((s) => s.id === sizeId) ?? ENVELOPE_SIZES[1],
@@ -169,6 +195,60 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
     })
   }, [data])
 
+  const isTemplateNameDuplicate = useCallback(
+    (name: string, excludeId?: string) => {
+      return templateList.some(
+        (t) => t.name.trim() === name.trim() && t.id !== excludeId,
+      )
+    },
+    [templateList],
+  )
+
+  const saveTemplate = useCallback(
+    (name: string): EnvelopeTemplate => {
+      const now = Date.now()
+      const newTemplate: EnvelopeTemplate = {
+        id: generateTemplateId(),
+        name: name.trim(),
+        createdAt: now,
+        updatedAt: now,
+        data: JSON.parse(JSON.stringify(data)),
+        layout,
+        sizeId,
+        side,
+      }
+      setTemplateList((prev) => [...prev, newTemplate])
+      return newTemplate
+    },
+    [data, layout, sizeId, side],
+  )
+
+  const updateTemplate = useCallback((id: string, name: string) => {
+    setTemplateList((prev) =>
+      prev.map((t) =>
+        t.id === id ? { ...t, name: name.trim(), updatedAt: Date.now() } : t,
+      ),
+    )
+  }, [])
+
+  const deleteTemplate = useCallback((id: string) => {
+    setTemplateList((prev) => prev.filter((t) => t.id !== id))
+  }, [])
+
+  const applyTemplate = useCallback((id: string) => {
+    setTemplateList((prev) => {
+      const template = prev.find((t) => t.id === id)
+      if (template) {
+        setDataState(template.data)
+        saveToStorage(template.data)
+        setLayout(template.layout)
+        setSizeId(template.sizeId)
+        setSide(template.side)
+      }
+      return prev
+    })
+  }, [])
+
   const value = useMemo(
     () => ({
       data,
@@ -176,6 +256,7 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       size,
       side,
       addressList,
+      templateList,
       setData,
       updateSender,
       updateRecipient,
@@ -190,6 +271,11 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       removeAddress,
       clearAddressList,
       setRecipientFromList,
+      saveTemplate,
+      updateTemplate,
+      deleteTemplate,
+      applyTemplate,
+      isTemplateNameDuplicate,
     }),
     [
       data,
@@ -197,6 +283,7 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       size,
       side,
       addressList,
+      templateList,
       setData,
       updateSender,
       updateRecipient,
@@ -208,6 +295,11 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       removeAddress,
       clearAddressList,
       setRecipientFromList,
+      saveTemplate,
+      updateTemplate,
+      deleteTemplate,
+      applyTemplate,
+      isTemplateNameDuplicate,
     ],
   )
 

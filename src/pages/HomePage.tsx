@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import AddressForm from '../components/AddressForm'
 import AddressList from '../components/AddressList'
 import CSVUploader from '../components/CSVUploader'
 import LanguageSwitcher from '../components/LanguageSwitcher'
+import SaveTemplateDialog from '../components/SaveTemplateDialog'
+import TemplateList from '../components/TemplateList'
 import { useEnvelope } from '../context/EnvelopeContext'
 import { useLanguage } from '../context/LanguageContext'
 import { mockBritishData } from '../data/mockData'
@@ -20,6 +23,13 @@ export default function HomePage() {
     setLayout,
   } = useEnvelope()
   const { t } = useLanguage()
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false)
+  const [toast, setToast] = useState<string | null>(null)
+
+  const showToast = (msg: string) => {
+    setToast(msg)
+    setTimeout(() => setToast(null), 2000)
+  }
 
   const loadBritishMock = () => {
     setData(mockBritishData)
@@ -28,6 +38,18 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-stone-900 px-4 py-2 text-sm text-white shadow-lg">
+          {toast}
+        </div>
+      )}
+
+      <SaveTemplateDialog
+        open={saveDialogOpen}
+        onClose={() => setSaveDialogOpen(false)}
+        onSaved={() => showToast(t('template.saveSuccess'))}
+      />
+
       <header className="border-b border-stone-200 bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-5">
           <div>
@@ -70,6 +92,16 @@ export default function HomePage() {
           >
             {t('home.resetForm')}
           </button>
+          <button
+            type="button"
+            onClick={() => setSaveDialogOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-medium text-violet-800 transition hover:bg-violet-100"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+            {t('template.saveTemplate')}
+          </button>
           <Link
             to="/addresses"
             className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-800 transition hover:bg-emerald-100"
@@ -85,6 +117,8 @@ export default function HomePage() {
             )}
           </Link>
         </div>
+
+        <TemplateList compact />
 
         <CSVUploader />
 
