@@ -8,6 +8,10 @@ export interface Address {
   postcode: string
 }
 
+export interface SavedAddress extends Address {
+  id: string
+}
+
 export interface EnvelopeData {
   sender: Address
   recipient: Address
@@ -62,6 +66,33 @@ export function createEmptyAddress(): Address {
     street: '',
     postcode: '',
   }
+}
+
+export function generateAddressId(): string {
+  return `addr_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+}
+
+export function toSavedAddress(address: Address): SavedAddress {
+  return {
+    ...address,
+    id: generateAddressId(),
+  }
+}
+
+export function getAddressKey(addr: Address): string {
+  return [
+    addr.name.trim(),
+    addr.phone.trim(),
+    addr.province.trim(),
+    addr.city.trim(),
+    addr.district.trim(),
+    addr.street.trim(),
+    addr.postcode.trim(),
+  ].join('|').toLowerCase()
+}
+
+export function isSameAddress(a: Address, b: Address): boolean {
+  return getAddressKey(a) === getAddressKey(b)
 }
 
 export function formatChineseAddress(addr: Address): string[] {

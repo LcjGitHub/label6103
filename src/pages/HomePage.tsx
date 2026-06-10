@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import AddressForm from '../components/AddressForm'
+import AddressList from '../components/AddressList'
 import CSVUploader from '../components/CSVUploader'
 import { useEnvelope } from '../context/EnvelopeContext'
 import { mockBritishData } from '../data/mockData'
@@ -80,6 +81,8 @@ export default function HomePage() {
         </div>
 
         <CSVUploader />
+
+        {addressList.length > 0 && <AddressList compact showClearButton={false} />}
 
         <AddressForm
           title="寄件人"

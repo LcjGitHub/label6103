@@ -1,10 +1,11 @@
-import { createEmptyAddress, type Address } from '../types/envelope'
+import { createEmptyAddress, getAddressKey, type Address } from '../types/envelope'
 
 export interface CsvParseResult {
   success: boolean
   total: number
   successCount: number
   failCount: number
+  duplicateCount: number
   addresses: Address[]
   errors: CsvParseError[]
 }
@@ -14,15 +15,15 @@ export interface CsvParseError {
   message: string
 }
 
-const CSV_HEADERS: (keyof Address)[] = [
-  'name',
-  'phone',
-  'province',
-  'city',
-  'district',
-  'street',
-  'postcode',
-]
+const CSV_HEADERS_CN: Record<keyof Address, string> = {
+  name: '姓名',
+  phone: '电话',
+  province: '省/州',
+  city: '城市',
+  district: '区/县',
+  street: '详细地址',
+  postcode: '邮政编码',
+}
 
 const CSV_HEADER_ALIASES: Record<string, keyof Address> = {
   name: 'name',
@@ -55,6 +56,13 @@ const CSV_HEADER_ALIASES: Record<string, keyof Address> = {
   'zip code': 'postcode',
   邮编: 'postcode',
   邮政编码: 'postcode',
+}
+
+function stripBom(text: string): string {
+  if (text.charCodeAt(0) === 0xfeff) {
+    return text.slice(1)
+  }
+  return text
 }
 
 function parseCsvLine(line: string): string[] {
@@ -98,17 +106,19 @@ function validateAddress(address: Address): string | null {
   return null
 }
 
-export function parseCsv(text: string): CsvParseResult {
+export function parseCsv(text: string, existingAddresses: Address[] = []): CsvParseResult {
   const result: CsvParseResult = {
     success: false,
     total: 0,
     successCount: 0,
     failCount: 0,
+    duplicateCount: 0,
     addresses: [],
     errors: [],
   }
 
-  const normalizedText = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+  const cleanText = stripBom(text)
+  const normalizedText = cleanText.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
   const lines = normalizedText.split('\n').filter((line) => line.trim().length > 0)
 
   if (lines.length === 0) {
@@ -120,20 +130,25 @@ export function parseCsv(text: string): CsvParseResult {
   const headerMapping: Map<number, keyof Address> = new Map()
 
   headerLine.forEach((header, index) => {
-    const normalizedHeader = header.trim().toLowerCase()
-    const fieldKey = CSV_HEADER_ALIASES[header.trim()] || CSV_HEADER_ALIASES[normalizedHeader]
+    const trimmed = header.trim()
+    const normalizedHeader = trimmed.toLowerCase()
+    const fieldKey = CSV_HEADER_ALIASES[trimmed] || CSV_HEADER_ALIASES[normalizedHeader]
     if (fieldKey) {
       headerMapping.set(index, fieldKey)
     }
   })
 
   if (headerMapping.size === 0) {
+    const supportedHeaders = Object.values(CSV_HEADERS_CN).join('、')
     result.errors.push({
       line: 1,
-      message: `未识别到有效表头。支持的表头包括: ${CSV_HEADERS.join(', ')}`,
+      message: `未识别到有效表头。支持的表头包括：${supportedHeaders}`,
     })
     return result
   }
+
+  const existingKeys = new Set(existingAddresses.map((a) => getAddressKey(a)))
+  const parsedKeys = new Set<string>()
 
   const dataLines = lines.slice(1)
   result.total = dataLines.length
@@ -152,10 +167,19 @@ export function parseCsv(text: string): CsvParseResult {
     if (validationError) {
       result.failCount++
       result.errors.push({ line: lineNumber, message: validationError })
-    } else {
-      result.successCount++
-      result.addresses.push(address)
+      return
     }
+
+    const key = getAddressKey(address)
+    if (existingKeys.has(key) || parsedKeys.has(key)) {
+      result.duplicateCount++
+      result.errors.push({ line: lineNumber, message: '该地址已存在，已跳过' })
+      return
+    }
+
+    parsedKeys.add(key)
+    result.successCount++
+    result.addresses.push(address)
   })
 
   result.success = result.failCount === 0
@@ -164,6 +188,7 @@ export function parseCsv(text: string): CsvParseResult {
 
 export function readCsvFile(
   file: File,
+  existingAddresses: Address[] = [],
   onProgress?: (percent: number) => void,
 ): Promise<CsvParseResult> {
   return new Promise((resolve, reject) => {
@@ -180,7 +205,7 @@ export function readCsvFile(
       try {
         const text = event.target?.result as string
         if (onProgress) onProgress(100)
-        resolve(parseCsv(text))
+        resolve(parseCsv(text, existingAddresses))
       } catch (error) {
         reject(error)
       }

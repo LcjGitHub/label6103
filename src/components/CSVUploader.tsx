@@ -10,7 +10,7 @@ import {
 type UploadStatus = 'idle' | 'uploading' | 'success' | 'partial' | 'error'
 
 export default function CSVUploader() {
-  const { addAddresses } = useEnvelope()
+  const { addressList, addAddresses } = useEnvelope()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useState<UploadStatus>('idle')
   const [progress, setProgress] = useState(0)
@@ -26,6 +26,7 @@ export default function CSVUploader() {
           total: 0,
           successCount: 0,
           failCount: 1,
+          duplicateCount: 0,
           addresses: [],
           errors: [{ line: 0, message: '请上传 CSV 格式的文件' }],
         })
@@ -36,9 +37,13 @@ export default function CSVUploader() {
       setProgress(0)
 
       try {
-        const parseResult = await readCsvFile(file, (percent) => {
-          setProgress(percent)
-        })
+        const parseResult = await readCsvFile(
+          file,
+          addressList,
+          (percent) => {
+            setProgress(percent)
+          },
+        )
 
         setResult(parseResult)
 
@@ -60,12 +65,13 @@ export default function CSVUploader() {
           total: 0,
           successCount: 0,
           failCount: 1,
+          duplicateCount: 0,
           addresses: [],
           errors: [{ line: 0, message: '文件读取失败，请重试' }],
         })
       }
     },
-    [addAddresses],
+    [addAddresses, addressList],
   )
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -185,7 +191,7 @@ export default function CSVUploader() {
 
       {(status === 'success' || status === 'partial' || status === 'error') && result && (
         <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-4 gap-3">
             <div className="rounded-lg bg-white px-4 py-3 text-center">
               <div className="text-2xl font-bold text-stone-800">{result.total}</div>
               <div className="text-xs text-stone-500">总数</div>
@@ -193,6 +199,10 @@ export default function CSVUploader() {
             <div className="rounded-lg bg-white px-4 py-3 text-center">
               <div className="text-2xl font-bold text-emerald-600">{result.successCount}</div>
               <div className="text-xs text-stone-500">成功</div>
+            </div>
+            <div className="rounded-lg bg-white px-4 py-3 text-center">
+              <div className="text-2xl font-bold text-amber-600">{result.duplicateCount}</div>
+              <div className="text-xs text-stone-500">重复</div>
             </div>
             <div className="rounded-lg bg-white px-4 py-3 text-center">
               <div className="text-2xl font-bold text-rose-600">{result.failCount}</div>
