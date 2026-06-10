@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
-import { useEnvelope } from '../context/EnvelopeContext'
-import { useLanguage } from '../context/LanguageContext'
+import { useEffect, useRef, useState } from 'react';
+import { useEnvelope } from '../context/EnvelopeContext';
+import { useLanguage } from '../context/LanguageContext';
 
 interface TagSelectorProps {
-  addressId: string
-  selectedTags: string[]
-  onChange: (tags: string[]) => void
-  compact?: boolean
+  addressId: string;
+  selectedTags: string[];
+  onChange: (tags: string[]) => void;
+  compact?: boolean;
 }
 
 export default function TagSelector({
@@ -15,30 +15,30 @@ export default function TagSelector({
   onChange,
   compact = false,
 }: TagSelectorProps) {
-  const { tagList } = useEnvelope()
-  const { t } = useLanguage()
-  const [isOpen, setIsOpen] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const { tagList } = useEnvelope();
+  const { t } = useLanguage();
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false)
+        setIsOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   function toggleTag(tagId: string) {
     if (selectedTags.includes(tagId)) {
-      onChange(selectedTags.filter((id) => id !== tagId))
+      onChange(selectedTags.filter((id) => id !== tagId));
     } else {
-      onChange([...selectedTags, tagId])
+      onChange([...selectedTags, tagId]);
     }
   }
 
-  const selectedTagObjects = tagList.filter((tag) => selectedTags.includes(tag.id))
+  const selectedTagObjects = tagList.filter((tag) => selectedTags.includes(tag.id));
 
   if (compact) {
     return (
@@ -62,7 +62,7 @@ export default function TagSelector({
           <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-xl border border-stone-200 bg-white p-2 shadow-lg">
             <div className="max-h-48 space-y-1 overflow-y-auto">
               {tagList.map((tag) => {
-                const isSelected = selectedTags.includes(tag.id)
+                const isSelected = selectedTags.includes(tag.id);
                 return (
                   <button
                     key={tag.id}
@@ -78,12 +78,22 @@ export default function TagSelector({
                     />
                     <span className="truncate flex-1 text-stone-700">{tag.name}</span>
                     {isSelected && (
-                      <svg className="h-4 w-4 text-sky-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="h-4 w-4 text-sky-600 shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2.5}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                     )}
                   </button>
-                )
+                );
               })}
             </div>
           </div>
@@ -94,7 +104,7 @@ export default function TagSelector({
           </div>
         )}
       </div>
-    )
+    );
   }
 
   return (
@@ -113,13 +123,15 @@ export default function TagSelector({
                 border: `1px solid ${tag.color}40`,
               }}
             >
-              <span
-                className="h-1.5 w-1.5 rounded-full"
-                style={{ backgroundColor: tag.color }}
-              />
+              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: tag.color }} />
               {tag.name}
               <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           ))}
@@ -143,7 +155,7 @@ export default function TagSelector({
             ) : (
               <div className="max-h-56 space-y-0.5 overflow-y-auto">
                 {tagList.map((tag) => {
-                  const isSelected = selectedTags.includes(tag.id)
+                  const isSelected = selectedTags.includes(tag.id);
                   return (
                     <button
                       key={tag.id}
@@ -159,12 +171,22 @@ export default function TagSelector({
                       />
                       <span className="truncate flex-1 text-stone-700">{tag.name}</span>
                       {isSelected && (
-                        <svg className="h-4 w-4 text-sky-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        <svg
+                          className="h-4 w-4 text-sky-600 shrink-0"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2.5}
+                            d="M5 13l4 4L19 7"
+                          />
                         </svg>
                       )}
                     </button>
-                  )
+                  );
                 })}
               </div>
             )}
@@ -173,5 +195,5 @@ export default function TagSelector({
       </div>
       <input type="hidden" name={`tags-${addressId}`} value={selectedTags.join(',')} />
     </div>
-  )
+  );
 }

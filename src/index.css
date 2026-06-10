@@ -10,12 +10,7 @@
 
 @layer components {
   .envelope-paper {
-    background: linear-gradient(
-      145deg,
-      #faf8f3 0%,
-      #f5f0e6 40%,
-      #ebe4d4 100%
-    );
+    background: linear-gradient(145deg, #faf8f3 0%, #f5f0e6 40%, #ebe4d4 100%);
     box-shadow:
       0 1px 2px rgba(0, 0, 0, 0.06),
       0 8px 24px rgba(0, 0, 0, 0.12),

@@ -1,20 +1,20 @@
-import { useMemo, useState } from 'react'
-import { useEnvelope } from '../context/EnvelopeContext'
-import { useLanguage } from '../context/LanguageContext'
-import type { SavedAddress } from '../types/envelope'
-import TagSelector from './TagSelector'
+import { useMemo, useState } from 'react';
+import { useEnvelope } from '../context/EnvelopeContext';
+import { useLanguage } from '../context/LanguageContext';
+import type { SavedAddress } from '../types/envelope';
+import TagSelector from './TagSelector';
 
 interface AddressListProps {
-  compact?: boolean
-  showClearButton?: boolean
-  showSearch?: boolean
-  showTagFilter?: boolean
-  rightActions?: React.ReactNode
+  compact?: boolean;
+  showClearButton?: boolean;
+  showSearch?: boolean;
+  showTagFilter?: boolean;
+  rightActions?: React.ReactNode;
 }
 
 function formatAddressSummary(addr: SavedAddress, noInfoText: string): string {
-  const parts = [addr.province, addr.city, addr.district, addr.street].filter(Boolean)
-  return parts.join(' ') || noInfoText
+  const parts = [addr.province, addr.city, addr.district, addr.street].filter(Boolean);
+  return parts.join(' ') || noInfoText;
 }
 
 export default function AddressList({
@@ -24,35 +24,40 @@ export default function AddressList({
   showTagFilter = true,
   rightActions,
 }: AddressListProps) {
-  const { addressList, removeAddress, clearAddressList, setRecipientFromList, updateAddressTags, tagList } = useEnvelope()
-  const { t } = useLanguage()
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
+  const {
+    addressList,
+    removeAddress,
+    clearAddressList,
+    setRecipientFromList,
+    updateAddressTags,
+    tagList,
+  } = useEnvelope();
+  const { t } = useLanguage();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
 
   function toggleTagFilter(tagId: string) {
     if (selectedTagIds.includes(tagId)) {
-      setSelectedTagIds(selectedTagIds.filter((id) => id !== tagId))
+      setSelectedTagIds(selectedTagIds.filter((id) => id !== tagId));
     } else {
-      setSelectedTagIds([...selectedTagIds, tagId])
+      setSelectedTagIds([...selectedTagIds, tagId]);
     }
   }
 
   function clearTagFilter() {
-    setSelectedTagIds([])
+    setSelectedTagIds([]);
   }
 
   const filteredList = useMemo(() => {
-    let list = addressList
+    let list = addressList;
 
     if (selectedTagIds.length > 0) {
-      list = list.filter((addr) =>
-        selectedTagIds.some((tagId) => addr.tags.includes(tagId)),
-      )
+      list = list.filter((addr) => selectedTagIds.some((tagId) => addr.tags.includes(tagId)));
     }
 
-    if (!searchQuery.trim()) return list
-    const query = searchQuery.toLowerCase()
+    if (!searchQuery.trim()) return list;
+    const query = searchQuery.toLowerCase();
     return list.filter(
       (addr) =>
         addr.name.toLowerCase().includes(query) ||
@@ -62,29 +67,27 @@ export default function AddressList({
         addr.district.toLowerCase().includes(query) ||
         addr.street.toLowerCase().includes(query) ||
         addr.tags.some((tagId) => {
-          const tag = tagList.find((t) => t.id === tagId)
-          return tag && tag.name.toLowerCase().includes(query)
+          const tag = tagList.find((t) => t.id === tagId);
+          return tag && tag.name.toLowerCase().includes(query);
         }),
-    )
-  }, [addressList, searchQuery, selectedTagIds, tagList])
+    );
+  }, [addressList, searchQuery, selectedTagIds, tagList]);
 
   const handleUseAddress = (id: string) => {
-    setRecipientFromList(id)
-    setSelectedId(id)
-    setTimeout(() => setSelectedId(null), 1500)
-  }
+    setRecipientFromList(id);
+    setSelectedId(id);
+    setTimeout(() => setSelectedId(null), 1500);
+  };
 
   const handleTagsChange = (id: string, tags: string[]) => {
-    updateAddressTags(id, tags)
-  }
+    updateAddressTags(id, tags);
+  };
 
-  const noAddressInfoText = t('common.noAddressInfo')
+  const noAddressInfoText = t('common.noAddressInfo');
 
   function renderAddressTags(addr: SavedAddress) {
-    const tags = addr.tags
-      .map((tagId) => tagList.find((t) => t.id === tagId))
-      .filter(Boolean)
-    if (tags.length === 0) return null
+    const tags = addr.tags.map((tagId) => tagList.find((t) => t.id === tagId)).filter(Boolean);
+    if (tags.length === 0) return null;
     return (
       <div className="flex flex-wrap gap-1">
         {tags.slice(0, 3).map((tag) => (
@@ -96,10 +99,7 @@ export default function AddressList({
               color: tag!.color,
             }}
           >
-            <span
-              className="h-1.5 w-1.5 rounded-full"
-              style={{ backgroundColor: tag!.color }}
-            />
+            <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: tag!.color }} />
             {tag!.name}
           </span>
         ))}
@@ -109,7 +109,7 @@ export default function AddressList({
           </span>
         )}
       </div>
-    )
+    );
   }
 
   if (compact) {
@@ -154,7 +154,7 @@ export default function AddressList({
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <span className="text-xs font-medium text-stone-500">{t('tags.filterBy')}:</span>
             {tagList.map((tag) => {
-              const isActive = selectedTagIds.includes(tag.id)
+              const isActive = selectedTagIds.includes(tag.id);
               return (
                 <button
                   key={tag.id}
@@ -176,7 +176,7 @@ export default function AddressList({
                   />
                   {tag.name}
                 </button>
-              )
+              );
             })}
             {selectedTagIds.length > 0 && (
               <button
@@ -193,9 +193,7 @@ export default function AddressList({
         {filteredList.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <p className="text-sm text-stone-500">
-              {addressList.length === 0
-                ? t('csvUploader.uploadHint')
-                : t('common.noMatch')}
+              {addressList.length === 0 ? t('csvUploader.uploadHint') : t('common.noMatch')}
             </p>
           </div>
         ) : (
@@ -215,9 +213,7 @@ export default function AddressList({
                     {addr.phone && (
                       <span className="shrink-0 text-sm text-stone-500">{addr.phone}</span>
                     )}
-                    <div className="ml-auto shrink-0">
-                      {renderAddressTags(addr)}
-                    </div>
+                    <div className="ml-auto shrink-0">{renderAddressTags(addr)}</div>
                   </div>
                   <div className="mt-1 flex items-center gap-2">
                     <p
@@ -237,8 +233,18 @@ export default function AddressList({
                 <div className="flex items-center gap-2 shrink-0">
                   {selectedId === addr.id && (
                     <span className="flex items-center gap-1 text-xs font-medium text-sky-600">
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                       {t('common.filled')}
                     </span>
@@ -263,7 +269,7 @@ export default function AddressList({
           </div>
         )}
       </section>
-    )
+    );
   }
 
   return (
@@ -308,7 +314,7 @@ export default function AddressList({
               type="button"
               onClick={() => {
                 if (confirm(t('common.confirmClear'))) {
-                  clearAddressList()
+                  clearAddressList();
                 }
               }}
               className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100"
@@ -321,7 +327,12 @@ export default function AddressList({
 
       {showTagFilter && tagList.length > 0 && (
         <div className="mb-5 flex flex-wrap items-center gap-2 rounded-xl border border-stone-100 bg-stone-50/50 p-3">
-          <svg className="h-4 w-4 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg
+            className="h-4 w-4 text-stone-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -331,16 +342,14 @@ export default function AddressList({
           </svg>
           <span className="text-xs font-medium text-stone-600">{t('tags.filterBy')}:</span>
           {tagList.map((tag) => {
-            const isActive = selectedTagIds.includes(tag.id)
+            const isActive = selectedTagIds.includes(tag.id);
             return (
               <button
                 key={tag.id}
                 type="button"
                 onClick={() => toggleTagFilter(tag.id)}
                 className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition ${
-                  isActive
-                    ? 'scale-105 shadow-sm'
-                    : 'opacity-70 hover:opacity-100'
+                  isActive ? 'scale-105 shadow-sm' : 'opacity-70 hover:opacity-100'
                 }`}
                 style={{
                   backgroundColor: isActive ? tag.color : `${tag.color}15`,
@@ -354,7 +363,7 @@ export default function AddressList({
                 />
                 {tag.name}
               </button>
-            )
+            );
           })}
           {selectedTagIds.length > 0 && (
             <button
@@ -363,7 +372,12 @@ export default function AddressList({
               className="ml-1 inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs font-medium text-stone-500 shadow-sm ring-1 ring-stone-200 transition hover:text-stone-700"
             >
               <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
               {t('tags.clearFilter')}
             </button>
@@ -373,7 +387,12 @@ export default function AddressList({
 
       {filteredList.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <svg className="mb-4 h-16 w-16 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg
+            className="mb-4 h-16 w-16 text-stone-300"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -385,9 +404,7 @@ export default function AddressList({
             {addressList.length === 0 ? t('common.noData') : t('common.noMatch')}
           </p>
           <p className="mt-1 text-sm text-stone-400">
-            {addressList.length === 0
-              ? t('csvUploader.uploadHint')
-              : t('common.tryModifyKeyword')}
+            {addressList.length === 0 ? t('csvUploader.uploadHint') : t('common.tryModifyKeyword')}
           </p>
         </div>
       ) : (
@@ -396,12 +413,24 @@ export default function AddressList({
             <table className="w-full text-sm">
               <thead className="bg-stone-50">
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-stone-700">{t('common.name')}</th>
-                  <th className="px-4 py-3 text-left font-semibold text-stone-700">{t('common.phone')}</th>
-                  <th className="px-4 py-3 text-left font-semibold text-stone-700">{t('common.street')}</th>
-                  <th className="px-4 py-3 text-left font-semibold text-stone-700">{t('tags.tags')}</th>
-                  <th className="px-4 py-3 text-left font-semibold text-stone-700">{t('common.postcode')}</th>
-                  <th className="px-4 py-3 text-right font-semibold text-stone-700">{t('common.operation')}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-stone-700">
+                    {t('common.name')}
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold text-stone-700">
+                    {t('common.phone')}
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold text-stone-700">
+                    {t('common.street')}
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold text-stone-700">
+                    {t('tags.tags')}
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold text-stone-700">
+                    {t('common.postcode')}
+                  </th>
+                  <th className="px-4 py-3 text-right font-semibold text-stone-700">
+                    {t('common.operation')}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-200">
@@ -435,8 +464,18 @@ export default function AddressList({
                       <div className="flex items-center justify-end gap-2">
                         {selectedId === addr.id && (
                           <span className="flex items-center gap-1 text-xs font-medium text-sky-600">
-                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            <svg
+                              className="h-4 w-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 13l4 4L19 7"
+                              />
                             </svg>
                             {t('common.filled')}
                           </span>
@@ -465,5 +504,5 @@ export default function AddressList({
         </div>
       )}
     </section>
-  )
+  );
 }

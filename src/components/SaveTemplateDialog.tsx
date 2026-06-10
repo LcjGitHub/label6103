@@ -1,49 +1,49 @@
-import { useEffect, useState } from 'react'
-import { useEnvelope } from '../context/EnvelopeContext'
-import { useLanguage } from '../context/LanguageContext'
+import { useEffect, useState } from 'react';
+import { useEnvelope } from '../context/EnvelopeContext';
+import { useLanguage } from '../context/LanguageContext';
 
 interface SaveTemplateDialogProps {
-  open: boolean
-  onClose: () => void
-  onSaved?: () => void
+  open: boolean;
+  onClose: () => void;
+  onSaved?: () => void;
 }
 
 export default function SaveTemplateDialog({ open, onClose, onSaved }: SaveTemplateDialogProps) {
-  const { saveTemplate, isTemplateNameDuplicate } = useEnvelope()
-  const { t } = useLanguage()
-  const [name, setName] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const { saveTemplate, isTemplateNameDuplicate } = useEnvelope();
+  const { t } = useLanguage();
+  const [name, setName] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
-      setName('')
-      setError(null)
+      setName('');
+      setError(null);
     }
-  }, [open])
+  }, [open]);
 
-  if (!open) return null
+  if (!open) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const trimmed = name.trim()
+    e.preventDefault();
+    const trimmed = name.trim();
     if (!trimmed) {
-      setError(t('template.emptyNameError'))
-      return
+      setError(t('template.emptyNameError'));
+      return;
     }
     if (isTemplateNameDuplicate(trimmed)) {
-      setError(t('template.duplicateNameError'))
-      return
+      setError(t('template.duplicateNameError'));
+      return;
     }
-    saveTemplate(trimmed)
-    onSaved?.()
-    onClose()
-  }
+    saveTemplate(trimmed);
+    onSaved?.();
+    onClose();
+  };
 
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
-      onClose()
+      onClose();
     }
-  }
+  };
 
   return (
     <div
@@ -63,8 +63,8 @@ export default function SaveTemplateDialog({ open, onClose, onSaved }: SaveTempl
               type="text"
               value={name}
               onChange={(e) => {
-                setName(e.target.value)
-                if (error) setError(null)
+                setName(e.target.value);
+                if (error) setError(null);
               }}
               placeholder={t('template.templateNamePlaceholder')}
               className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200"
@@ -90,5 +90,5 @@ export default function SaveTemplateDialog({ open, onClose, onSaved }: SaveTempl
         </form>
       </div>
     </div>
-  )
+  );
 }

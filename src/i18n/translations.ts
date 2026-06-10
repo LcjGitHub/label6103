@@ -1,255 +1,255 @@
-export type Language = 'zh' | 'en'
+export type Language = 'zh' | 'en';
 
 export interface Translations {
   app: {
-    title: string
-    subtitle: string
-    localMock: string
-  }
+    title: string;
+    subtitle: string;
+    localMock: string;
+  };
   nav: {
-    home: string
-    preview: string
-    addressList: string
-    switchLang: string
-    zh: string
-    en: string
-  }
+    home: string;
+    preview: string;
+    addressList: string;
+    switchLang: string;
+    zh: string;
+    en: string;
+  };
   zoom: {
-    zoomOut: string
-    zoomIn: string
-    zoomReset: string
-    zoomPercent: string
-  }
+    zoomOut: string;
+    zoomIn: string;
+    zoomReset: string;
+    zoomPercent: string;
+  };
   common: {
-    name: string
-    phone: string
-    province: string
-    city: string
-    district: string
-    street: string
-    postcode: string
-    sender: string
-    recipient: string
-    search: string
-    searchPlaceholder: string
-    searchPlaceholderCompact: string
-    use: string
-    useThisAddress: string
-    delete: string
-    filled: string
-    totalItems: string
-    noData: string
-    noMatch: string
-    tryModifyKeyword: string
-    confirmClear: string
-    clearList: string
-    noAddressInfo: string
-    operation: string
-    rename: string
-    save: string
-    cancel: string
-    confirm: string
-    history: string
-    historyTitle: string
-    historyEmpty: string
-    historyLastUsed: string
-    historyUse: string
-    historyDelete: string
-    historyClearAll: string
-    historyClearConfirm: string
-  }
+    name: string;
+    phone: string;
+    province: string;
+    city: string;
+    district: string;
+    street: string;
+    postcode: string;
+    sender: string;
+    recipient: string;
+    search: string;
+    searchPlaceholder: string;
+    searchPlaceholderCompact: string;
+    use: string;
+    useThisAddress: string;
+    delete: string;
+    filled: string;
+    totalItems: string;
+    noData: string;
+    noMatch: string;
+    tryModifyKeyword: string;
+    confirmClear: string;
+    clearList: string;
+    noAddressInfo: string;
+    operation: string;
+    rename: string;
+    save: string;
+    cancel: string;
+    confirm: string;
+    history: string;
+    historyTitle: string;
+    historyEmpty: string;
+    historyLastUsed: string;
+    historyUse: string;
+    historyDelete: string;
+    historyClearAll: string;
+    historyClearConfirm: string;
+  };
   time: {
-    justNow: string
-    minutesAgo: string
-    hoursAgo: string
-    daysAgo: string
-    dateFormat: string
-  }
+    justNow: string;
+    minutesAgo: string;
+    hoursAgo: string;
+    daysAgo: string;
+    dateFormat: string;
+  };
   template: {
-    title: string
-    subtitle: string
-    saveTemplate: string
-    templateList: string
-    saveAsTemplate: string
-    templateName: string
-    templateNamePlaceholder: string
-    emptyNameError: string
-    duplicateNameError: string
-    loadTemplate: string
-    deleteTemplate: string
-    renameTemplate: string
-    deleteConfirm: string
-    noTemplates: string
-    created: string
-    updated: string
-    applySuccess: string
-    saveSuccess: string
-    deleteSuccess: string
-    renameSuccess: string
-  }
+    title: string;
+    subtitle: string;
+    saveTemplate: string;
+    templateList: string;
+    saveAsTemplate: string;
+    templateName: string;
+    templateNamePlaceholder: string;
+    emptyNameError: string;
+    duplicateNameError: string;
+    loadTemplate: string;
+    deleteTemplate: string;
+    renameTemplate: string;
+    deleteConfirm: string;
+    noTemplates: string;
+    created: string;
+    updated: string;
+    applySuccess: string;
+    saveSuccess: string;
+    deleteSuccess: string;
+    renameSuccess: string;
+  };
   form: {
     placeholders: {
-      name: string
-      phone: string
-      province: string
-      city: string
-      citySelect: string
-      district: string
-      districtSelect: string
-      street: string
-      postcode: string
-    }
-  }
+      name: string;
+      phone: string;
+      province: string;
+      city: string;
+      citySelect: string;
+      district: string;
+      districtSelect: string;
+      street: string;
+      postcode: string;
+    };
+  };
   home: {
-    loadChineseMock: string
-    loadBritishMock: string
-    resetForm: string
-    addressList: string
-    dataSavedTip: string
-    goPreview: string
-  }
+    loadChineseMock: string;
+    loadBritishMock: string;
+    resetForm: string;
+    addressList: string;
+    dataSavedTip: string;
+    goPreview: string;
+  };
   preview: {
-    backEdit: string
-    title: string
-    subtitle: string
-    layout: string
-    layoutLabel: string
-    chineseStyle: string
-    britishStyle: string
-    chineseDesc: string
-    britishDesc: string
-    sizeLabel: string
-    sizeDescription: string
-    sideLabel: string
-    front: string
-    back: string
-    currentData: string
-    noRecipientTip: string
-    previewScaleTip: string
-    style: string
-    sideDisplay: string
-    exportPNG: string
-    exporting: string
-    exportFailed: string
+    backEdit: string;
+    title: string;
+    subtitle: string;
+    layout: string;
+    layoutLabel: string;
+    chineseStyle: string;
+    britishStyle: string;
+    chineseDesc: string;
+    britishDesc: string;
+    sizeLabel: string;
+    sizeDescription: string;
+    sideLabel: string;
+    front: string;
+    back: string;
+    currentData: string;
+    noRecipientTip: string;
+    previewScaleTip: string;
+    style: string;
+    sideDisplay: string;
+    exportPNG: string;
+    exporting: string;
+    exportFailed: string;
     sizes: {
-      small: string
-      medium: string
-      large: string
-      custom: string
-      width: string
-      height: string
-      mmUnit: string
-      sizeRangeTip: string
-      sizeOutOfRange: string
-      minSize: string
-      maxSize: string
-    }
-  }
+      small: string;
+      medium: string;
+      large: string;
+      custom: string;
+      width: string;
+      height: string;
+      mmUnit: string;
+      sizeRangeTip: string;
+      sizeOutOfRange: string;
+      minSize: string;
+      maxSize: string;
+    };
+  };
   addressListPage: {
-    title: string
-    subtitle: string
-    backHome: string
-    continueEdit: string
-  }
+    title: string;
+    subtitle: string;
+    backHome: string;
+    continueEdit: string;
+  };
   csvUploader: {
-    title: string
-    downloadTemplate: string
-    uploadHint: string
-    uploadHintFormat: string
-    uploadHintSub: string
-    parsingFile: string
-    total: string
-    success: string
-    duplicate: string
-    fail: string
-    errorDetails: string
-    lineN: string
-    moreErrors: string
-    continueUpload: string
-    uploadCsvOnly: string
-    uploadSupportedOnly: string
-    readFailed: string
-    formatCsv: string
-    formatJson: string
-    formatExcel: string
-  }
+    title: string;
+    downloadTemplate: string;
+    uploadHint: string;
+    uploadHintFormat: string;
+    uploadHintSub: string;
+    parsingFile: string;
+    total: string;
+    success: string;
+    duplicate: string;
+    fail: string;
+    errorDetails: string;
+    lineN: string;
+    moreErrors: string;
+    continueUpload: string;
+    uploadCsvOnly: string;
+    uploadSupportedOnly: string;
+    readFailed: string;
+    formatCsv: string;
+    formatJson: string;
+    formatExcel: string;
+  };
   addressExporter: {
-    exportAll: string
-    title: string
-    subtitle: string
-    selectFormat: string
-    selectFields: string
-    selectAll: string
-    clearAll: string
-    confirmExport: string
-    formatCsv: string
-    formatJson: string
-    formatExcel: string
-  }
+    exportAll: string;
+    title: string;
+    subtitle: string;
+    selectFormat: string;
+    selectFields: string;
+    selectAll: string;
+    clearAll: string;
+    confirmExport: string;
+    formatCsv: string;
+    formatJson: string;
+    formatExcel: string;
+  };
   exportFields: {
-    name: string
-    phone: string
-    province: string
-    city: string
-    district: string
-    street: string
-    postcode: string
-    tags: string
-  }
+    name: string;
+    phone: string;
+    province: string;
+    city: string;
+    district: string;
+    street: string;
+    postcode: string;
+    tags: string;
+  };
   printPreview: {
-    title: string
-    subtitle: string
-    backPreview: string
-    perPage: string
-    perPage1: string
-    perPage2: string
-    perPage4: string
-    perPage9: string
-    print: string
-    printing: string
-    printTip: string
-    noAddresses: string
-    noAddressesTip: string
-    page: string
-    useCurrentOnly: string
-    useAddressList: string
-    dataMode: string
-  }
+    title: string;
+    subtitle: string;
+    backPreview: string;
+    perPage: string;
+    perPage1: string;
+    perPage2: string;
+    perPage4: string;
+    perPage9: string;
+    print: string;
+    printing: string;
+    printTip: string;
+    noAddresses: string;
+    noAddressesTip: string;
+    page: string;
+    useCurrentOnly: string;
+    useAddressList: string;
+    dataMode: string;
+  };
   tags: {
-    title: string
-    addTag: string
-    createTag: string
-    editTag: string
-    tagName: string
-    tagNamePlaceholder: string
-    tagColor: string
-    tags: string
-    emptyNameError: string
-    duplicateNameError: string
-    deleteConfirm: string
-    noTags: string
-    noTagsHint: string
-    filterBy: string
-    clearFilter: string
-    manageTags: string
-    autoCreated: string
-    selectColor: string
-  }
+    title: string;
+    addTag: string;
+    createTag: string;
+    editTag: string;
+    tagName: string;
+    tagNamePlaceholder: string;
+    tagColor: string;
+    tags: string;
+    emptyNameError: string;
+    duplicateNameError: string;
+    deleteConfirm: string;
+    noTags: string;
+    noTagsHint: string;
+    filterBy: string;
+    clearFilter: string;
+    manageTags: string;
+    autoCreated: string;
+    selectColor: string;
+  };
   envelope: {
     chinese: {
-      senderLabel: string
-      senderPlaceholder: string
-      recipientPlaceholder: string
-      stampLabel: string
-      stampArea: string
-    }
+      senderLabel: string;
+      senderPlaceholder: string;
+      recipientPlaceholder: string;
+      stampLabel: string;
+      stampArea: string;
+    };
     british: {
-      returnAddress: string
-      senderPlaceholder: string
-      recipientPlaceholder: string
-      stamp: string
-    }
-  }
+      returnAddress: string;
+      senderPlaceholder: string;
+      recipientPlaceholder: string;
+      stamp: string;
+    };
+  };
 }
 
 export const translations: Record<Language, Translations> = {
@@ -461,9 +461,11 @@ export const translations: Record<Language, Translations> = {
       perPage9: '9 个/页',
       print: '打印',
       printing: '正在准备打印…',
-      printTip: '打印时将隐藏所有界面元素，仅输出信封内容。请在打印对话框中选择"A4"纸张，并取消"页眉页脚"选项以获得最佳效果。',
+      printTip:
+        '打印时将隐藏所有界面元素，仅输出信封内容。请在打印对话框中选择"A4"纸张，并取消"页眉页脚"选项以获得最佳效果。',
       noAddresses: '无可用地址',
-      noAddressesTip: '地址列表为空，将使用当前编辑的收件人地址生成单封信封。如需批量打印，请先导入地址列表。',
+      noAddressesTip:
+        '地址列表为空，将使用当前编辑的收件人地址生成单封信封。如需批量打印，请先导入地址列表。',
       page: '第 {current} / {total} 页',
       useCurrentOnly: '仅当前收件人',
       useAddressList: '使用地址列表',
@@ -486,11 +488,11 @@ export const translations: Record<Language, Translations> = {
       filterBy: '按标签筛选',
       clearFilter: '清除筛选',
       manageTags: '管理标签',
-    autoCreated: '自动创建标签',
-    selectColor: '选择颜色',
-  },
-  envelope: {
-    chinese: {
+      autoCreated: '自动创建标签',
+      selectColor: '选择颜色',
+    },
+    envelope: {
+      chinese: {
         senderLabel: '寄件人',
         senderPlaceholder: '（寄件人地址）',
         recipientPlaceholder: '（收件人地址）',
@@ -715,9 +717,11 @@ export const translations: Record<Language, Translations> = {
       perPage9: '9 / page',
       print: 'Print',
       printing: 'Preparing to print…',
-      printTip: 'All UI elements will be hidden during printing, only envelope content is output. Select "A4" paper and disable "Headers and footers" in the print dialog for best results.',
+      printTip:
+        'All UI elements will be hidden during printing, only envelope content is output. Select "A4" paper and disable "Headers and footers" in the print dialog for best results.',
       noAddresses: 'No Addresses',
-      noAddressesTip: 'The address list is empty. The current recipient will be used for a single envelope. Import addresses first for batch printing.',
+      noAddressesTip:
+        'The address list is empty. The current recipient will be used for a single envelope. Import addresses first for batch printing.',
       page: 'Page {current} / {total}',
       useCurrentOnly: 'Current Recipient Only',
       useAddressList: 'Use Address List',
@@ -734,7 +738,8 @@ export const translations: Record<Language, Translations> = {
       tags: 'Tags',
       emptyNameError: 'Tag name cannot be empty',
       duplicateNameError: 'Tag name already exists',
-      deleteConfirm: 'Are you sure you want to delete this tag? It will be removed from all addresses. This action cannot be undone.',
+      deleteConfirm:
+        'Are you sure you want to delete this tag? It will be removed from all addresses. This action cannot be undone.',
       noTags: 'No tags yet. Click the "Add Tag" button in the top right to create your first tag.',
       noTagsHint: 'Please create tags above first',
       filterBy: 'Filter by tag',
@@ -759,6 +764,6 @@ export const translations: Record<Language, Translations> = {
       },
     },
   },
-}
+};
 
-export type TranslationKey = string
+export type TranslationKey = string;

@@ -1,122 +1,120 @@
-import { useState, useImperativeHandle, forwardRef } from 'react'
-import type { Address, AddressSide } from '../types/envelope'
-import AddressAutocomplete from './AddressAutocomplete'
-import TagSelector from './TagSelector'
-import AddressHistoryDropdown from './AddressHistoryDropdown'
-import type { AddressSuggestion } from '../utils/addressSearch'
-import { useLanguage } from '../context/LanguageContext'
-import { addAddressToHistory, isAddressEmpty } from '../utils/addressHistory'
+import { useState, useImperativeHandle, forwardRef } from 'react';
+import type { Address, AddressSide } from '../types/envelope';
+import AddressAutocomplete from './AddressAutocomplete';
+import TagSelector from './TagSelector';
+import AddressHistoryDropdown from './AddressHistoryDropdown';
+import type { AddressSuggestion } from '../utils/addressSearch';
+import { useLanguage } from '../context/LanguageContext';
+import { addAddressToHistory, isAddressEmpty } from '../utils/addressHistory';
 
 interface AddressFormProps {
-  title: string
-  side: AddressSide
-  accent: 'amber' | 'sky'
-  address: Address
-  onChange: (field: keyof Address, value: string) => void
-  onTagsChange?: (tags: string[]) => void
-  showTags?: boolean
+  title: string;
+  side: AddressSide;
+  accent: 'amber' | 'sky';
+  address: Address;
+  onChange: (field: keyof Address, value: string) => void;
+  onTagsChange?: (tags: string[]) => void;
+  showTags?: boolean;
 }
 
 export interface AddressFormRef {
-  saveToHistory: () => void
+  saveToHistory: () => void;
 }
 
 const accentMap = {
   amber: 'border-amber-400 focus:ring-amber-400/30',
   sky: 'border-sky-400 focus:ring-sky-400/30',
-}
+};
 
 const AddressForm = forwardRef<AddressFormRef, AddressFormProps>(function AddressForm(
-  {
-    title,
-    side,
-    accent,
-    address,
-    onChange,
-    onTagsChange,
-    showTags = true,
-  },
+  { title, side, accent, address, onChange, onTagsChange, showTags = true },
   ref,
 ) {
-  const [closeVersion, setCloseVersion] = useState(0)
-  const [provinceConfirmed, setProvinceConfirmed] = useState(false)
-  const [cityConfirmed, setCityConfirmed] = useState(false)
-  const { t } = useLanguage()
+  const [closeVersion, setCloseVersion] = useState(0);
+  const [provinceConfirmed, setProvinceConfirmed] = useState(false);
+  const [cityConfirmed, setCityConfirmed] = useState(false);
+  const { t } = useLanguage();
 
   useImperativeHandle(ref, () => ({
     saveToHistory: () => {
       if (!isAddressEmpty(address)) {
-        addAddressToHistory(side, address)
+        addAddressToHistory(side, address);
       }
     },
-  }))
+  }));
 
   function closeAllDropdowns() {
-    setCloseVersion((v) => v + 1)
+    setCloseVersion((v) => v + 1);
   }
 
   function handleProvinceSelect(suggestion: AddressSuggestion) {
-    if (suggestion.type !== 'province') return
-    onChange('province', suggestion.province)
-    onChange('city', '')
-    onChange('district', '')
-    setProvinceConfirmed(true)
-    setCityConfirmed(false)
-    closeAllDropdowns()
+    if (suggestion.type !== 'province') return;
+    onChange('province', suggestion.province);
+    onChange('city', '');
+    onChange('district', '');
+    setProvinceConfirmed(true);
+    setCityConfirmed(false);
+    closeAllDropdowns();
   }
 
   function handleCitySelect(suggestion: AddressSuggestion) {
-    if (suggestion.type !== 'city') return
-    onChange('city', suggestion.city)
-    onChange('district', '')
-    setCityConfirmed(true)
-    closeAllDropdowns()
+    if (suggestion.type !== 'city') return;
+    onChange('city', suggestion.city);
+    onChange('district', '');
+    setCityConfirmed(true);
+    closeAllDropdowns();
   }
 
   function handleDistrictSelect(suggestion: AddressSuggestion) {
-    if (suggestion.type !== 'district') return
-    onChange('district', suggestion.district)
-    closeAllDropdowns()
+    if (suggestion.type !== 'district') return;
+    onChange('district', suggestion.district);
+    closeAllDropdowns();
   }
 
   function handleProvinceManualInput() {
     if (provinceConfirmed || address.city || address.district) {
-      setProvinceConfirmed(false)
-      setCityConfirmed(false)
-      onChange('city', '')
-      onChange('district', '')
+      setProvinceConfirmed(false);
+      setCityConfirmed(false);
+      onChange('city', '');
+      onChange('district', '');
     }
   }
 
   function handleCityManualInput() {
     if (cityConfirmed || address.district) {
-      setCityConfirmed(false)
-      onChange('district', '')
+      setCityConfirmed(false);
+      onChange('district', '');
     }
   }
 
   function handleHistorySelect(historyAddress: Address) {
     const fields: (keyof Address)[] = [
-      'name', 'phone', 'province', 'city', 'district', 'street', 'postcode',
-    ]
+      'name',
+      'phone',
+      'province',
+      'city',
+      'district',
+      'street',
+      'postcode',
+    ];
     fields.forEach((field) => {
-      onChange(field, historyAddress[field] as string)
-    })
+      onChange(field, historyAddress[field] as string);
+    });
     if (onTagsChange && historyAddress.tags) {
-      onTagsChange(historyAddress.tags)
+      onTagsChange(historyAddress.tags);
     }
-    if (historyAddress.province) setProvinceConfirmed(true)
-    if (historyAddress.city) setCityConfirmed(true)
-    closeAllDropdowns()
+    if (historyAddress.province) setProvinceConfirmed(true);
+    if (historyAddress.city) setCityConfirmed(true);
+    closeAllDropdowns();
   }
 
   const cityPlaceholder = provinceConfirmed
     ? t('form.placeholders.citySelect')
-    : t('form.placeholders.city')
+    : t('form.placeholders.city');
   const districtPlaceholder =
     provinceConfirmed && cityConfirmed
       ? t('form.placeholders.districtSelect')
-      : t('form.placeholders.district')
+      : t('form.placeholders.district');
 
   return (
     <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
@@ -233,7 +231,7 @@ const AddressForm = forwardRef<AddressFormRef, AddressFormProps>(function Addres
         )}
       </div>
     </section>
-  )
-})
+  );
+});
 
-export default AddressForm
+export default AddressForm;

@@ -1,13 +1,13 @@
-import type { Address } from '../types/envelope'
-import { formatBritishAddress } from '../types/envelope'
-import { useLanguage } from '../context/LanguageContext'
+import type { Address } from '../types/envelope';
+import { formatBritishAddress } from '../types/envelope';
+import { useLanguage } from '../context/LanguageContext';
 
 interface EnvelopeBritishProps {
-  side: 'front' | 'back'
-  recipient: Address
-  sender: Address
-  widthPx: number
-  heightPx: number
+  side: 'front' | 'back';
+  recipient: Address;
+  sender: Address;
+  widthPx: number;
+  heightPx: number;
 }
 
 export default function EnvelopeBritish({
@@ -17,9 +17,9 @@ export default function EnvelopeBritish({
   widthPx,
   heightPx,
 }: EnvelopeBritishProps) {
-  const { t } = useLanguage()
-  const recipientLines = formatBritishAddress(recipient)
-  const senderLines = formatBritishAddress(sender)
+  const { t } = useLanguage();
+  const recipientLines = formatBritishAddress(recipient);
+  const senderLines = formatBritishAddress(sender);
 
   if (side === 'back') {
     return (
@@ -33,15 +33,13 @@ export default function EnvelopeBritish({
             {t('envelope.british.returnAddress')}
           </p>
           {senderLines.length > 0 ? (
-            senderLines.map((line, i) => (
-              <p key={i}>{line}</p>
-            ))
+            senderLines.map((line, i) => <p key={i}>{line}</p>)
           ) : (
             <p className="text-stone-400">{t('envelope.british.senderPlaceholder')}</p>
           )}
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -80,5 +78,5 @@ export default function EnvelopeBritish({
         </div>
       </div>
     </div>
-  )
+  );
 }

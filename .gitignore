@@ -111,6 +111,7 @@ tmp/
 .sass-cache/
 .eslintcache
 .stylelintcache
+.prettiercache
 .turbo/
 .vercel/
 .netlify/

@@ -1,33 +1,33 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react';
 import {
   searchProvinces,
   searchCities,
   searchDistricts,
   type AddressSuggestion,
-} from '../utils/addressSearch'
-import type { Address } from '../types/envelope'
+} from '../utils/addressSearch';
+import type { Address } from '../types/envelope';
 
 interface AddressAutocompleteProps {
-  fieldType: 'province' | 'city' | 'district'
-  value: string
-  placeholder: string
-  accent: 'amber' | 'sky'
-  address: Address
-  closeVersion: number
-  onSelect: (suggestion: AddressSuggestion) => void
-  onChange: (value: string) => void
-  onManualInput?: () => void
+  fieldType: 'province' | 'city' | 'district';
+  value: string;
+  placeholder: string;
+  accent: 'amber' | 'sky';
+  address: Address;
+  closeVersion: number;
+  onSelect: (suggestion: AddressSuggestion) => void;
+  onChange: (value: string) => void;
+  onManualInput?: () => void;
 }
 
 const accentMap = {
   amber: 'border-amber-400 focus:ring-amber-400/30',
   sky: 'border-sky-400 focus:ring-sky-400/30',
-}
+};
 
 const activeAccentMap = {
   amber: 'bg-amber-50',
   sky: 'bg-sky-50',
-}
+};
 
 export default function AddressAutocomplete({
   fieldType,
@@ -40,71 +40,71 @@ export default function AddressAutocomplete({
   onChange,
   onManualInput,
 }: AddressAutocompleteProps) {
-  const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
-  const [activeIndex, setActiveIndex] = useState(-1)
-  const [isOpen, setIsOpen] = useState(false)
-  const lastSelectedValueRef = useRef<string>('')
-  const containerRef = useRef<HTMLDivElement>(null)
+  const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const [isOpen, setIsOpen] = useState(false);
+  const lastSelectedValueRef = useRef<string>('');
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setIsOpen(false)
-    setActiveIndex(-1)
-  }, [closeVersion])
+    setIsOpen(false);
+    setActiveIndex(-1);
+  }, [closeVersion]);
 
   useEffect(() => {
-    const searchValue = value.trim()
+    const searchValue = value.trim();
     if (searchValue.length >= 1) {
-      let results: AddressSuggestion[] = []
+      let results: AddressSuggestion[] = [];
       if (fieldType === 'province') {
-        results = searchProvinces(searchValue)
+        results = searchProvinces(searchValue);
       } else if (fieldType === 'city') {
-        results = searchCities(searchValue, address.province)
+        results = searchCities(searchValue, address.province);
       } else if (fieldType === 'district') {
-        results = searchDistricts(searchValue, address.province, address.city)
+        results = searchDistricts(searchValue, address.province, address.city);
       }
-      setSuggestions(results)
+      setSuggestions(results);
       const isSameAsLastSelected =
-        lastSelectedValueRef.current && searchValue === lastSelectedValueRef.current
-      setIsOpen(results.length > 0 && !isSameAsLastSelected)
-      setActiveIndex(-1)
+        lastSelectedValueRef.current && searchValue === lastSelectedValueRef.current;
+      setIsOpen(results.length > 0 && !isSameAsLastSelected);
+      setActiveIndex(-1);
     } else {
-      setSuggestions([])
-      setIsOpen(false)
-      setActiveIndex(-1)
-      lastSelectedValueRef.current = ''
+      setSuggestions([]);
+      setIsOpen(false);
+      setActiveIndex(-1);
+      lastSelectedValueRef.current = '';
     }
-  }, [value, address.province, address.city, fieldType])
+  }, [value, address.province, address.city, fieldType]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false)
+        setIsOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (!isOpen || suggestions.length === 0) return
+    if (!isOpen || suggestions.length === 0) return;
 
     if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      setActiveIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : prev))
+      e.preventDefault();
+      setActiveIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : prev));
     } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
+      e.preventDefault();
       setActiveIndex((prev) => {
-        if (prev <= 0) return -1
-        return prev - 1
-      })
+        if (prev <= 0) return -1;
+        return prev - 1;
+      });
     } else if (e.key === 'Enter') {
-      e.preventDefault()
+      e.preventDefault();
       if (activeIndex >= 0 && activeIndex < suggestions.length) {
-        handleSelect(suggestions[activeIndex])
+        handleSelect(suggestions[activeIndex]);
       }
     } else if (e.key === 'Escape') {
-      setIsOpen(false)
-      setActiveIndex(-1)
+      setIsOpen(false);
+      setActiveIndex(-1);
     }
   }
 
@@ -114,34 +114,34 @@ export default function AddressAutocomplete({
         ? suggestion.province
         : suggestion.type === 'city'
           ? suggestion.city
-          : suggestion.district
-    lastSelectedValueRef.current = selectedValue
-    onSelect(suggestion)
-    setIsOpen(false)
-    setActiveIndex(-1)
+          : suggestion.district;
+    lastSelectedValueRef.current = selectedValue;
+    onSelect(suggestion);
+    setIsOpen(false);
+    setActiveIndex(-1);
   }
 
   function handleInputChange(val: string) {
     if (lastSelectedValueRef.current && val !== lastSelectedValueRef.current) {
-      lastSelectedValueRef.current = ''
-      onManualInput?.()
+      lastSelectedValueRef.current = '';
+      onManualInput?.();
     } else if (!lastSelectedValueRef.current) {
-      onManualInput?.()
+      onManualInput?.();
     }
-    onChange(val)
+    onChange(val);
   }
 
   function highlightMatch(text: string, keyword: string) {
-    if (!keyword.trim()) return text
-    const idx = text.toLowerCase().indexOf(keyword.toLowerCase())
-    if (idx === -1) return text
+    if (!keyword.trim()) return text;
+    const idx = text.toLowerCase().indexOf(keyword.toLowerCase());
+    if (idx === -1) return text;
     return (
       <>
         {text.slice(0, idx)}
         <strong className="font-semibold">{text.slice(idx, idx + keyword.length)}</strong>
         {text.slice(idx + keyword.length)}
       </>
-    )
+    );
   }
 
   return (
@@ -152,11 +152,8 @@ export default function AddressAutocomplete({
         onChange={(e) => handleInputChange(e.target.value)}
         onKeyDown={handleKeyDown}
         onFocus={() => {
-          if (
-            suggestions.length > 0 &&
-            value.trim() !== lastSelectedValueRef.current
-          ) {
-            setIsOpen(true)
+          if (suggestions.length > 0 && value.trim() !== lastSelectedValueRef.current) {
+            setIsOpen(true);
           }
         }}
         placeholder={placeholder}
@@ -180,5 +177,5 @@ export default function AddressAutocomplete({
         </ul>
       )}
     </div>
-  )
+  );
 }

@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  type ReactNode,
-} from 'react'
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
 import {
   CUSTOM_SIZE_ID,
   generateTemplateId,
@@ -17,80 +11,80 @@ import {
   type LayoutStyle,
   type SavedAddress,
   type Tag,
-} from '../types/envelope'
-import { useEnvelopeData } from '../hooks/useEnvelopeData'
-import { useAddressList } from '../hooks/useAddressList'
-import { useTagList } from '../hooks/useTagList'
-import { useTemplateList } from '../hooks/useTemplateList'
-import { useUiSettings } from '../hooks/useUiSettings'
+} from '../types/envelope';
+import { useEnvelopeData } from '../hooks/useEnvelopeData';
+import { useAddressList } from '../hooks/useAddressList';
+import { useTagList } from '../hooks/useTagList';
+import { useTemplateList } from '../hooks/useTemplateList';
+import { useUiSettings } from '../hooks/useUiSettings';
 
 interface EnvelopeContextValue {
-  data: EnvelopeData
-  layout: LayoutStyle
-  size: EnvelopeSize
-  side: EnvelopeSide
-  customSize: CustomSizeSettings
-  zoomPercent: number
-  addressList: SavedAddress[]
-  templateList: EnvelopeTemplate[]
-  tagList: Tag[]
-  setData: (data: EnvelopeData) => void
-  updateSender: (field: keyof EnvelopeData['sender'], value: string) => void
-  updateRecipient: (field: keyof EnvelopeData['recipient'], value: string) => void
-  updateSenderTags: (tags: string[]) => void
-  updateRecipientTags: (tags: string[]) => void
-  setLayout: (layout: LayoutStyle) => void
-  setSizeId: (id: string) => void
-  setCustomSize: (size: Partial<CustomSizeSettings>) => void
-  setSide: (side: EnvelopeSide) => void
-  setZoomPercent: (percent: number) => void
-  loadMockData: () => void
-  resetData: () => void
-  persist: () => void
-  addAddress: (address: Address) => void
-  addAddresses: (addresses: Address[]) => void
-  removeAddress: (id: string) => void
-  clearAddressList: () => void
-  setRecipientFromList: (id: string) => void
-  updateAddressTags: (id: string, tags: string[]) => void
-  saveTemplate: (name: string) => EnvelopeTemplate
-  updateTemplate: (id: string, name: string) => void
-  deleteTemplate: (id: string) => void
-  applyTemplate: (id: string) => void
-  isTemplateNameDuplicate: (name: string, excludeId?: string) => boolean
-  addTag: (name: string, color: string) => Tag
-  importTags: (tags: Tag[]) => void
-  updateTag: (id: string, name: string, color: string) => void
-  deleteTag: (id: string) => void
-  isTagNameDuplicate: (name: string, excludeId?: string) => boolean
+  data: EnvelopeData;
+  layout: LayoutStyle;
+  size: EnvelopeSize;
+  side: EnvelopeSide;
+  customSize: CustomSizeSettings;
+  zoomPercent: number;
+  addressList: SavedAddress[];
+  templateList: EnvelopeTemplate[];
+  tagList: Tag[];
+  setData: (data: EnvelopeData) => void;
+  updateSender: (field: keyof EnvelopeData['sender'], value: string) => void;
+  updateRecipient: (field: keyof EnvelopeData['recipient'], value: string) => void;
+  updateSenderTags: (tags: string[]) => void;
+  updateRecipientTags: (tags: string[]) => void;
+  setLayout: (layout: LayoutStyle) => void;
+  setSizeId: (id: string) => void;
+  setCustomSize: (size: Partial<CustomSizeSettings>) => void;
+  setSide: (side: EnvelopeSide) => void;
+  setZoomPercent: (percent: number) => void;
+  loadMockData: () => void;
+  resetData: () => void;
+  persist: () => void;
+  addAddress: (address: Address) => void;
+  addAddresses: (addresses: Address[]) => void;
+  removeAddress: (id: string) => void;
+  clearAddressList: () => void;
+  setRecipientFromList: (id: string) => void;
+  updateAddressTags: (id: string, tags: string[]) => void;
+  saveTemplate: (name: string) => EnvelopeTemplate;
+  updateTemplate: (id: string, name: string) => void;
+  deleteTemplate: (id: string) => void;
+  applyTemplate: (id: string) => void;
+  isTemplateNameDuplicate: (name: string, excludeId?: string) => boolean;
+  addTag: (name: string, color: string) => Tag;
+  importTags: (tags: Tag[]) => void;
+  updateTag: (id: string, name: string, color: string) => void;
+  deleteTag: (id: string) => void;
+  isTagNameDuplicate: (name: string, excludeId?: string) => boolean;
 }
 
-const EnvelopeContext = createContext<EnvelopeContextValue | null>(null)
+const EnvelopeContext = createContext<EnvelopeContextValue | null>(null);
 
 export function EnvelopeProvider({ children }: { children: ReactNode }) {
-  const envelopeData = useEnvelopeData()
-  const addressListHook = useAddressList()
-  const tagListHook = useTagList()
-  const templateListHook = useTemplateList()
-  const uiSettings = useUiSettings()
+  const envelopeData = useEnvelopeData();
+  const addressListHook = useAddressList();
+  const tagListHook = useTagList();
+  const templateListHook = useTemplateList();
+  const uiSettings = useUiSettings();
 
   const setRecipientFromList = useCallback(
     (id: string) => {
-      const address = addressListHook.addressList.find((a) => a.id === id)
+      const address = addressListHook.addressList.find((a) => a.id === id);
       if (address) {
-        const { id: _id, ...recipientData } = address
+        const { id: _id, ...recipientData } = address;
         envelopeData.setDataAndPersist({
           ...envelopeData.data,
           recipient: recipientData,
-        })
+        });
       }
     },
     [addressListHook.addressList, envelopeData.data, envelopeData.setDataAndPersist],
-  )
+  );
 
   const saveTemplate = useCallback(
     (name: string): EnvelopeTemplate => {
-      const now = Date.now()
+      const now = Date.now();
       const newTemplate: EnvelopeTemplate = {
         id: generateTemplateId(),
         name: name.trim(),
@@ -101,31 +95,38 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
         sizeId: uiSettings.sizeId,
         side: uiSettings.side,
         customSize: uiSettings.sizeId === CUSTOM_SIZE_ID ? { ...uiSettings.customSize } : undefined,
-      }
-      templateListHook.addTemplate(newTemplate)
-      return newTemplate
+      };
+      templateListHook.addTemplate(newTemplate);
+      return newTemplate;
     },
-    [envelopeData.data, uiSettings.layout, uiSettings.sizeId, uiSettings.side, uiSettings.customSize, templateListHook.addTemplate],
-  )
+    [
+      envelopeData.data,
+      uiSettings.layout,
+      uiSettings.sizeId,
+      uiSettings.side,
+      uiSettings.customSize,
+      templateListHook.addTemplate,
+    ],
+  );
 
   const applyTemplate = useCallback(
     (id: string) => {
-      const template = templateListHook.findTemplate(id)
+      const template = templateListHook.findTemplate(id);
       if (template) {
-        envelopeData.setDataAndPersist(template.data)
-        uiSettings.applyUiFromTemplate(template)
+        envelopeData.setDataAndPersist(template.data);
+        uiSettings.applyUiFromTemplate(template);
       }
     },
     [templateListHook.findTemplate, envelopeData.setDataAndPersist, uiSettings.applyUiFromTemplate],
-  )
+  );
 
   const deleteTag = useCallback(
     (id: string) => {
-      tagListHook.removeTag(id)
-      addressListHook.removeTagFromAddresses(id)
+      tagListHook.removeTag(id);
+      addressListHook.removeTagFromAddresses(id);
     },
     [tagListHook.removeTag, addressListHook.removeTagFromAddresses],
-  )
+  );
 
   const value = useMemo(
     () => ({
@@ -212,15 +213,13 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       applyTemplate,
       deleteTag,
     ],
-  )
+  );
 
-  return (
-    <EnvelopeContext.Provider value={value}>{children}</EnvelopeContext.Provider>
-  )
+  return <EnvelopeContext.Provider value={value}>{children}</EnvelopeContext.Provider>;
 }
 
 export function useEnvelope() {
-  const ctx = useContext(EnvelopeContext)
-  if (!ctx) throw new Error('useEnvelope must be used within EnvelopeProvider')
-  return ctx
+  const ctx = useContext(EnvelopeContext);
+  if (!ctx) throw new Error('useEnvelope must be used within EnvelopeProvider');
+  return ctx;
 }

@@ -5,7 +5,7 @@ import {
   getAddressKey,
   type Address,
   type Tag,
-} from '../types/envelope'
+} from '../types/envelope';
 
 export const FIELD_ALIASES: Record<string, keyof Address | 'tags'> = {
   name: 'name',
@@ -47,7 +47,7 @@ export const FIELD_ALIASES: Record<string, keyof Address | 'tags'> = {
   categories: 'tags',
   groups: 'tags',
   group: 'tags',
-}
+};
 
 export const FIELD_LABELS_CN: Record<string, string> = {
   name: '姓名',
@@ -58,111 +58,114 @@ export const FIELD_LABELS_CN: Record<string, string> = {
   street: '详细地址',
   postcode: '邮政编码',
   tags: '标签',
-}
+};
 
 export function resolveFieldKey(rawHeader: string): keyof Address | 'tags' | undefined {
-  const trimmed = String(rawHeader || '').trim()
-  const normalized = trimmed.toLowerCase()
-  return FIELD_ALIASES[trimmed] || FIELD_ALIASES[normalized]
+  const trimmed = String(rawHeader || '').trim();
+  const normalized = trimmed.toLowerCase();
+  return FIELD_ALIASES[trimmed] || FIELD_ALIASES[normalized];
 }
 
 export function validateAddress(address: Address): string | null {
-  if (!address.name.trim()) return '姓名不能为空'
+  if (!address.name.trim()) return '姓名不能为空';
   if (!address.province.trim() && !address.city.trim() && !address.street.trim()) {
-    return '地址信息不完整（至少需要省、城市或详细地址之一）'
+    return '地址信息不完整（至少需要省、城市或详细地址之一）';
   }
-  return null
+  return null;
 }
 
 export function parseTagsValue(value: unknown): string[] {
   if (Array.isArray(value)) {
-    return value.map((v) => String(v).trim()).filter(Boolean)
+    return value.map((v) => String(v).trim()).filter(Boolean);
   }
   if (typeof value === 'string' && value.trim()) {
     return value
       .split(/[;；,，|、\s]+/)
       .map((n) => n.trim())
-      .filter(Boolean)
+      .filter(Boolean);
   }
-  return []
+  return [];
 }
 
 export interface ProcessAddressContext {
-  existingAddresses: Address[]
-  existingTags: Tag[]
+  existingAddresses: Address[];
+  existingTags: Tag[];
 }
 
 export interface ProcessAddressResult {
-  address: Address | null
-  error: string | null
-  isDuplicate: boolean
-  newTags: Tag[]
+  address: Address | null;
+  error: string | null;
+  isDuplicate: boolean;
+  newTags: Tag[];
 }
 
 export class AddressProcessor {
-  private existingKeys: Set<string>
-  private parsedKeys: Set<string> = new Set()
-  private tagMap: Map<string, Tag>
-  private autoTagColorIndex: number
-  private autoCreatedTags: Tag[] = []
+  private existingKeys: Set<string>;
+  private parsedKeys: Set<string> = new Set();
+  private tagMap: Map<string, Tag>;
+  private autoTagColorIndex: number;
+  private autoCreatedTags: Tag[] = [];
 
   constructor(ctx: ProcessAddressContext) {
-    this.existingKeys = new Set(ctx.existingAddresses.map((a) => getAddressKey(a)))
-    this.tagMap = new Map()
+    this.existingKeys = new Set(ctx.existingAddresses.map((a) => getAddressKey(a)));
+    this.tagMap = new Map();
     ctx.existingTags.forEach((tag) => {
-      this.tagMap.set(tag.name.trim().toLowerCase(), tag)
-    })
-    this.autoTagColorIndex = ctx.existingTags.length % DEFAULT_TAG_COLORS.length
+      this.tagMap.set(tag.name.trim().toLowerCase(), tag);
+    });
+    this.autoTagColorIndex = ctx.existingTags.length % DEFAULT_TAG_COLORS.length;
   }
 
-  process(rawTags: string[], fieldValues: Partial<Record<keyof Address, string>>): ProcessAddressResult {
-    const address = createEmptyAddress()
+  process(
+    rawTags: string[],
+    fieldValues: Partial<Record<keyof Address, string>>,
+  ): ProcessAddressResult {
+    const address = createEmptyAddress();
 
     for (const [key, value] of Object.entries(fieldValues) as [keyof Address, string][]) {
-      ;(address as unknown as Record<string, string>)[key] = value
+      (address as unknown as Record<string, string>)[key] = value;
     }
 
-    const newTags: Tag[] = []
+    const newTags: Tag[] = [];
     if (rawTags.length > 0) {
-      const tagIds: string[] = []
+      const tagIds: string[] = [];
       rawTags.forEach((name) => {
-        const nameLower = name.toLowerCase()
-        let tag = this.tagMap.get(nameLower)
+        const nameLower = name.toLowerCase();
+        let tag = this.tagMap.get(nameLower);
         if (!tag) {
-          const color = DEFAULT_TAG_COLORS[this.autoTagColorIndex % DEFAULT_TAG_COLORS.length]
-          this.autoTagColorIndex++
+          const color = DEFAULT_TAG_COLORS[this.autoTagColorIndex % DEFAULT_TAG_COLORS.length];
+          this.autoTagColorIndex++;
           tag = {
             id: generateTagId(),
             name,
             color,
-          }
-          this.tagMap.set(nameLower, tag)
-          this.autoCreatedTags.push(tag)
-          newTags.push(tag)
+          };
+          this.tagMap.set(nameLower, tag);
+          this.autoCreatedTags.push(tag);
+          newTags.push(tag);
         }
         if (!tagIds.includes(tag.id)) {
-          tagIds.push(tag.id)
+          tagIds.push(tag.id);
         }
-      })
-      address.tags = tagIds
+      });
+      address.tags = tagIds;
     }
 
-    const validationError = validateAddress(address)
+    const validationError = validateAddress(address);
     if (validationError) {
-      return { address: null, error: validationError, isDuplicate: false, newTags }
+      return { address: null, error: validationError, isDuplicate: false, newTags };
     }
 
-    const key = getAddressKey(address)
+    const key = getAddressKey(address);
     if (this.existingKeys.has(key) || this.parsedKeys.has(key)) {
-      return { address: null, error: '该地址已存在，已跳过', isDuplicate: true, newTags }
+      return { address: null, error: '该地址已存在，已跳过', isDuplicate: true, newTags };
     }
 
-    this.parsedKeys.add(key)
-    return { address, error: null, isDuplicate: false, newTags }
+    this.parsedKeys.add(key);
+    return { address, error: null, isDuplicate: false, newTags };
   }
 
   getAutoCreatedTags(): Tag[] {
-    return this.autoCreatedTags
+    return this.autoCreatedTags;
   }
 }
 
@@ -170,11 +173,11 @@ export function resolveTagNames(address: Address, tagList: Tag[]): string {
   return address.tags
     .map((tagId) => tagList.find((t) => t.id === tagId)?.name)
     .filter(Boolean)
-    .join(';')
+    .join(';');
 }
 
 export function resolveTagNamesArray(address: Address, tagList: Tag[]): string[] {
   return address.tags
     .map((tagId) => tagList.find((t) => t.id === tagId)?.name)
-    .filter((n): n is string => Boolean(n))
+    .filter((n): n is string => Boolean(n));
 }

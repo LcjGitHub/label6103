@@ -1,77 +1,77 @@
-import { useState } from 'react'
-import { useEnvelope } from '../context/EnvelopeContext'
-import { useLanguage } from '../context/LanguageContext'
-import { DEFAULT_TAG_COLORS } from '../types/envelope'
-import type { Tag } from '../types/envelope'
+import { useState } from 'react';
+import { useEnvelope } from '../context/EnvelopeContext';
+import { useLanguage } from '../context/LanguageContext';
+import { DEFAULT_TAG_COLORS } from '../types/envelope';
+import type { Tag } from '../types/envelope';
 
 interface TagFormState {
-  name: string
-  color: string
+  name: string;
+  color: string;
 }
 
 const emptyForm: TagFormState = {
   name: '',
   color: DEFAULT_TAG_COLORS[0],
-}
+};
 
 export default function TagManager() {
-  const { tagList, addTag, updateTag, deleteTag, isTagNameDuplicate } = useEnvelope()
-  const { t } = useLanguage()
-  const [isAdding, setIsAdding] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [form, setForm] = useState<TagFormState>(emptyForm)
-  const [error, setError] = useState('')
+  const { tagList, addTag, updateTag, deleteTag, isTagNameDuplicate } = useEnvelope();
+  const { t } = useLanguage();
+  const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState<TagFormState>(emptyForm);
+  const [error, setError] = useState('');
 
   function startAdd() {
-    setForm(emptyForm)
-    setError('')
-    setEditingId(null)
-    setIsAdding(true)
+    setForm(emptyForm);
+    setError('');
+    setEditingId(null);
+    setIsAdding(true);
   }
 
   function startEdit(tag: Tag) {
-    setForm({ name: tag.name, color: tag.color })
-    setError('')
-    setIsAdding(false)
-    setEditingId(tag.id)
+    setForm({ name: tag.name, color: tag.color });
+    setError('');
+    setIsAdding(false);
+    setEditingId(tag.id);
   }
 
   function cancel() {
-    setIsAdding(false)
-    setEditingId(null)
-    setForm(emptyForm)
-    setError('')
+    setIsAdding(false);
+    setEditingId(null);
+    setForm(emptyForm);
+    setError('');
   }
 
   function handleSubmit() {
-    const trimmedName = form.name.trim()
+    const trimmedName = form.name.trim();
     if (!trimmedName) {
-      setError(t('tags.emptyNameError'))
-      return
+      setError(t('tags.emptyNameError'));
+      return;
     }
     if (isTagNameDuplicate(trimmedName, editingId ?? undefined)) {
-      setError(t('tags.duplicateNameError'))
-      return
+      setError(t('tags.duplicateNameError'));
+      return;
     }
 
     if (isAdding) {
-      addTag(trimmedName, form.color)
+      addTag(trimmedName, form.color);
     } else if (editingId) {
-      updateTag(editingId, trimmedName, form.color)
+      updateTag(editingId, trimmedName, form.color);
     }
-    cancel()
+    cancel();
   }
 
   function handleDelete(id: string) {
     if (confirm(t('tags.deleteConfirm'))) {
-      deleteTag(id)
+      deleteTag(id);
       if (editingId === id) {
-        cancel()
+        cancel();
       }
     }
   }
 
-  const showForm = isAdding || editingId !== null
+  const showForm = isAdding || editingId !== null;
 
   return (
     <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
@@ -92,7 +92,12 @@ export default function TagManager() {
             className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-violet-700"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
             </svg>
             {t('tags.addTag')}
           </button>
@@ -161,7 +166,12 @@ export default function TagManager() {
 
       {tagList.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <svg className="mb-3 h-12 w-12 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg
+            className="mb-3 h-12 w-12 text-stone-300"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -185,10 +195,7 @@ export default function TagManager() {
                 border: `1px solid ${tag.color}40`,
               }}
             >
-              <span
-                className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: tag.color }}
-              />
+              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: tag.color }} />
               <span>{tag.name}</span>
               <div className="ml-1 flex items-center gap-0.5 transition md:opacity-0 md:group-hover:opacity-100">
                 <button
@@ -197,8 +204,18 @@ export default function TagManager() {
                   className="rounded p-0.5 transition hover:bg-white/60"
                   title={t('common.rename')}
                 >
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  <svg
+                    className="h-3.5 w-3.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
                   </svg>
                 </button>
                 <button
@@ -207,8 +224,18 @@ export default function TagManager() {
                   className="rounded p-0.5 transition hover:bg-white/60"
                   title={t('common.delete')}
                 >
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  <svg
+                    className="h-3.5 w-3.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
                   </svg>
                 </button>
               </div>
@@ -217,5 +244,5 @@ export default function TagManager() {
         </div>
       )}
     </section>
-  )
+  );
 }

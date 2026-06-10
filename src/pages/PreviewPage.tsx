@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
-import EnvelopePreview from '../components/EnvelopePreview'
-import ExportButton from '../components/ExportButton'
-import LanguageSwitcher from '../components/LanguageSwitcher'
-import SaveTemplateDialog from '../components/SaveTemplateDialog'
-import TemplateList from '../components/TemplateList'
-import { useEnvelope } from '../context/EnvelopeContext'
-import { useLanguage } from '../context/LanguageContext'
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import EnvelopePreview from '../components/EnvelopePreview';
+import ExportButton from '../components/ExportButton';
+import LanguageSwitcher from '../components/LanguageSwitcher';
+import SaveTemplateDialog from '../components/SaveTemplateDialog';
+import TemplateList from '../components/TemplateList';
+import { useEnvelope } from '../context/EnvelopeContext';
+import { useLanguage } from '../context/LanguageContext';
 import {
   clampSize,
   clampZoom,
@@ -19,65 +19,76 @@ import {
   MIN_ENVELOPE_MM,
   MIN_ZOOM_PERCENT,
   ZOOM_STEP,
-} from '../types/envelope'
+} from '../types/envelope';
 
 export default function PreviewPage() {
-  const { data, layout, size, side, customSize, zoomPercent, setLayout, setSizeId, setCustomSize, setSide, setZoomPercent } =
-    useEnvelope()
-  const { t } = useLanguage()
-  const [saveDialogOpen, setSaveDialogOpen] = useState(false)
-  const [toast, setToast] = useState<string | null>(null)
-  const [customWidthInput, setCustomWidthInput] = useState<string>(String(customSize.widthMm))
-  const [customHeightInput, setCustomHeightInput] = useState<string>(String(customSize.heightMm))
+  const {
+    data,
+    layout,
+    size,
+    side,
+    customSize,
+    zoomPercent,
+    setLayout,
+    setSizeId,
+    setCustomSize,
+    setSide,
+    setZoomPercent,
+  } = useEnvelope();
+  const { t } = useLanguage();
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [customWidthInput, setCustomWidthInput] = useState<string>(String(customSize.widthMm));
+  const [customHeightInput, setCustomHeightInput] = useState<string>(String(customSize.heightMm));
 
   useEffect(() => {
-    setCustomWidthInput(String(customSize.widthMm))
-    setCustomHeightInput(String(customSize.heightMm))
-  }, [customSize.widthMm, customSize.heightMm])
+    setCustomWidthInput(String(customSize.widthMm));
+    setCustomHeightInput(String(customSize.heightMm));
+  }, [customSize.widthMm, customSize.heightMm]);
 
   const handleWidthBlur = () => {
-    const num = Number(customWidthInput)
+    const num = Number(customWidthInput);
     if (Number.isNaN(num) || customWidthInput.trim() === '') {
-      setCustomSize({ widthMm: MIN_ENVELOPE_MM })
+      setCustomSize({ widthMm: MIN_ENVELOPE_MM });
     } else {
-      setCustomSize({ widthMm: clampSize(num) })
+      setCustomSize({ widthMm: clampSize(num) });
     }
-  }
+  };
 
   const handleHeightBlur = () => {
-    const num = Number(customHeightInput)
+    const num = Number(customHeightInput);
     if (Number.isNaN(num) || customHeightInput.trim() === '') {
-      setCustomSize({ heightMm: MIN_ENVELOPE_MM })
+      setCustomSize({ heightMm: MIN_ENVELOPE_MM });
     } else {
-      setCustomSize({ heightMm: clampSize(num) })
+      setCustomSize({ heightMm: clampSize(num) });
     }
-  }
+  };
 
   const showToast = (msg: string) => {
-    setToast(msg)
-    setTimeout(() => setToast(null), 2000)
-  }
+    setToast(msg);
+    setTimeout(() => setToast(null), 2000);
+  };
 
-  const hasRecipient = Boolean(data.recipient.name || data.recipient.street)
+  const hasRecipient = Boolean(data.recipient.name || data.recipient.street);
 
-  const previewAreaRef = useRef<HTMLDivElement>(null)
+  const previewAreaRef = useRef<HTMLDivElement>(null);
 
   const handleWheelZoom = useCallback(
     (e: WheelEvent) => {
-      e.preventDefault()
-      const deltaPercent = -e.deltaY * 0.1
-      const next = clampZoom(zoomPercent + deltaPercent)
-      setZoomPercent(next)
+      e.preventDefault();
+      const deltaPercent = -e.deltaY * 0.1;
+      const next = clampZoom(zoomPercent + deltaPercent);
+      setZoomPercent(next);
     },
     [zoomPercent, setZoomPercent],
-  )
+  );
 
   useEffect(() => {
-    const el = previewAreaRef.current
-    if (!el) return
-    el.addEventListener('wheel', handleWheelZoom, { passive: false })
-    return () => el.removeEventListener('wheel', handleWheelZoom)
-  }, [handleWheelZoom])
+    const el = previewAreaRef.current;
+    if (!el) return;
+    el.addEventListener('wheel', handleWheelZoom, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheelZoom);
+  }, [handleWheelZoom]);
 
   return (
     <div className="min-h-screen">
@@ -101,7 +112,12 @@ export default function PreviewPage() {
               className="inline-flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm font-medium text-stone-600 transition hover:bg-stone-50"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
               {t('preview.backEdit')}
             </Link>
@@ -142,7 +158,12 @@ export default function PreviewPage() {
               title={t('zoom.zoomIn')}
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
             </button>
 
@@ -158,7 +179,12 @@ export default function PreviewPage() {
               title={t('zoom.zoomReset')}
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
               </svg>
             </button>
           </div>
@@ -170,7 +196,12 @@ export default function PreviewPage() {
               className="inline-flex items-center gap-1.5 rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-sm font-medium text-violet-800 transition hover:bg-violet-100"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                />
               </svg>
               {t('template.saveTemplate')}
             </button>
@@ -180,7 +211,12 @@ export default function PreviewPage() {
               className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800 transition hover:bg-emerald-100"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                />
               </svg>
               {t('printPreview.title')}
             </Link>
@@ -221,9 +257,7 @@ export default function PreviewPage() {
                 </button>
               </div>
               <p className="mt-3 text-xs leading-relaxed text-stone-400">
-                {layout === 'chinese'
-                  ? t('preview.chineseDesc')
-                  : t('preview.britishDesc')}
+                {layout === 'chinese' ? t('preview.chineseDesc') : t('preview.britishDesc')}
               </p>
             </section>
 
@@ -262,9 +296,7 @@ export default function PreviewPage() {
                 >
                   <span className="font-medium">{t('preview.sizes.custom')}</span>
                   {size.id === CUSTOM_SIZE_ID && (
-                    <span className="text-xs text-stone-300">
-                      {size.description}
-                    </span>
+                    <span className="text-xs text-stone-300">{size.description}</span>
                   )}
                 </button>
                 {size.id === CUSTOM_SIZE_ID && (
@@ -313,8 +345,8 @@ export default function PreviewPage() {
                       <div className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
                         <p className="font-medium">{t('preview.sizes.sizeOutOfRange')}</p>
                         <p className="mt-0.5 text-amber-600">
-                          {t('preview.sizes.minSize')}: {MIN_ENVELOPE_MM}mm · {t('preview.sizes.maxSize')}:{' '}
-                          {MAX_ENVELOPE_MM}mm
+                          {t('preview.sizes.minSize')}: {MIN_ENVELOPE_MM}mm ·{' '}
+                          {t('preview.sizes.maxSize')}: {MAX_ENVELOPE_MM}mm
                         </p>
                       </div>
                     )}
@@ -382,7 +414,9 @@ export default function PreviewPage() {
                 {size.description}
               </span>
               <span className="text-stone-300">|</span>
-              <span>{layout === 'chinese' ? t('preview.chineseStyle') : t('preview.britishStyle')}</span>
+              <span>
+                {layout === 'chinese' ? t('preview.chineseStyle') : t('preview.britishStyle')}
+              </span>
               <span className="text-stone-300">|</span>
               <span>{side === 'front' ? t('preview.front') : t('preview.back')}</span>
             </div>
@@ -401,5 +435,5 @@ export default function PreviewPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

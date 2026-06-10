@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { useLanguage } from '../context/LanguageContext'
+import { useEffect, useRef, useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import {
   clearAddressHistory,
   formatAddressDisplay,
@@ -8,93 +8,92 @@ import {
   markHistoryUsed,
   removeAddressFromHistory,
   subscribeHistoryChange,
-} from '../utils/addressHistory'
-import type { Address, AddressHistoryItem, AddressSide } from '../types/envelope'
+} from '../utils/addressHistory';
+import type { Address, AddressHistoryItem, AddressSide } from '../types/envelope';
 
 interface AddressHistoryDropdownProps {
-  side: AddressSide
-  accent: 'amber' | 'sky'
-  onSelect: (address: Address) => void
+  side: AddressSide;
+  accent: 'amber' | 'sky';
+  onSelect: (address: Address) => void;
 }
 
 const accentBorderMap = {
   amber: 'border-amber-200 hover:border-amber-400 focus:ring-amber-400/30',
   sky: 'border-sky-200 hover:border-sky-400 focus:ring-sky-400/30',
-}
+};
 
 const accentTextMap = {
   amber: 'text-amber-700',
   sky: 'text-sky-700',
-}
+};
 
 const accentBgMap = {
   amber: 'bg-amber-50',
   sky: 'bg-sky-50',
-}
+};
 
 const accentHoverBgMap = {
   amber: 'hover:bg-amber-50',
   sky: 'hover:bg-sky-50',
-}
+};
 
 export default function AddressHistoryDropdown({
   side,
   accent,
   onSelect,
 }: AddressHistoryDropdownProps) {
-  const { t, language } = useLanguage()
-  const [isOpen, setIsOpen] = useState(false)
-  const [history, setHistory] = useState<AddressHistoryItem[]>([])
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  const { t, language } = useLanguage();
+  const [isOpen, setIsOpen] = useState(false);
+  const [history, setHistory] = useState<AddressHistoryItem[]>([]);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setHistory(loadAddressHistory(side))
-  }, [side])
+    setHistory(loadAddressHistory(side));
+  }, [side]);
 
   useEffect(() => {
     const unsubscribe = subscribeHistoryChange((changedSide) => {
       if (changedSide === side) {
-        setHistory(loadAddressHistory(side))
+        setHistory(loadAddressHistory(side));
       }
-    })
-    return unsubscribe
-  }, [side])
+    });
+    return unsubscribe;
+  }, [side]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
+        setIsOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   function handleSelect(item: AddressHistoryItem) {
-    const updated = markHistoryUsed(side, item.id)
-    setHistory(updated)
-    onSelect(item.address)
-    setIsOpen(false)
+    const updated = markHistoryUsed(side, item.id);
+    setHistory(updated);
+    onSelect(item.address);
+    setIsOpen(false);
   }
 
   function handleDelete(id: string, e: React.MouseEvent) {
-    e.stopPropagation()
-    const updated = removeAddressFromHistory(side, id)
-    setHistory(updated)
+    e.stopPropagation();
+    const updated = removeAddressFromHistory(side, id);
+    setHistory(updated);
   }
 
   function handleClearAll(e: React.MouseEvent) {
-    e.stopPropagation()
+    e.stopPropagation();
     if (window.confirm(t('common.historyClearConfirm'))) {
-      const updated = clearAddressHistory(side)
-      setHistory(updated)
+      const updated = clearAddressHistory(side);
+      setHistory(updated);
     }
   }
 
   const timeParams = {
     justNow: t('time.justNow'),
-    minutesAgo: (count: number) =>
-      t('time.minutesAgo').replace('{count}', String(count)),
+    minutesAgo: (count: number) => t('time.minutesAgo').replace('{count}', String(count)),
     hoursAgo: (count: number) =>
       t('time.hoursAgo')
         .replace('{count}', String(count))
@@ -104,11 +103,8 @@ export default function AddressHistoryDropdown({
         .replace('{count}', String(count))
         .replace('{plural}', language === 'en' && count > 1 ? 's' : ''),
     dateFormat: (y: string, m: string, d: string) =>
-      t('time.dateFormat')
-        .replace('{year}', y)
-        .replace('{month}', m)
-        .replace('{day}', d),
-  }
+      t('time.dateFormat').replace('{year}', y).replace('{month}', m).replace('{day}', d),
+  };
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -144,9 +140,7 @@ export default function AddressHistoryDropdown({
       {isOpen && (
         <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl border border-stone-200 bg-white shadow-lg">
           <div className="flex items-center justify-between border-b border-stone-100 px-4 py-3">
-            <h3 className="text-sm font-semibold text-stone-800">
-              {t('common.historyTitle')}
-            </h3>
+            <h3 className="text-sm font-semibold text-stone-800">{t('common.historyTitle')}</h3>
             {history.length > 0 && (
               <button
                 type="button"
@@ -179,9 +173,7 @@ export default function AddressHistoryDropdown({
                         {formatAddressDisplay(item.address, t('common.noAddressInfo'))}
                       </div>
                       {item.address.phone && (
-                        <div className="mt-0.5 text-xs text-stone-400">
-                          {item.address.phone}
-                        </div>
+                        <div className="mt-0.5 text-xs text-stone-400">{item.address.phone}</div>
                       )}
                       <div className="mt-1 text-xs text-stone-400">
                         {t('common.historyLastUsed')}: {formatLastUsed(item.lastUsedAt, timeParams)}
@@ -192,8 +184,8 @@ export default function AddressHistoryDropdown({
                         type="button"
                         className={`rounded px-2 py-1 text-xs font-medium ${accentTextMap[accent]} ${accentBgMap[accent]}`}
                         onClick={(e) => {
-                          e.stopPropagation()
-                          handleSelect(item)
+                          e.stopPropagation();
+                          handleSelect(item);
                         }}
                       >
                         {t('common.historyUse')}
@@ -204,7 +196,12 @@ export default function AddressHistoryDropdown({
                         className="rounded p-1 text-stone-400 transition hover:bg-red-50 hover:text-red-600"
                         title={t('common.historyDelete')}
                       >
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -222,5 +219,5 @@ export default function AddressHistoryDropdown({
         </div>
       )}
     </div>
-  )
+  );
 }

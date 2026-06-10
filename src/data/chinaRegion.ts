@@ -1,15 +1,15 @@
 export interface District {
-  name: string
+  name: string;
 }
 
 export interface City {
-  name: string
-  districts: District[]
+  name: string;
+  districts: District[];
 }
 
 export interface Province {
-  name: string
-  cities: City[]
+  name: string;
+  cities: City[];
 }
 
 export const CHINA_REGIONS: Province[] = [
@@ -478,11 +478,7 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '乌海市',
-        districts: [
-          { name: '海勃湾区' },
-          { name: '海南区' },
-          { name: '乌达区' },
-        ],
+        districts: [{ name: '海勃湾区' }, { name: '海南区' }, { name: '乌达区' }],
       },
       {
         name: '赤峰市',
@@ -605,11 +601,7 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '阿拉善盟',
-        districts: [
-          { name: '阿拉善左旗' },
-          { name: '阿拉善右旗' },
-          { name: '额济纳旗' },
-        ],
+        districts: [{ name: '阿拉善左旗' }, { name: '阿拉善右旗' }, { name: '额济纳旗' }],
       },
     ],
   },
@@ -834,12 +826,7 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '辽源市',
-        districts: [
-          { name: '龙山区' },
-          { name: '西安区' },
-          { name: '东丰县' },
-          { name: '东辽县' },
-        ],
+        districts: [{ name: '龙山区' }, { name: '西安区' }, { name: '东丰县' }, { name: '东辽县' }],
       },
       {
         name: '通化市',
@@ -1398,12 +1385,7 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '舟山市',
-        districts: [
-          { name: '定海区' },
-          { name: '普陀区' },
-          { name: '岱山县' },
-          { name: '嵊泗县' },
-        ],
+        districts: [{ name: '定海区' }, { name: '普陀区' }, { name: '岱山县' }, { name: '嵊泗县' }],
       },
       {
         name: '台州市',
@@ -1503,21 +1485,11 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '淮北市',
-        districts: [
-          { name: '杜集区' },
-          { name: '相山区' },
-          { name: '烈山区' },
-          { name: '濉溪县' },
-        ],
+        districts: [{ name: '杜集区' }, { name: '相山区' }, { name: '烈山区' }, { name: '濉溪县' }],
       },
       {
         name: '铜陵市',
-        districts: [
-          { name: '铜官区' },
-          { name: '义安区' },
-          { name: '郊江区' },
-          { name: '枞阳县' },
-        ],
+        districts: [{ name: '铜官区' }, { name: '义安区' }, { name: '郊江区' }, { name: '枞阳县' }],
       },
       {
         name: '安庆市',
@@ -1596,21 +1568,11 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '亳州市',
-        districts: [
-          { name: '谯城区' },
-          { name: '涡阳县' },
-          { name: '蒙城县' },
-          { name: '利辛县' },
-        ],
+        districts: [{ name: '谯城区' }, { name: '涡阳县' }, { name: '蒙城县' }, { name: '利辛县' }],
       },
       {
         name: '池州市',
-        districts: [
-          { name: '贵池区' },
-          { name: '东至县' },
-          { name: '石台县' },
-          { name: '青阳县' },
-        ],
+        districts: [{ name: '贵池区' }, { name: '东至县' }, { name: '石台县' }, { name: '青阳县' }],
       },
       {
         name: '宣城市',
@@ -1780,12 +1742,7 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '景德镇市',
-        districts: [
-          { name: '昌江区' },
-          { name: '珠山区' },
-          { name: '浮梁县' },
-          { name: '乐平市' },
-        ],
+        districts: [{ name: '昌江区' }, { name: '珠山区' }, { name: '浮梁县' }, { name: '乐平市' }],
       },
       {
         name: '萍乡市',
@@ -1817,18 +1774,11 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '新余市',
-        districts: [
-          { name: '渝水区' },
-          { name: '分宜县' },
-        ],
+        districts: [{ name: '渝水区' }, { name: '分宜县' }],
       },
       {
         name: '鹰潭市',
-        districts: [
-          { name: '月湖区' },
-          { name: '余江区' },
-          { name: '贵溪市' },
-        ],
+        districts: [{ name: '月湖区' }, { name: '余江区' }, { name: '贵溪市' }],
       },
       {
         name: '赣州市',
@@ -2052,21 +2002,11 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '威海市',
-        districts: [
-          { name: '环翠区' },
-          { name: '文登区' },
-          { name: '荣成市' },
-          { name: '乳山市' },
-        ],
+        districts: [{ name: '环翠区' }, { name: '文登区' }, { name: '荣成市' }, { name: '乳山市' }],
       },
       {
         name: '日照市',
-        districts: [
-          { name: '东港区' },
-          { name: '岚山区' },
-          { name: '五莲县' },
-          { name: '莒县' },
-        ],
+        districts: [{ name: '东港区' }, { name: '岚山区' }, { name: '五莲县' }, { name: '莒县' }],
       },
       {
         name: '临沂市',
@@ -2390,9 +2330,7 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '济源市',
-        districts: [
-          { name: '济源市' },
-        ],
+        districts: [{ name: '济源市' }],
       },
     ],
   },
@@ -2475,11 +2413,7 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '鄂州市',
-        districts: [
-          { name: '梁子湖区' },
-          { name: '华容区' },
-          { name: '鄂城区' },
-        ],
+        districts: [{ name: '梁子湖区' }, { name: '华容区' }, { name: '鄂城区' }],
       },
       {
         name: '荆门市',
@@ -2544,11 +2478,7 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '随州市',
-        districts: [
-          { name: '曾都区' },
-          { name: '随县' },
-          { name: '广水市' },
-        ],
+        districts: [{ name: '曾都区' }, { name: '随县' }, { name: '广水市' }],
       },
       {
         name: '恩施土家族苗族自治州',
@@ -2565,27 +2495,19 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '仙桃市',
-        districts: [
-          { name: '仙桃市' },
-        ],
+        districts: [{ name: '仙桃市' }],
       },
       {
         name: '潜江市',
-        districts: [
-          { name: '潜江市' },
-        ],
+        districts: [{ name: '潜江市' }],
       },
       {
         name: '天门市',
-        districts: [
-          { name: '天门市' },
-        ],
+        districts: [{ name: '天门市' }],
       },
       {
         name: '神农架林区',
-        districts: [
-          { name: '神农架林区' },
-        ],
+        districts: [{ name: '神农架林区' }],
       },
     ],
   },
@@ -2835,11 +2757,7 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '珠海市',
-        districts: [
-          { name: '香洲区' },
-          { name: '斗门区' },
-          { name: '金湾区' },
-        ],
+        districts: [{ name: '香洲区' }, { name: '斗门区' }, { name: '金湾区' }],
       },
       {
         name: '汕头市',
@@ -2937,12 +2855,7 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '汕尾市',
-        districts: [
-          { name: '城区' },
-          { name: '海丰县' },
-          { name: '陆河县' },
-          { name: '陆丰市' },
-        ],
+        districts: [{ name: '城区' }, { name: '海丰县' }, { name: '陆河县' }, { name: '陆丰市' }],
       },
       {
         name: '河源市',
@@ -2957,12 +2870,7 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '阳江市',
-        districts: [
-          { name: '江城区' },
-          { name: '阳东区' },
-          { name: '阳西县' },
-          { name: '阳春市' },
-        ],
+        districts: [{ name: '江城区' }, { name: '阳东区' }, { name: '阳西县' }, { name: '阳春市' }],
       },
       {
         name: '清远市',
@@ -2979,23 +2887,15 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '东莞市',
-        districts: [
-          { name: '东莞市' },
-        ],
+        districts: [{ name: '东莞市' }],
       },
       {
         name: '中山市',
-        districts: [
-          { name: '中山市' },
-        ],
+        districts: [{ name: '中山市' }],
       },
       {
         name: '潮州市',
-        districts: [
-          { name: '湘桥区' },
-          { name: '潮安区' },
-          { name: '饶平县' },
-        ],
+        districts: [{ name: '湘桥区' }, { name: '潮安区' }, { name: '饶平县' }],
       },
       {
         name: '揭阳市',
@@ -3099,21 +2999,11 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '防城港市',
-        districts: [
-          { name: '港口区' },
-          { name: '防城区' },
-          { name: '上思县' },
-          { name: '东兴市' },
-        ],
+        districts: [{ name: '港口区' }, { name: '防城区' }, { name: '上思县' }, { name: '东兴市' }],
       },
       {
         name: '钦州市',
-        districts: [
-          { name: '钦南区' },
-          { name: '钦北区' },
-          { name: '浦北县' },
-          { name: '灵山县' },
-        ],
+        districts: [{ name: '钦南区' }, { name: '钦北区' }, { name: '浦北县' }, { name: '灵山县' }],
       },
       {
         name: '贵港市',
@@ -3210,34 +3100,19 @@ export const CHINA_REGIONS: Province[] = [
     cities: [
       {
         name: '海口市',
-        districts: [
-          { name: '秀英区' },
-          { name: '龙华区' },
-          { name: '琼山区' },
-          { name: '美兰区' },
-        ],
+        districts: [{ name: '秀英区' }, { name: '龙华区' }, { name: '琼山区' }, { name: '美兰区' }],
       },
       {
         name: '三亚市',
-        districts: [
-          { name: '海棠区' },
-          { name: '吉阳区' },
-          { name: '天涯区' },
-          { name: '崖州区' },
-        ],
+        districts: [{ name: '海棠区' }, { name: '吉阳区' }, { name: '天涯区' }, { name: '崖州区' }],
       },
       {
         name: '三沙市',
-        districts: [
-          { name: '西沙区' },
-          { name: '南沙区' },
-        ],
+        districts: [{ name: '西沙区' }, { name: '南沙区' }],
       },
       {
         name: '儋州市',
-        districts: [
-          { name: '儋州市' },
-        ],
+        districts: [{ name: '儋州市' }],
       },
       {
         name: '省直辖县级行政单位',
@@ -3531,11 +3406,7 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '资阳市',
-        districts: [
-          { name: '雁江区' },
-          { name: '安岳县' },
-          { name: '乐至县' },
-        ],
+        districts: [{ name: '雁江区' }, { name: '安岳县' }, { name: '乐至县' }],
       },
       {
         name: '阿坝藏族羌族自治州',
@@ -3902,11 +3773,7 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '西双版纳傣族自治州',
-        districts: [
-          { name: '景洪市' },
-          { name: '勐海县' },
-          { name: '勐腊县' },
-        ],
+        districts: [{ name: '景洪市' }, { name: '勐海县' }, { name: '勐腊县' }],
       },
       {
         name: '大理白族自治州',
@@ -3946,11 +3813,7 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '迪庆藏族自治州',
-        districts: [
-          { name: '香格里拉市' },
-          { name: '德钦县' },
-          { name: '维西傈僳族自治县' },
-        ],
+        districts: [{ name: '香格里拉市' }, { name: '德钦县' }, { name: '维西傈僳族自治县' }],
       },
     ],
   },
@@ -4091,12 +3954,7 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '铜川市',
-        districts: [
-          { name: '王益区' },
-          { name: '印台区' },
-          { name: '耀州区' },
-          { name: '宜君县' },
-        ],
+        districts: [{ name: '王益区' }, { name: '印台区' }, { name: '耀州区' }, { name: '宜君县' }],
       },
       {
         name: '宝鸡市',
@@ -4248,16 +4106,11 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '嘉峪关市',
-        districts: [
-          { name: '嘉峪关市' },
-        ],
+        districts: [{ name: '嘉峪关市' }],
       },
       {
         name: '金昌市',
-        districts: [
-          { name: '金川区' },
-          { name: '永昌县' },
-        ],
+        districts: [{ name: '金川区' }, { name: '永昌县' }],
       },
       {
         name: '白银市',
@@ -4497,11 +4350,7 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '石嘴山市',
-        districts: [
-          { name: '大武口区' },
-          { name: '惠农区' },
-          { name: '平罗县' },
-        ],
+        districts: [{ name: '大武口区' }, { name: '惠农区' }, { name: '平罗县' }],
       },
       {
         name: '吴忠市',
@@ -4525,11 +4374,7 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '中卫市',
-        districts: [
-          { name: '沙坡头区' },
-          { name: '中宁县' },
-          { name: '海原县' },
-        ],
+        districts: [{ name: '沙坡头区' }, { name: '中宁县' }, { name: '海原县' }],
       },
     ],
   },
@@ -4560,19 +4405,11 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '吐鲁番市',
-        districts: [
-          { name: '高昌区' },
-          { name: '鄯善县' },
-          { name: '托克逊县' },
-        ],
+        districts: [{ name: '高昌区' }, { name: '鄯善县' }, { name: '托克逊县' }],
       },
       {
         name: '哈密市',
-        districts: [
-          { name: '伊州区' },
-          { name: '巴里坤哈萨克自治县' },
-          { name: '伊吾县' },
-        ],
+        districts: [{ name: '伊州区' }, { name: '巴里坤哈萨克自治县' }, { name: '伊吾县' }],
       },
       {
         name: '昌吉回族自治州',
@@ -4917,12 +4754,7 @@ export const CHINA_REGIONS: Province[] = [
     cities: [
       {
         name: '香港岛',
-        districts: [
-          { name: '中西区' },
-          { name: '湾仔区' },
-          { name: '东区' },
-          { name: '南区' },
-        ],
+        districts: [{ name: '中西区' }, { name: '湾仔区' }, { name: '东区' }, { name: '南区' }],
       },
       {
         name: '九龙',
@@ -4965,17 +4797,12 @@ export const CHINA_REGIONS: Province[] = [
       },
       {
         name: '氹仔岛',
-        districts: [
-          { name: '嘉模堂区' },
-          { name: '路凼填海区' },
-        ],
+        districts: [{ name: '嘉模堂区' }, { name: '路凼填海区' }],
       },
       {
         name: '路环岛',
-        districts: [
-          { name: '圣方济各堂区' },
-        ],
+        districts: [{ name: '圣方济各堂区' }],
       },
     ],
   },
-]
+];

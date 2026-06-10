@@ -1,17 +1,17 @@
-import type { Address } from '../types/envelope'
-import { formatChineseAddress } from '../types/envelope'
-import { useLanguage } from '../context/LanguageContext'
+import type { Address } from '../types/envelope';
+import { formatChineseAddress } from '../types/envelope';
+import { useLanguage } from '../context/LanguageContext';
 
 interface EnvelopeChineseProps {
-  side: 'front' | 'back'
-  recipient: Address
-  sender: Address
-  widthPx: number
-  heightPx: number
+  side: 'front' | 'back';
+  recipient: Address;
+  sender: Address;
+  widthPx: number;
+  heightPx: number;
 }
 
 function PostcodeBoxes({ code }: { code: string }) {
-  const digits = (code.replace(/\s/g, '').slice(0, 6) + '      ').slice(0, 6).split('')
+  const digits = (code.replace(/\s/g, '').slice(0, 6) + '      ').slice(0, 6).split('');
   return (
     <div className="flex gap-0.5">
       {digits.map((d, i) => (
@@ -20,7 +20,7 @@ function PostcodeBoxes({ code }: { code: string }) {
         </span>
       ))}
     </div>
-  )
+  );
 }
 
 export default function EnvelopeChinese({
@@ -30,9 +30,9 @@ export default function EnvelopeChinese({
   widthPx,
   heightPx,
 }: EnvelopeChineseProps) {
-  const { t } = useLanguage()
-  const recipientLines = formatChineseAddress(recipient)
-  const senderLines = formatChineseAddress(sender)
+  const { t } = useLanguage();
+  const recipientLines = formatChineseAddress(recipient);
+  const senderLines = formatChineseAddress(sender);
 
   if (side === 'back') {
     return (
@@ -42,11 +42,11 @@ export default function EnvelopeChinese({
       >
         <div className="absolute inset-0 border border-stone-300/50" />
         <div className="absolute bottom-[8%] left-[6%] max-w-[55%] space-y-1 text-[clamp(10px,2.2vw,13px)] leading-relaxed">
-          <p className="text-[10px] tracking-widest text-stone-500">{t('envelope.chinese.senderLabel')}</p>
+          <p className="text-[10px] tracking-widest text-stone-500">
+            {t('envelope.chinese.senderLabel')}
+          </p>
           {senderLines.length > 0 ? (
-            senderLines.map((line, i) => (
-              <p key={i}>{line}</p>
-            ))
+            senderLines.map((line, i) => <p key={i}>{line}</p>)
           ) : (
             <p className="text-stone-400">{t('envelope.chinese.senderPlaceholder')}</p>
           )}
@@ -55,7 +55,7 @@ export default function EnvelopeChinese({
           {t('envelope.chinese.stampLabel')}
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -93,5 +93,5 @@ export default function EnvelopeChinese({
       {/* 装饰线 */}
       <div className="pointer-events-none absolute bottom-[12%] left-[5%] right-[5%] border-b border-stone-300/40" />
     </div>
-  )
+  );
 }

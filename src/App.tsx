@@ -1,8 +1,8 @@
-import { Routes, Route } from 'react-router-dom'
-import HomePage from './pages/HomePage'
-import PreviewPage from './pages/PreviewPage'
-import PrintPreviewPage from './pages/PrintPreviewPage'
-import AddressListPage from './pages/AddressListPage'
+import { Routes, Route } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import PreviewPage from './pages/PreviewPage';
+import PrintPreviewPage from './pages/PrintPreviewPage';
+import AddressListPage from './pages/AddressListPage';
 
 export default function App() {
   return (
@@ -12,5 +12,5 @@ export default function App() {
       <Route path="/print" element={<PrintPreviewPage />} />
       <Route path="/addresses" element={<AddressListPage />} />
     </Routes>
-  )
+  );
 }

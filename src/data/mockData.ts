@@ -1,4 +1,4 @@
-import type { EnvelopeData } from '../types/envelope'
+import type { EnvelopeData } from '../types/envelope';
 
 export const mockEnvelopeData: EnvelopeData = {
   sender: {
@@ -21,7 +21,7 @@ export const mockEnvelopeData: EnvelopeData = {
     postcode: '200120',
     tags: [],
   },
-}
+};
 
 export const mockBritishData: EnvelopeData = {
   sender: {
@@ -44,4 +44,4 @@ export const mockBritishData: EnvelopeData = {
     postcode: 'M1 1AE',
     tags: [],
   },
-}
+};

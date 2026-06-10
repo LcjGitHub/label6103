@@ -1,95 +1,95 @@
-import { useState } from 'react'
-import { useEnvelope } from '../context/EnvelopeContext'
-import { useLanguage } from '../context/LanguageContext'
-import { CUSTOM_SIZE_ID, getSizeDescription, type EnvelopeTemplate } from '../types/envelope'
+import { useState } from 'react';
+import { useEnvelope } from '../context/EnvelopeContext';
+import { useLanguage } from '../context/LanguageContext';
+import { CUSTOM_SIZE_ID, getSizeDescription, type EnvelopeTemplate } from '../types/envelope';
 
 interface TemplateListProps {
-  compact?: boolean
-  onApplied?: () => void
+  compact?: boolean;
+  onApplied?: () => void;
 }
 
 function formatDate(ts: number): string {
-  const d = new Date(ts)
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  const h = String(d.getHours()).padStart(2, '0')
-  const min = String(d.getMinutes()).padStart(2, '0')
-  return `${y}-${m}-${day} ${h}:${min}`
+  const d = new Date(ts);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const h = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  return `${y}-${m}-${day} ${h}:${min}`;
 }
 
 export default function TemplateList({ compact = false, onApplied }: TemplateListProps) {
   const { templateList, applyTemplate, deleteTemplate, updateTemplate, isTemplateNameDuplicate } =
-    useEnvelope()
-  const { t } = useLanguage()
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [editingName, setEditingName] = useState('')
-  const [editingError, setEditingError] = useState<string | null>(null)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [toast, setToast] = useState<string | null>(null)
+    useEnvelope();
+  const { t } = useLanguage();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState('');
+  const [editingError, setEditingError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
-    setToast(msg)
-    setTimeout(() => setToast(null), 2000)
-  }
+    setToast(msg);
+    setTimeout(() => setToast(null), 2000);
+  };
 
   const handleApply = (tmpl: EnvelopeTemplate) => {
-    applyTemplate(tmpl.id)
-    showToast(t('template.applySuccess'))
-    onApplied?.()
-  }
+    applyTemplate(tmpl.id);
+    showToast(t('template.applySuccess'));
+    onApplied?.();
+  };
 
   const handleDelete = (id: string) => {
-    deleteTemplate(id)
-    setDeletingId(null)
-    showToast(t('template.deleteSuccess'))
-  }
+    deleteTemplate(id);
+    setDeletingId(null);
+    showToast(t('template.deleteSuccess'));
+  };
 
   const startRename = (e: React.MouseEvent, tmpl: EnvelopeTemplate) => {
-    e.stopPropagation()
-    setEditingId(tmpl.id)
-    setEditingName(tmpl.name)
-    setEditingError(null)
-  }
+    e.stopPropagation();
+    setEditingId(tmpl.id);
+    setEditingName(tmpl.name);
+    setEditingError(null);
+  };
 
   const startDelete = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation()
-    setDeletingId(id)
-  }
+    e.stopPropagation();
+    setDeletingId(id);
+  };
 
   const cancelRename = (e?: React.MouseEvent) => {
-    e?.stopPropagation()
-    setEditingId(null)
-    setEditingName('')
-    setEditingError(null)
-  }
+    e?.stopPropagation();
+    setEditingId(null);
+    setEditingName('');
+    setEditingError(null);
+  };
 
   const cancelDelete = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setDeletingId(null)
-  }
+    e.stopPropagation();
+    setDeletingId(null);
+  };
 
   const submitRename = (e: React.FormEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (!editingId) return
-    const trimmed = editingName.trim()
+    e.preventDefault();
+    e.stopPropagation();
+    if (!editingId) return;
+    const trimmed = editingName.trim();
     if (!trimmed) {
-      setEditingError(t('template.emptyNameError'))
-      return
+      setEditingError(t('template.emptyNameError'));
+      return;
     }
     if (isTemplateNameDuplicate(trimmed, editingId)) {
-      setEditingError(t('template.duplicateNameError'))
-      return
+      setEditingError(t('template.duplicateNameError'));
+      return;
     }
-    updateTemplate(editingId, trimmed)
-    setEditingId(null)
-    setEditingName('')
-    setEditingError(null)
-    showToast(t('template.renameSuccess'))
-  }
+    updateTemplate(editingId, trimmed);
+    setEditingId(null);
+    setEditingName('');
+    setEditingError(null);
+    showToast(t('template.renameSuccess'));
+  };
 
-  const sortedList = [...templateList].sort((a, b) => b.updatedAt - a.updatedAt)
+  const sortedList = [...templateList].sort((a, b) => b.updatedAt - a.updatedAt);
 
   return (
     <div className="relative">
@@ -138,15 +138,15 @@ export default function TemplateList({ compact = false, onApplied }: TemplateLis
         ) : (
           <div className="space-y-2">
             {sortedList.map((tmpl) => {
-              const isEditing = editingId === tmpl.id
-              const isDeleting = deletingId === tmpl.id
+              const isEditing = editingId === tmpl.id;
+              const isDeleting = deletingId === tmpl.id;
               const layoutLabel =
-                tmpl.layout === 'chinese' ? t('preview.chineseStyle') : t('preview.britishStyle')
+                tmpl.layout === 'chinese' ? t('preview.chineseStyle') : t('preview.britishStyle');
               const sizeLabel =
                 tmpl.sizeId === CUSTOM_SIZE_ID && tmpl.customSize
                   ? `${t('preview.sizes.custom')} (${getSizeDescription(tmpl.customSize.widthMm, tmpl.customSize.heightMm)})`
-                  : (t(`preview.sizes.${tmpl.sizeId}` as never) || tmpl.sizeId)
-              const sideLabel = tmpl.side === 'front' ? t('preview.front') : t('preview.back')
+                  : t(`preview.sizes.${tmpl.sizeId}` as never) || tmpl.sizeId;
+              const sideLabel = tmpl.side === 'front' ? t('preview.front') : t('preview.back');
 
               return (
                 <div
@@ -163,15 +163,13 @@ export default function TemplateList({ compact = false, onApplied }: TemplateLis
                             value={editingName}
                             onClick={(e) => e.stopPropagation()}
                             onChange={(e) => {
-                              setEditingName(e.target.value)
-                              if (editingError) setEditingError(null)
+                              setEditingName(e.target.value);
+                              if (editingError) setEditingError(null);
                             }}
                             className="w-full rounded-lg border border-violet-300 bg-white px-2.5 py-1.5 text-sm outline-none focus:ring-2 focus:ring-violet-200"
                             autoFocus
                           />
-                          {editingError && (
-                            <p className="text-xs text-rose-600">{editingError}</p>
-                          )}
+                          {editingError && <p className="text-xs text-rose-600">{editingError}</p>}
                           <div className="flex gap-1.5">
                             <button
                               type="submit"
@@ -216,8 +214,8 @@ export default function TemplateList({ compact = false, onApplied }: TemplateLis
                         <button
                           type="button"
                           onClick={(e) => {
-                            e.stopPropagation()
-                            handleApply(tmpl)
+                            e.stopPropagation();
+                            handleApply(tmpl);
                           }}
                           className="rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1.5 text-xs font-medium text-violet-700 transition hover:bg-violet-100"
                           title={t('template.loadTemplate')}
@@ -272,14 +270,12 @@ export default function TemplateList({ compact = false, onApplied }: TemplateLis
                         className="flex shrink-0 items-center gap-1.5"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <span className="text-xs text-rose-700">
-                          {t('template.deleteConfirm')}
-                        </span>
+                        <span className="text-xs text-rose-700">{t('template.deleteConfirm')}</span>
                         <button
                           type="button"
                           onClick={(e) => {
-                            e.stopPropagation()
-                            handleDelete(tmpl.id)
+                            e.stopPropagation();
+                            handleDelete(tmpl.id);
                           }}
                           className="rounded-md bg-rose-600 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-rose-700"
                         >
@@ -296,11 +292,11 @@ export default function TemplateList({ compact = false, onApplied }: TemplateLis
                     )}
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }

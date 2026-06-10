@@ -1,15 +1,15 @@
-import { useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
-import AddressForm, { type AddressFormRef } from '../components/AddressForm'
-import AddressList from '../components/AddressList'
-import CSVUploader from '../components/CSVUploader'
-import LanguageSwitcher from '../components/LanguageSwitcher'
-import SaveTemplateDialog from '../components/SaveTemplateDialog'
-import TemplateList from '../components/TemplateList'
-import AddressExporter from '../components/AddressExporter'
-import { useEnvelope } from '../context/EnvelopeContext'
-import { useLanguage } from '../context/LanguageContext'
-import { mockBritishData } from '../data/mockData'
+import { useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import AddressForm, { type AddressFormRef } from '../components/AddressForm';
+import AddressList from '../components/AddressList';
+import CSVUploader from '../components/CSVUploader';
+import LanguageSwitcher from '../components/LanguageSwitcher';
+import SaveTemplateDialog from '../components/SaveTemplateDialog';
+import TemplateList from '../components/TemplateList';
+import AddressExporter from '../components/AddressExporter';
+import { useEnvelope } from '../context/EnvelopeContext';
+import { useLanguage } from '../context/LanguageContext';
+import { mockBritishData } from '../data/mockData';
 
 export default function HomePage() {
   const {
@@ -24,40 +24,40 @@ export default function HomePage() {
     persist,
     setData,
     setLayout,
-  } = useEnvelope()
-  const { t } = useLanguage()
-  const [saveDialogOpen, setSaveDialogOpen] = useState(false)
-  const [toast, setToast] = useState<string | null>(null)
-  const senderFormRef = useRef<AddressFormRef>(null)
-  const recipientFormRef = useRef<AddressFormRef>(null)
+  } = useEnvelope();
+  const { t } = useLanguage();
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const senderFormRef = useRef<AddressFormRef>(null);
+  const recipientFormRef = useRef<AddressFormRef>(null);
 
   const showToast = (msg: string) => {
-    setToast(msg)
-    setTimeout(() => setToast(null), 2000)
-  }
+    setToast(msg);
+    setTimeout(() => setToast(null), 2000);
+  };
 
   const loadBritishMock = () => {
-    setData(mockBritishData)
-    setLayout('british')
-  }
+    setData(mockBritishData);
+    setLayout('british');
+  };
 
   const saveAddressHistory = () => {
-    senderFormRef.current?.saveToHistory()
-    recipientFormRef.current?.saveToHistory()
-  }
+    senderFormRef.current?.saveToHistory();
+    recipientFormRef.current?.saveToHistory();
+  };
 
   const persistWithHistory = () => {
-    saveAddressHistory()
-    persist()
-  }
+    saveAddressHistory();
+    persist();
+  };
 
   const handleGoPreview = () => {
-    persistWithHistory()
-  }
+    persistWithHistory();
+  };
 
   const handleGoPrint = () => {
-    persistWithHistory()
-  }
+    persistWithHistory();
+  };
 
   return (
     <div className="min-h-screen">
@@ -76,12 +76,8 @@ export default function HomePage() {
       <header className="border-b border-stone-200 bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-5">
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-stone-900">
-              {t('app.title')}
-            </h1>
-            <p className="mt-0.5 text-sm text-stone-500">
-              {t('app.subtitle')}
-            </p>
+            <h1 className="text-xl font-bold tracking-tight text-stone-900">{t('app.title')}</h1>
+            <p className="mt-0.5 text-sm text-stone-500">{t('app.subtitle')}</p>
           </div>
           <div className="flex items-center gap-3">
             <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-500">
@@ -121,7 +117,12 @@ export default function HomePage() {
             className="inline-flex items-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-medium text-violet-800 transition hover:bg-violet-100"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+              />
             </svg>
             {t('template.saveTemplate')}
           </button>
@@ -130,7 +131,12 @@ export default function HomePage() {
             className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-800 transition hover:bg-emerald-100"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 10h16M4 14h16M4 18h16"
+              />
             </svg>
             {t('home.addressList')}
             {addressList.length > 0 && (
@@ -176,9 +182,7 @@ export default function HomePage() {
         />
 
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-stone-500">
-            {t('home.dataSavedTip')}
-          </p>
+          <p className="text-sm text-stone-500">{t('home.dataSavedTip')}</p>
           <div className="flex items-center gap-3">
             <Link
               to="/preview"
@@ -187,7 +191,12 @@ export default function HomePage() {
             >
               {t('home.goPreview')}
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </Link>
             <Link
@@ -196,7 +205,12 @@ export default function HomePage() {
               className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-6 py-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                />
               </svg>
               {t('printPreview.title')}
             </Link>
@@ -204,5 +218,5 @@ export default function HomePage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

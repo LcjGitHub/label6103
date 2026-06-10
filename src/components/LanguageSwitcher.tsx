@@ -1,13 +1,13 @@
-import { useLanguage } from '../context/LanguageContext'
-import type { Language } from '../i18n/translations'
+import { useLanguage } from '../context/LanguageContext';
+import type { Language } from '../i18n/translations';
 
 export default function LanguageSwitcher() {
-  const { language, setLanguage, t } = useLanguage()
+  const { language, setLanguage, t } = useLanguage();
 
   const languages: { code: Language; label: string }[] = [
     { code: 'zh', label: t('nav.zh') },
     { code: 'en', label: t('nav.en') },
-  ]
+  ];
 
   return (
     <div className="inline-flex items-center rounded-full border border-stone-200 bg-white p-0.5 shadow-sm">
@@ -27,5 +27,5 @@ export default function LanguageSwitcher() {
         </button>
       ))}
     </div>
-  )
+  );
 }
