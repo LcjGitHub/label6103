@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import { useEnvelope } from '../context/EnvelopeContext'
+import { useLanguage } from '../context/LanguageContext'
 import {
   generateCsvTemplate,
   readCsvFile,
@@ -11,6 +12,7 @@ type UploadStatus = 'idle' | 'uploading' | 'success' | 'partial' | 'error'
 
 export default function CSVUploader() {
   const { addressList, addAddresses } = useEnvelope()
+  const { t } = useLanguage()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useState<UploadStatus>('idle')
   const [progress, setProgress] = useState(0)
@@ -28,7 +30,7 @@ export default function CSVUploader() {
           failCount: 1,
           duplicateCount: 0,
           addresses: [],
-          errors: [{ line: 0, message: '请上传 CSV 格式的文件' }],
+          errors: [{ line: 0, message: t('csvUploader.uploadCsvOnly') }],
         })
         return
       }
@@ -67,11 +69,11 @@ export default function CSVUploader() {
           failCount: 1,
           duplicateCount: 0,
           addresses: [],
-          errors: [{ line: 0, message: '文件读取失败，请重试' }],
+          errors: [{ line: 0, message: t('csvUploader.readFailed') }],
         })
       }
     },
-    [addAddresses, addressList],
+    [addAddresses, addressList, t],
   )
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,14 +135,14 @@ export default function CSVUploader() {
       <div className="mb-4 flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-800">
           <span className="h-2 w-2 rounded-full bg-emerald-500" />
-          批量导入地址
+          {t('csvUploader.title')}
         </h2>
         <button
           type="button"
           onClick={downloadTemplate}
           className="text-sm font-medium text-stone-500 transition hover:text-stone-700"
         >
-          下载CSV模板
+          {t('csvUploader.downloadTemplate')}
         </button>
       </div>
 
@@ -162,8 +164,8 @@ export default function CSVUploader() {
               d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
             />
           </svg>
-          <p className="text-sm font-medium text-stone-700">点击或拖拽 CSV 文件到此处上传</p>
-          <p className="mt-1 text-xs text-stone-500">支持中英文表头，详见模板文件</p>
+          <p className="text-sm font-medium text-stone-700">{t('csvUploader.uploadHint')}</p>
+          <p className="mt-1 text-xs text-stone-500">{t('csvUploader.uploadHintSub')}</p>
           <input
             ref={fileInputRef}
             type="file"
@@ -177,7 +179,7 @@ export default function CSVUploader() {
       {status === 'uploading' && (
         <div className="rounded-xl bg-white p-6">
           <div className="mb-2 flex items-center justify-between text-sm">
-            <span className="font-medium text-stone-700">正在解析文件...</span>
+            <span className="font-medium text-stone-700">{t('csvUploader.parsingFile')}</span>
             <span className="font-semibold text-sky-600">{progress}%</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-stone-200">
@@ -194,34 +196,34 @@ export default function CSVUploader() {
           <div className="grid grid-cols-4 gap-3">
             <div className="rounded-lg bg-white px-4 py-3 text-center">
               <div className="text-2xl font-bold text-stone-800">{result.total}</div>
-              <div className="text-xs text-stone-500">总数</div>
+              <div className="text-xs text-stone-500">{t('csvUploader.total')}</div>
             </div>
             <div className="rounded-lg bg-white px-4 py-3 text-center">
               <div className="text-2xl font-bold text-emerald-600">{result.successCount}</div>
-              <div className="text-xs text-stone-500">成功</div>
+              <div className="text-xs text-stone-500">{t('csvUploader.success')}</div>
             </div>
             <div className="rounded-lg bg-white px-4 py-3 text-center">
               <div className="text-2xl font-bold text-amber-600">{result.duplicateCount}</div>
-              <div className="text-xs text-stone-500">重复</div>
+              <div className="text-xs text-stone-500">{t('csvUploader.duplicate')}</div>
             </div>
             <div className="rounded-lg bg-white px-4 py-3 text-center">
               <div className="text-2xl font-bold text-rose-600">{result.failCount}</div>
-              <div className="text-xs text-stone-500">失败</div>
+              <div className="text-xs text-stone-500">{t('csvUploader.fail')}</div>
             </div>
           </div>
 
           {result.errors.length > 0 && (
             <div className="max-h-40 overflow-y-auto rounded-lg bg-white p-4">
-              <p className="mb-2 text-sm font-medium text-stone-700">错误详情：</p>
+              <p className="mb-2 text-sm font-medium text-stone-700">{t('csvUploader.errorDetails')}</p>
               <ul className="space-y-1 text-sm">
                 {result.errors.slice(0, 10).map((err: CsvParseError, idx: number) => (
                   <li key={idx} className="flex gap-2 text-stone-600">
-                    <span className="shrink-0 text-rose-500">第{err.line}行:</span>
+                    <span className="shrink-0 text-rose-500">{t('csvUploader.lineN', { line: err.line })}</span>
                     <span>{err.message}</span>
                   </li>
                 ))}
                 {result.errors.length > 10 && (
-                  <li className="text-stone-400">... 还有 {result.errors.length - 10} 条错误</li>
+                  <li className="text-stone-400">{t('csvUploader.moreErrors', { count: result.errors.length - 10 })}</li>
                 )}
               </ul>
             </div>
@@ -233,7 +235,7 @@ export default function CSVUploader() {
               onClick={resetState}
               className="flex-1 rounded-lg border border-stone-300 bg-white px-4 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50"
             >
-              继续上传
+              {t('csvUploader.continueUpload')}
             </button>
           </div>
         </div>

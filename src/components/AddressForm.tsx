@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Address } from '../types/envelope'
 import AddressAutocomplete from './AddressAutocomplete'
 import type { AddressSuggestion } from '../utils/addressSearch'
+import { useLanguage } from '../context/LanguageContext'
 
 interface AddressFormProps {
   title: string
@@ -24,6 +25,7 @@ export default function AddressForm({
   const [closeVersion, setCloseVersion] = useState(0)
   const [provinceConfirmed, setProvinceConfirmed] = useState(false)
   const [cityConfirmed, setCityConfirmed] = useState(false)
+  const { t } = useLanguage()
 
   function closeAllDropdowns() {
     setCloseVersion((v) => v + 1)
@@ -70,12 +72,12 @@ export default function AddressForm({
   }
 
   const cityPlaceholder = provinceConfirmed
-    ? '请选择城市'
-    : '北京市 / London'
+    ? t('form.placeholders.citySelect')
+    : t('form.placeholders.city')
   const districtPlaceholder =
     provinceConfirmed && cityConfirmed
-      ? '请选择区/县'
-      : '海淀区（可选）'
+      ? t('form.placeholders.districtSelect')
+      : t('form.placeholders.district')
 
   return (
     <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
@@ -87,33 +89,33 @@ export default function AddressForm({
       </h2>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-stone-600">姓名</span>
+          <span className="font-medium text-stone-600">{t('common.name')}</span>
           <input
             type="text"
             value={address.name}
             onChange={(e) => onChange('name', e.target.value)}
-            placeholder="张三 / John Smith"
+            placeholder={t('form.placeholders.name')}
             className={`rounded-lg border bg-stone-50 px-3 py-2.5 text-stone-800 outline-none transition focus:bg-white focus:ring-2 ${accentMap[accent]}`}
           />
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-stone-600">电话</span>
+          <span className="font-medium text-stone-600">{t('common.phone')}</span>
           <input
             type="text"
             value={address.phone}
             onChange={(e) => onChange('phone', e.target.value)}
-            placeholder="13800138000"
+            placeholder={t('form.placeholders.phone')}
             className={`rounded-lg border bg-stone-50 px-3 py-2.5 text-stone-800 outline-none transition focus:bg-white focus:ring-2 ${accentMap[accent]}`}
           />
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-stone-600">省/州</span>
+          <span className="font-medium text-stone-600">{t('common.province')}</span>
           <AddressAutocomplete
             fieldType="province"
             value={address.province}
-            placeholder="北京市 / England"
+            placeholder={t('form.placeholders.province')}
             accent={accent}
             address={address}
             closeVersion={closeVersion}
@@ -124,7 +126,7 @@ export default function AddressForm({
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-stone-600">城市</span>
+          <span className="font-medium text-stone-600">{t('common.city')}</span>
           <AddressAutocomplete
             fieldType="city"
             value={address.city}
@@ -139,7 +141,7 @@ export default function AddressForm({
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-stone-600">区/县</span>
+          <span className="font-medium text-stone-600">{t('common.district')}</span>
           <AddressAutocomplete
             fieldType="district"
             value={address.district}
@@ -153,23 +155,23 @@ export default function AddressForm({
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm sm:col-span-2">
-          <span className="font-medium text-stone-600">详细地址</span>
+          <span className="font-medium text-stone-600">{t('common.street')}</span>
           <input
             type="text"
             value={address.street}
             onChange={(e) => onChange('street', e.target.value)}
-            placeholder="街道、门牌号、楼层"
+            placeholder={t('form.placeholders.street')}
             className={`rounded-lg border bg-stone-50 px-3 py-2.5 text-stone-800 outline-none transition focus:bg-white focus:ring-2 ${accentMap[accent]}`}
           />
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-stone-600">邮政编码</span>
+          <span className="font-medium text-stone-600">{t('common.postcode')}</span>
           <input
             type="text"
             value={address.postcode}
             onChange={(e) => onChange('postcode', e.target.value)}
-            placeholder="100080 / SW1A 2AA"
+            placeholder={t('form.placeholders.postcode')}
             className={`rounded-lg border bg-stone-50 px-3 py-2.5 text-stone-800 outline-none transition focus:bg-white focus:ring-2 ${accentMap[accent]}`}
           />
         </label>

@@ -2,10 +2,12 @@ import { useRef, useState } from 'react'
 import html2canvas from 'html2canvas'
 import EnvelopePreview from './EnvelopePreview'
 import { useEnvelope } from '../context/EnvelopeContext'
+import { useLanguage } from '../context/LanguageContext'
 
 export default function ExportButton() {
   const previewRef = useRef<HTMLDivElement>(null)
   const { size, layout, side } = useEnvelope()
+  const { t } = useLanguage()
   const [exporting, setExporting] = useState(false)
 
   const handleExport = async () => {
@@ -24,7 +26,7 @@ export default function ExportButton() {
       link.click()
     } catch (err) {
       console.error('Export failed:', err)
-      alert('导出失败，请重试')
+      alert(t('preview.exportFailed'))
     } finally {
       setExporting(false)
     }
@@ -49,7 +51,7 @@ export default function ExportButton() {
         {exporting ? (
           <>
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-            导出中…
+            {t('preview.exporting')}
           </>
         ) : (
           <>
@@ -61,7 +63,7 @@ export default function ExportButton() {
                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
               />
             </svg>
-            导出 PNG
+            {t('preview.exportPNG')}
           </>
         )}
       </button>

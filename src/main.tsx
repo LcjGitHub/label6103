@@ -3,14 +3,17 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { EnvelopeProvider } from './context/EnvelopeContext'
+import { LanguageProvider } from './context/LanguageContext'
 import './index.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
-      <EnvelopeProvider>
-        <App />
-      </EnvelopeProvider>
-    </BrowserRouter>
+    <LanguageProvider>
+      <BrowserRouter>
+        <EnvelopeProvider>
+          <App />
+        </EnvelopeProvider>
+      </BrowserRouter>
+    </LanguageProvider>
   </StrictMode>,
 )

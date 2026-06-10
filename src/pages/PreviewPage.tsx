@@ -1,11 +1,14 @@
 import { Link } from 'react-router-dom'
 import EnvelopePreview from '../components/EnvelopePreview'
 import ExportButton from '../components/ExportButton'
+import LanguageSwitcher from '../components/LanguageSwitcher'
 import { useEnvelope } from '../context/EnvelopeContext'
+import { useLanguage } from '../context/LanguageContext'
 import { ENVELOPE_SIZES } from '../types/envelope'
 
 export default function PreviewPage() {
   const { data, layout, size, side, setLayout, setSizeId, setSide } = useEnvelope()
+  const { t } = useLanguage()
 
   const hasRecipient = Boolean(data.recipient.name || data.recipient.street)
 
@@ -21,14 +24,17 @@ export default function PreviewPage() {
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              返回编辑
+              {t('preview.backEdit')}
             </Link>
             <div>
-              <h1 className="text-lg font-bold text-stone-900">信封预览</h1>
-              <p className="text-xs text-stone-500">实时 CSS 排版 · 切换尺寸与版式</p>
+              <h1 className="text-lg font-bold text-stone-900">{t('preview.title')}</h1>
+              <p className="text-xs text-stone-500">{t('preview.subtitle')}</p>
             </div>
           </div>
-          <ExportButton />
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher />
+            <ExportButton />
+          </div>
         </div>
       </header>
 
@@ -39,7 +45,7 @@ export default function PreviewPage() {
             {/* 版式切换 */}
             <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
               <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500">
-                信封版式
+                {t('preview.layout')}
               </h2>
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -51,7 +57,7 @@ export default function PreviewPage() {
                       : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
                   }`}
                 >
-                  中式
+                  {t('preview.chineseStyle')}
                 </button>
                 <button
                   type="button"
@@ -62,20 +68,20 @@ export default function PreviewPage() {
                       : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
                   }`}
                 >
-                  英式
+                  {t('preview.britishStyle')}
                 </button>
               </div>
               <p className="mt-3 text-xs leading-relaxed text-stone-400">
                 {layout === 'chinese'
-                  ? '中式：正面收件人居右，邮编框左上；背面左下为寄件人。'
-                  : '英式：正面居中偏下为收件人；背面左上为 Return Address。'}
+                  ? t('preview.chineseDesc')
+                  : t('preview.britishDesc')}
               </p>
             </section>
 
             {/* 尺寸模板 */}
             <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
               <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500">
-                信封尺寸
+                {t('preview.sizeLabel')}
               </h2>
               <div className="space-y-2">
                 {ENVELOPE_SIZES.map((s) => (
@@ -103,7 +109,7 @@ export default function PreviewPage() {
             {/* 正反面 */}
             <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
               <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500">
-                展示面
+                {t('preview.sideLabel')}
               </h2>
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -115,7 +121,7 @@ export default function PreviewPage() {
                       : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
                   }`}
                 >
-                  正面
+                  {t('preview.front')}
                 </button>
                 <button
                   type="button"
@@ -126,27 +132,27 @@ export default function PreviewPage() {
                       : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
                   }`}
                 >
-                  背面
+                  {t('preview.back')}
                 </button>
               </div>
             </section>
 
             {/* 地址摘要 */}
             <section className="rounded-2xl border border-stone-200 bg-stone-50 p-5 text-sm">
-              <h2 className="mb-2 font-semibold text-stone-700">当前数据</h2>
+              <h2 className="mb-2 font-semibold text-stone-700">{t('preview.currentData')}</h2>
               <dl className="space-y-2 text-stone-600">
                 <div>
-                  <dt className="text-xs text-stone-400">收件人</dt>
+                  <dt className="text-xs text-stone-400">{t('common.recipient')}</dt>
                   <dd>{data.recipient.name || '—'}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-stone-400">寄件人</dt>
+                  <dt className="text-xs text-stone-400">{t('common.sender')}</dt>
                   <dd>{data.sender.name || '—'}</dd>
                 </div>
               </dl>
               {!hasRecipient && (
                 <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
-                  尚未填写收件人，请返回首页补充或载入 Mock 数据。
+                  {t('preview.noRecipientTip')}
                 </p>
               )}
             </section>
@@ -159,9 +165,9 @@ export default function PreviewPage() {
                 {size.label} · {size.description}
               </span>
               <span className="text-stone-300">|</span>
-              <span>{layout === 'chinese' ? '中式' : '英式'}</span>
+              <span>{layout === 'chinese' ? t('preview.chineseStyle') : t('preview.britishStyle')}</span>
               <span className="text-stone-300">|</span>
-              <span>{side === 'front' ? '正面' : '背面'}</span>
+              <span>{side === 'front' ? t('preview.front') : t('preview.back')}</span>
             </div>
 
             <div className="flex min-h-[480px] w-full items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-gradient-to-br from-stone-200/50 to-stone-100 p-8">
@@ -169,7 +175,7 @@ export default function PreviewPage() {
             </div>
 
             <p className="mt-4 max-w-md text-center text-xs text-stone-400">
-              预览按真实毫米比例换算（1 mm ≈ 3.78 px）。点击「导出 PNG」可下载当前布局高清图片。
+              {t('preview.previewScaleTip')}
             </p>
           </section>
         </div>

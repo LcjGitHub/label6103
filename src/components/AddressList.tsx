@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useEnvelope } from '../context/EnvelopeContext'
+import { useLanguage } from '../context/LanguageContext'
 import type { SavedAddress } from '../types/envelope'
 
 interface AddressListProps {
@@ -8,9 +9,9 @@ interface AddressListProps {
   showSearch?: boolean
 }
 
-function formatAddressSummary(addr: SavedAddress): string {
+function formatAddressSummary(addr: SavedAddress, noInfoText: string): string {
   const parts = [addr.province, addr.city, addr.district, addr.street].filter(Boolean)
-  return parts.join(' ') || '暂无地址信息'
+  return parts.join(' ') || noInfoText
 }
 
 export default function AddressList({
@@ -19,6 +20,7 @@ export default function AddressList({
   showSearch = true,
 }: AddressListProps) {
   const { addressList, removeAddress, clearAddressList, setRecipientFromList } = useEnvelope()
+  const { t } = useLanguage()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
@@ -42,13 +44,15 @@ export default function AddressList({
     setTimeout(() => setSelectedId(null), 1500)
   }
 
+  const noAddressInfoText = t('common.noAddressInfo')
+
   if (compact) {
     return (
       <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-800">
             <span className="h-2 w-2 rounded-full bg-sky-500" />
-            已导入地址
+            {t('csvUploader.title')}
             <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-600">
               {addressList.length}
             </span>
@@ -72,7 +76,7 @@ export default function AddressList({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜索..."
+                placeholder={t('common.searchPlaceholderCompact')}
                 className="w-48 rounded-lg border border-stone-300 bg-stone-50 py-1.5 pl-9 pr-3 text-sm text-stone-800 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-2 focus:ring-sky-400/30"
               />
             </div>
@@ -82,7 +86,9 @@ export default function AddressList({
         {filteredList.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <p className="text-sm text-stone-500">
-              {addressList.length === 0 ? '暂无地址，请先通过上方导入 CSV 文件' : '未找到匹配的地址'}
+              {addressList.length === 0
+                ? t('csvUploader.uploadHint')
+                : t('common.noMatch')}
             </p>
           </div>
         ) : (
@@ -105,9 +111,9 @@ export default function AddressList({
                   </div>
                   <p
                     className="truncate text-sm text-stone-500"
-                    title={formatAddressSummary(addr)}
+                    title={formatAddressSummary(addr, noAddressInfoText)}
                   >
-                    {formatAddressSummary(addr)}
+                    {formatAddressSummary(addr, noAddressInfoText)}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -116,7 +122,7 @@ export default function AddressList({
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      已填充
+                      {t('common.filled')}
                     </span>
                   )}
                   <button
@@ -124,14 +130,14 @@ export default function AddressList({
                     onClick={() => handleUseAddress(addr.id)}
                     className="rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-sky-700"
                   >
-                    使用
+                    {t('common.use')}
                   </button>
                   <button
                     type="button"
                     onClick={() => removeAddress(addr.id)}
                     className="rounded-lg border border-stone-300 px-3 py-1.5 text-xs font-medium text-stone-500 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600"
                   >
-                    删除
+                    {t('common.delete')}
                   </button>
                 </div>
               </div>
@@ -148,10 +154,10 @@ export default function AddressList({
         <div className="flex items-center gap-3">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-800">
             <span className="h-2 w-2 rounded-full bg-sky-500" />
-            地址列表
+            {t('home.addressList')}
           </h2>
           <span className="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-medium text-stone-600">
-            共 {addressList.length} 条
+            {t('common.totalItems', { count: addressList.length })}
           </span>
         </div>
         <div className="flex items-center gap-3">
@@ -174,7 +180,7 @@ export default function AddressList({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜索姓名、电话或地址..."
+                placeholder={t('common.searchPlaceholder')}
                 className="w-64 rounded-lg border border-stone-300 bg-stone-50 py-2 pl-9 pr-3 text-sm text-stone-800 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-2 focus:ring-sky-400/30"
               />
             </div>
@@ -183,13 +189,13 @@ export default function AddressList({
             <button
               type="button"
               onClick={() => {
-                if (confirm('确定要清空所有地址吗？此操作不可撤销。')) {
+                if (confirm(t('common.confirmClear'))) {
                   clearAddressList()
                 }
               }}
               className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100"
             >
-              清空列表
+              {t('common.clearList')}
             </button>
           )}
         </div>
@@ -206,10 +212,12 @@ export default function AddressList({
             />
           </svg>
           <p className="text-base font-medium text-stone-600">
-            {addressList.length === 0 ? '暂无地址数据' : '未找到匹配的地址'}
+            {addressList.length === 0 ? t('common.noData') : t('common.noMatch')}
           </p>
           <p className="mt-1 text-sm text-stone-400">
-            {addressList.length === 0 ? '请通过上方区域导入 CSV 文件' : '尝试修改搜索关键词'}
+            {addressList.length === 0
+              ? t('csvUploader.uploadHint')
+              : t('common.tryModifyKeyword')}
           </p>
         </div>
       ) : (
@@ -218,11 +226,11 @@ export default function AddressList({
             <table className="w-full text-sm">
               <thead className="bg-stone-50">
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-stone-700">姓名</th>
-                  <th className="px-4 py-3 text-left font-semibold text-stone-700">电话</th>
-                  <th className="px-4 py-3 text-left font-semibold text-stone-700">地址</th>
-                  <th className="px-4 py-3 text-left font-semibold text-stone-700">邮编</th>
-                  <th className="px-4 py-3 text-right font-semibold text-stone-700">操作</th>
+                  <th className="px-4 py-3 text-left font-semibold text-stone-700">{t('common.name')}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-stone-700">{t('common.phone')}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-stone-700">{t('common.street')}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-stone-700">{t('common.postcode')}</th>
+                  <th className="px-4 py-3 text-right font-semibold text-stone-700">{t('common.operation')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-200">
@@ -237,9 +245,9 @@ export default function AddressList({
                     <td className="px-4 py-3 text-stone-600">{addr.phone || '-'}</td>
                     <td
                       className="px-4 py-3 max-w-xs truncate text-stone-600"
-                      title={formatAddressSummary(addr)}
+                      title={formatAddressSummary(addr, noAddressInfoText)}
                     >
-                      {formatAddressSummary(addr)}
+                      {formatAddressSummary(addr, noAddressInfoText)}
                     </td>
                     <td className="px-4 py-3 text-stone-600">{addr.postcode || '-'}</td>
                     <td className="px-4 py-3 text-right">
@@ -249,7 +257,7 @@ export default function AddressList({
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
-                            已填充
+                            {t('common.filled')}
                           </span>
                         )}
                         <button
@@ -257,14 +265,14 @@ export default function AddressList({
                           onClick={() => handleUseAddress(addr.id)}
                           className="rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-sky-700"
                         >
-                          使用此地址
+                          {t('common.useThisAddress')}
                         </button>
                         <button
                           type="button"
                           onClick={() => removeAddress(addr.id)}
                           className="rounded-lg border border-stone-300 px-3 py-1.5 text-xs font-medium text-stone-600 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600"
                         >
-                          删除
+                          {t('common.delete')}
                         </button>
                       </div>
                     </td>
