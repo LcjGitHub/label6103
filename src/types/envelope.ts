@@ -56,6 +56,13 @@ export const ENVELOPE_SIZES: EnvelopeSize[] = [
 export const STORAGE_KEY = 'envelope-preview-data'
 export const ADDRESS_LIST_KEY = 'envelope-address-list'
 export const TEMPLATE_LIST_KEY = 'envelope-template-list'
+export const UI_SETTINGS_KEY = 'envelope-ui-settings'
+
+export interface EnvelopeUiSettings {
+  layout: LayoutStyle
+  sizeId: string
+  side: EnvelopeSide
+}
 
 export interface EnvelopeTemplate {
   id: string

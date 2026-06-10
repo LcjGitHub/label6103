@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useEnvelope } from '../context/EnvelopeContext'
 import { useLanguage } from '../context/LanguageContext'
-import { ENVELOPE_SIZES, type EnvelopeTemplate } from '../types/envelope'
+import type { EnvelopeTemplate } from '../types/envelope'
 
 interface TemplateListProps {
   compact?: boolean
@@ -18,14 +18,10 @@ function formatDate(ts: number): string {
   return `${y}-${m}-${day} ${h}:${min}`
 }
 
-function getSizeLabel(sizeId: string): string {
-  return ENVELOPE_SIZES.find((s) => s.id === sizeId)?.label ?? sizeId
-}
-
 export default function TemplateList({ compact = false, onApplied }: TemplateListProps) {
   const { templateList, applyTemplate, deleteTemplate, updateTemplate, isTemplateNameDuplicate } =
     useEnvelope()
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingName, setEditingName] = useState('')
   const [editingError, setEditingError] = useState<string | null>(null)
@@ -49,20 +45,33 @@ export default function TemplateList({ compact = false, onApplied }: TemplateLis
     showToast(t('template.deleteSuccess'))
   }
 
-  const startRename = (tmpl: EnvelopeTemplate) => {
+  const startRename = (e: React.MouseEvent, tmpl: EnvelopeTemplate) => {
+    e.stopPropagation()
     setEditingId(tmpl.id)
     setEditingName(tmpl.name)
     setEditingError(null)
   }
 
-  const cancelRename = () => {
+  const startDelete = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation()
+    setDeletingId(id)
+  }
+
+  const cancelRename = (e?: React.MouseEvent) => {
+    e?.stopPropagation()
     setEditingId(null)
     setEditingName('')
     setEditingError(null)
   }
 
+  const cancelDelete = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setDeletingId(null)
+  }
+
   const submitRename = (e: React.FormEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     if (!editingId) return
     const trimmed = editingName.trim()
     if (!trimmed) {
@@ -133,12 +142,14 @@ export default function TemplateList({ compact = false, onApplied }: TemplateLis
               const isDeleting = deletingId === tmpl.id
               const layoutLabel =
                 tmpl.layout === 'chinese' ? t('preview.chineseStyle') : t('preview.britishStyle')
+              const sizeLabel = t(`preview.sizes.${tmpl.sizeId}` as never) || tmpl.sizeId
               const sideLabel = tmpl.side === 'front' ? t('preview.front') : t('preview.back')
 
               return (
                 <div
                   key={tmpl.id}
-                  className="group rounded-xl border border-stone-200 bg-stone-50/50 p-3 transition hover:border-violet-300 hover:bg-violet-50/30"
+                  onClick={() => !isEditing && !isDeleting && handleApply(tmpl)}
+                  className="group cursor-pointer rounded-xl border border-stone-200 bg-stone-50/50 p-3 transition hover:border-violet-300 hover:bg-violet-50/30"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
@@ -147,6 +158,7 @@ export default function TemplateList({ compact = false, onApplied }: TemplateLis
                           <input
                             type="text"
                             value={editingName}
+                            onClick={(e) => e.stopPropagation()}
                             onChange={(e) => {
                               setEditingName(e.target.value)
                               if (editingError) setEditingError(null)
@@ -160,6 +172,7 @@ export default function TemplateList({ compact = false, onApplied }: TemplateLis
                           <div className="flex gap-1.5">
                             <button
                               type="submit"
+                              onClick={(e) => e.stopPropagation()}
                               className="rounded-md bg-violet-600 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-violet-700"
                             >
                               {t('common.confirm')}
@@ -179,7 +192,7 @@ export default function TemplateList({ compact = false, onApplied }: TemplateLis
                             {tmpl.name}
                           </h3>
                           <p className="mt-1 truncate text-xs text-stone-500">
-                            {layoutLabel} · {getSizeLabel(tmpl.sizeId)} · {sideLabel}
+                            {layoutLabel} · {sizeLabel} · {sideLabel}
                           </p>
                           {!compact && (
                             <div className="mt-1.5 flex flex-wrap gap-3 text-[11px] text-stone-400">
@@ -199,7 +212,10 @@ export default function TemplateList({ compact = false, onApplied }: TemplateLis
                       <div className="flex shrink-0 gap-1">
                         <button
                           type="button"
-                          onClick={() => handleApply(tmpl)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleApply(tmpl)
+                          }}
                           className="rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1.5 text-xs font-medium text-violet-700 transition hover:bg-violet-100"
                           title={t('template.loadTemplate')}
                         >
@@ -207,7 +223,7 @@ export default function TemplateList({ compact = false, onApplied }: TemplateLis
                         </button>
                         <button
                           type="button"
-                          onClick={() => startRename(tmpl)}
+                          onClick={(e) => startRename(e, tmpl)}
                           className="rounded-lg border border-stone-200 bg-white px-2.5 py-1.5 text-xs font-medium text-stone-600 transition hover:bg-stone-50"
                           title={t('template.renameTemplate')}
                         >
@@ -227,7 +243,7 @@ export default function TemplateList({ compact = false, onApplied }: TemplateLis
                         </button>
                         <button
                           type="button"
-                          onClick={() => setDeletingId(tmpl.id)}
+                          onClick={(e) => startDelete(e, tmpl.id)}
                           className="rounded-lg border border-rose-200 bg-white px-2.5 py-1.5 text-xs font-medium text-rose-600 transition hover:bg-rose-50"
                           title={t('template.deleteTemplate')}
                         >
@@ -249,20 +265,26 @@ export default function TemplateList({ compact = false, onApplied }: TemplateLis
                     )}
 
                     {isDeleting && (
-                      <div className="flex shrink-0 items-center gap-1.5">
+                      <div
+                        className="flex shrink-0 items-center gap-1.5"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <span className="text-xs text-rose-700">
-                          {language === 'zh' ? '确定删除？' : 'Confirm delete?'}
+                          {t('template.deleteConfirm')}
                         </span>
                         <button
                           type="button"
-                          onClick={() => handleDelete(tmpl.id)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDelete(tmpl.id)
+                          }}
                           className="rounded-md bg-rose-600 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-rose-700"
                         >
                           {t('common.confirm')}
                         </button>
                         <button
                           type="button"
-                          onClick={() => setDeletingId(null)}
+                          onClick={cancelDelete}
                           className="rounded-md border border-stone-300 bg-white px-2.5 py-1 text-xs font-medium text-stone-600 transition hover:bg-stone-50"
                         >
                           {t('common.cancel')}

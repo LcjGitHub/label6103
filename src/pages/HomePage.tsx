@@ -118,7 +118,7 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <TemplateList compact />
+        <TemplateList />
 
         <CSVUploader />
 

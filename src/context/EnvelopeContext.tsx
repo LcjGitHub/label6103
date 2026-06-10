@@ -15,12 +15,14 @@ import {
   generateTemplateId,
   STORAGE_KEY,
   TEMPLATE_LIST_KEY,
+  UI_SETTINGS_KEY,
   toSavedAddress,
   type Address,
   type EnvelopeData,
   type EnvelopeSide,
   type EnvelopeSize,
   type EnvelopeTemplate,
+  type EnvelopeUiSettings,
   type LayoutStyle,
   type SavedAddress,
 } from '../types/envelope'
@@ -101,11 +103,39 @@ function saveToStorage(data: EnvelopeData) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
 }
 
+function loadUiSettingsFromStorage(): EnvelopeUiSettings {
+  try {
+    const raw = localStorage.getItem(UI_SETTINGS_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<EnvelopeUiSettings>
+      return {
+        layout: parsed.layout === 'british' ? 'british' : 'chinese',
+        sizeId: ENVELOPE_SIZES.some((s) => s.id === parsed.sizeId)
+          ? parsed.sizeId!
+          : ENVELOPE_SIZES[1].id,
+        side: parsed.side === 'back' ? 'back' : 'front',
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  return {
+    layout: 'chinese',
+    sizeId: ENVELOPE_SIZES[1].id,
+    side: 'front',
+  }
+}
+
+function saveUiSettingsToStorage(settings: EnvelopeUiSettings) {
+  localStorage.setItem(UI_SETTINGS_KEY, JSON.stringify(settings))
+}
+
 export function EnvelopeProvider({ children }: { children: ReactNode }) {
+  const initialUi = loadUiSettingsFromStorage()
   const [data, setDataState] = useState<EnvelopeData>(loadFromStorage)
-  const [layout, setLayout] = useState<LayoutStyle>('chinese')
-  const [sizeId, setSizeId] = useState(ENVELOPE_SIZES[1].id)
-  const [side, setSide] = useState<EnvelopeSide>('front')
+  const [layout, setLayout] = useState<LayoutStyle>(initialUi.layout)
+  const [sizeId, setSizeId] = useState<string>(initialUi.sizeId)
+  const [side, setSide] = useState<EnvelopeSide>(initialUi.side)
   const [addressList, setAddressList] = useState<SavedAddress[]>(loadAddressListFromStorage)
   const [templateList, setTemplateList] = useState<EnvelopeTemplate[]>(loadTemplateListFromStorage)
 
@@ -116,6 +146,10 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorage.setItem(TEMPLATE_LIST_KEY, JSON.stringify(templateList))
   }, [templateList])
+
+  useEffect(() => {
+    saveUiSettingsToStorage({ layout, sizeId, side })
+  }, [layout, sizeId, side])
 
   const size = useMemo(
     () => ENVELOPE_SIZES.find((s) => s.id === sizeId) ?? ENVELOPE_SIZES[1],
