@@ -115,6 +115,8 @@ export const ADDRESS_LIST_KEY = 'envelope-address-list'
 export const TEMPLATE_LIST_KEY = 'envelope-template-list'
 export const UI_SETTINGS_KEY = 'envelope-ui-settings'
 export const TAG_LIST_KEY = 'envelope-tag-list'
+export const ADDRESS_HISTORY_KEY = 'envelope-address-history'
+export const MAX_HISTORY_ITEMS = 20
 
 export const DEFAULT_TAG_COLORS = [
   '#ef4444',
@@ -228,4 +230,14 @@ export function formatBritishAddress(addr: Address): string[] {
   if (addr.postcode) lines.push(addr.postcode.toUpperCase())
   if (addr.phone) lines.push(addr.phone)
   return lines
+}
+
+export interface AddressHistoryItem {
+  id: string
+  address: Address
+  lastUsedAt: number
+}
+
+export function generateHistoryId(): string {
+  return `hist_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
 }

@@ -43,6 +43,14 @@ export interface Translations {
     save: string
     cancel: string
     confirm: string
+    history: string
+    historyTitle: string
+    historyEmpty: string
+    historyLastUsed: string
+    historyUse: string
+    historyDelete: string
+    historyClearAll: string
+    historyClearConfirm: string
   }
   template: {
     title: string
@@ -247,6 +255,14 @@ export const translations: Record<Language, Translations> = {
       save: '保存',
       cancel: '取消',
       confirm: '确认',
+      history: '历史记录',
+      historyTitle: '最近使用的地址',
+      historyEmpty: '暂无历史记录',
+      historyLastUsed: '最后使用',
+      historyUse: '使用',
+      historyDelete: '删除',
+      historyClearAll: '清空全部',
+      historyClearConfirm: '确定要清空所有历史记录吗？此操作不可撤销。',
     },
     template: {
       title: '信封模板',
@@ -450,6 +466,14 @@ export const translations: Record<Language, Translations> = {
       save: 'Save',
       cancel: 'Cancel',
       confirm: 'Confirm',
+      history: 'History',
+      historyTitle: 'Recently Used Addresses',
+      historyEmpty: 'No history yet',
+      historyLastUsed: 'Last used',
+      historyUse: 'Use',
+      historyDelete: 'Delete',
+      historyClearAll: 'Clear All',
+      historyClearConfirm: 'Are you sure you want to clear all history? This cannot be undone.',
     },
     template: {
       title: 'Envelope Templates',

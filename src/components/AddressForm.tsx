@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, useImperativeHandle, forwardRef } from 'react'
 import type { Address } from '../types/envelope'
 import AddressAutocomplete from './AddressAutocomplete'
 import TagSelector from './TagSelector'
+import AddressHistoryDropdown from './AddressHistoryDropdown'
 import type { AddressSuggestion } from '../utils/addressSearch'
 import { useLanguage } from '../context/LanguageContext'
+import { addAddressToHistory, isAddressEmpty } from '../utils/addressHistory'
 
 interface AddressFormProps {
   title: string
@@ -14,23 +16,38 @@ interface AddressFormProps {
   showTags?: boolean
 }
 
+export interface AddressFormRef {
+  saveToHistory: () => void
+}
+
 const accentMap = {
   amber: 'border-amber-400 focus:ring-amber-400/30',
   sky: 'border-sky-400 focus:ring-sky-400/30',
 }
 
-export default function AddressForm({
-  title,
-  accent,
-  address,
-  onChange,
-  onTagsChange,
-  showTags = true,
-}: AddressFormProps) {
+const AddressForm = forwardRef<AddressFormRef, AddressFormProps>(function AddressForm(
+  {
+    title,
+    accent,
+    address,
+    onChange,
+    onTagsChange,
+    showTags = true,
+  },
+  ref,
+) {
   const [closeVersion, setCloseVersion] = useState(0)
   const [provinceConfirmed, setProvinceConfirmed] = useState(false)
   const [cityConfirmed, setCityConfirmed] = useState(false)
   const { t } = useLanguage()
+
+  useImperativeHandle(ref, () => ({
+    saveToHistory: () => {
+      if (!isAddressEmpty(address)) {
+        addAddressToHistory(address)
+      }
+    },
+  }))
 
   function closeAllDropdowns() {
     setCloseVersion((v) => v + 1)
@@ -76,6 +93,21 @@ export default function AddressForm({
     }
   }
 
+  function handleHistorySelect(historyAddress: Address) {
+    const fields: (keyof Address)[] = [
+      'name', 'phone', 'province', 'city', 'district', 'street', 'postcode',
+    ]
+    fields.forEach((field) => {
+      onChange(field, historyAddress[field] as string)
+    })
+    if (onTagsChange && historyAddress.tags) {
+      onTagsChange(historyAddress.tags)
+    }
+    if (historyAddress.province) setProvinceConfirmed(true)
+    if (historyAddress.city) setCityConfirmed(true)
+    closeAllDropdowns()
+  }
+
   const cityPlaceholder = provinceConfirmed
     ? t('form.placeholders.citySelect')
     : t('form.placeholders.city')
@@ -86,12 +118,15 @@ export default function AddressForm({
 
   return (
     <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-      <h2 className="mb-5 flex items-center gap-2 text-lg font-semibold text-stone-800">
-        <span
-          className={`h-2 w-2 rounded-full ${accent === 'amber' ? 'bg-amber-500' : 'bg-sky-500'}`}
-        />
-        {title}
-      </h2>
+      <div className="mb-5 flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-800">
+          <span
+            className={`h-2 w-2 rounded-full ${accent === 'amber' ? 'bg-amber-500' : 'bg-sky-500'}`}
+          />
+          {title}
+        </h2>
+        <AddressHistoryDropdown accent={accent} onSelect={handleHistorySelect} />
+      </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-stone-600">{t('common.name')}</span>
@@ -197,4 +232,6 @@ export default function AddressForm({
       </div>
     </section>
   )
-}
+})
+
+export default AddressForm

@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import AddressForm from '../components/AddressForm'
+import AddressForm, { type AddressFormRef } from '../components/AddressForm'
 import AddressList from '../components/AddressList'
 import CSVUploader from '../components/CSVUploader'
 import LanguageSwitcher from '../components/LanguageSwitcher'
@@ -27,6 +27,8 @@ export default function HomePage() {
   const { t } = useLanguage()
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const senderFormRef = useRef<AddressFormRef>(null)
+  const recipientFormRef = useRef<AddressFormRef>(null)
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -36,6 +38,21 @@ export default function HomePage() {
   const loadBritishMock = () => {
     setData(mockBritishData)
     setLayout('british')
+  }
+
+  const saveAddressHistory = () => {
+    senderFormRef.current?.saveToHistory()
+    recipientFormRef.current?.saveToHistory()
+  }
+
+  const handleGoPreview = () => {
+    saveAddressHistory()
+    persist()
+  }
+
+  const handleGoPrint = () => {
+    saveAddressHistory()
+    persist()
   }
 
   return (
@@ -127,6 +144,7 @@ export default function HomePage() {
         {addressList.length > 0 && <AddressList compact showClearButton={false} />}
 
         <AddressForm
+          ref={senderFormRef}
           title={t('common.sender')}
           accent="amber"
           address={data.sender}
@@ -135,6 +153,7 @@ export default function HomePage() {
         />
 
         <AddressForm
+          ref={recipientFormRef}
           title={t('common.recipient')}
           accent="sky"
           address={data.recipient}
@@ -149,7 +168,7 @@ export default function HomePage() {
           <div className="flex items-center gap-3">
             <Link
               to="/preview"
-              onClick={persist}
+              onClick={handleGoPreview}
               className="inline-flex items-center gap-2 rounded-xl bg-stone-900 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-stone-800"
             >
               {t('home.goPreview')}
@@ -159,7 +178,7 @@ export default function HomePage() {
             </Link>
             <Link
               to="/print"
-              onClick={persist}
+              onClick={handleGoPrint}
               className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-6 py-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
