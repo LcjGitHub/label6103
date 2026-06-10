@@ -176,6 +176,7 @@ export interface Translations {
     clearFilter: string
     manageTags: string
     autoCreated: string
+    selectColor: string
   }
   envelope: {
     chinese: {
@@ -220,8 +221,8 @@ export const translations: Record<Language, Translations> = {
       sender: '寄件人',
       recipient: '收件人',
       search: '搜索',
-      searchPlaceholder: '搜索姓名、电话或地址...',
-      searchPlaceholderCompact: '搜索...',
+      searchPlaceholder: '搜索姓名、电话、地址或标签...',
+      searchPlaceholderCompact: '搜索地址或标签...',
       use: '使用',
       useThisAddress: '使用此地址',
       delete: '删除',
@@ -371,10 +372,11 @@ export const translations: Record<Language, Translations> = {
       filterBy: '按标签筛选',
       clearFilter: '清除筛选',
       manageTags: '管理标签',
-      autoCreated: '自动创建标签',
-    },
-    envelope: {
-      chinese: {
+    autoCreated: '自动创建标签',
+    selectColor: '选择颜色',
+  },
+  envelope: {
+    chinese: {
         senderLabel: '寄件人',
         senderPlaceholder: '（寄件人地址）',
         recipientPlaceholder: '（收件人地址）',
@@ -414,8 +416,8 @@ export const translations: Record<Language, Translations> = {
       sender: 'Sender',
       recipient: 'Recipient',
       search: 'Search',
-      searchPlaceholder: 'Search name, phone or address...',
-      searchPlaceholderCompact: 'Search...',
+      searchPlaceholder: 'Search name, phone, address or tag...',
+      searchPlaceholderCompact: 'Search address or tag...',
       use: 'Use',
       useThisAddress: 'Use This',
       delete: 'Delete',
@@ -568,6 +570,7 @@ export const translations: Record<Language, Translations> = {
       clearFilter: 'Clear filter',
       manageTags: 'Manage tags',
       autoCreated: 'Auto-created tags',
+      selectColor: 'Select color',
     },
     envelope: {
       chinese: {

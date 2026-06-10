@@ -11,7 +11,7 @@ import {
 type UploadStatus = 'idle' | 'uploading' | 'success' | 'partial' | 'error'
 
 export default function CSVUploader() {
-  const { addressList, addAddresses, tagList, addTag } = useEnvelope()
+  const { addressList, addAddresses, tagList, importTags } = useEnvelope()
   const { t } = useLanguage()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useState<UploadStatus>('idle')
@@ -52,9 +52,7 @@ export default function CSVUploader() {
         setResult(parseResult)
 
         if (parseResult.autoCreatedTags.length > 0) {
-          parseResult.autoCreatedTags.forEach((tag) => {
-            addTag(tag.name, tag.color)
-          })
+          importTags(parseResult.autoCreatedTags)
         }
 
         if (parseResult.addresses.length > 0) {
@@ -82,7 +80,7 @@ export default function CSVUploader() {
         })
       }
     },
-    [addAddresses, addTag, addressList, tagList, t],
+    [addAddresses, importTags, addressList, tagList, t],
   )
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

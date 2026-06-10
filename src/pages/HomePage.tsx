@@ -16,6 +16,8 @@ export default function HomePage() {
     addressList,
     updateSender,
     updateRecipient,
+    updateSenderTags,
+    updateRecipientTags,
     loadMockData,
     resetData,
     persist,
@@ -129,6 +131,7 @@ export default function HomePage() {
           accent="amber"
           address={data.sender}
           onChange={updateSender}
+          onTagsChange={updateSenderTags}
         />
 
         <AddressForm
@@ -136,6 +139,7 @@ export default function HomePage() {
           accent="sky"
           address={data.recipient}
           onChange={updateRecipient}
+          onTagsChange={updateRecipientTags}
         />
 
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">

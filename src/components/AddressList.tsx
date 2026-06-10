@@ -116,7 +116,7 @@ export default function AddressList({
         <div className="mb-4 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-800">
             <span className="h-2 w-2 rounded-full bg-sky-500" />
-            {t('csvUploader.title')}
+            {t('home.addressList')}
             <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-600">
               {addressList.length}
             </span>

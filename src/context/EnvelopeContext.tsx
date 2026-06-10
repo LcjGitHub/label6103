@@ -42,6 +42,8 @@ interface EnvelopeContextValue {
   setData: (data: EnvelopeData) => void
   updateSender: (field: keyof EnvelopeData['sender'], value: string) => void
   updateRecipient: (field: keyof EnvelopeData['recipient'], value: string) => void
+  updateSenderTags: (tags: string[]) => void
+  updateRecipientTags: (tags: string[]) => void
   setLayout: (layout: LayoutStyle) => void
   setSizeId: (id: string) => void
   setSide: (side: EnvelopeSide) => void
@@ -60,6 +62,7 @@ interface EnvelopeContextValue {
   applyTemplate: (id: string) => void
   isTemplateNameDuplicate: (name: string, excludeId?: string) => boolean
   addTag: (name: string, color: string) => Tag
+  importTags: (tags: Tag[]) => void
   updateTag: (id: string, name: string, color: string) => void
   deleteTag: (id: string) => void
   isTagNameDuplicate: (name: string, excludeId?: string) => boolean
@@ -226,6 +229,20 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
     [],
   )
 
+  const updateSenderTags = useCallback((tags: string[]) => {
+    setDataState((prev) => ({
+      ...prev,
+      sender: { ...prev.sender, tags },
+    }))
+  }, [])
+
+  const updateRecipientTags = useCallback((tags: string[]) => {
+    setDataState((prev) => ({
+      ...prev,
+      recipient: { ...prev.recipient, tags },
+    }))
+  }, [])
+
   const loadMockData = useCallback(() => {
     setDataState(mockEnvelopeData)
   }, [])
@@ -357,6 +374,17 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
     [],
   )
 
+  const importTags = useCallback((tags: Tag[]) => {
+    setTagList((prev) => {
+      const existingIds = new Set(prev.map((t) => t.id))
+      const existingNames = new Set(prev.map((t) => t.name.trim().toLowerCase()))
+      const newTags = tags.filter(
+        (t) => !existingIds.has(t.id) && !existingNames.has(t.name.trim().toLowerCase()),
+      )
+      return [...prev, ...newTags]
+    })
+  }, [])
+
   const updateTag = useCallback((id: string, name: string, color: string) => {
     setTagList((prev) =>
       prev.map((t) =>
@@ -387,6 +415,8 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       setData,
       updateSender,
       updateRecipient,
+      updateSenderTags,
+      updateRecipientTags,
       setLayout,
       setSizeId,
       setSide,
@@ -405,6 +435,7 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       applyTemplate,
       isTemplateNameDuplicate,
       addTag,
+      importTags,
       updateTag,
       deleteTag,
       isTagNameDuplicate,
@@ -435,6 +466,7 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       applyTemplate,
       isTemplateNameDuplicate,
       addTag,
+      importTags,
       updateTag,
       deleteTag,
       isTagNameDuplicate,

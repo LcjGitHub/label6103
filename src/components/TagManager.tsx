@@ -134,7 +134,7 @@ export default function TagManager() {
                         : 'border-white shadow-sm hover:scale-105'
                     }`}
                     style={{ backgroundColor: color }}
-                    aria-label={`Color ${color}`}
+                    aria-label={`${t('tags.selectColor')}: ${color}`}
                   />
                 ))}
               </div>
@@ -190,7 +190,7 @@ export default function TagManager() {
                 style={{ backgroundColor: tag.color }}
               />
               <span>{tag.name}</span>
-              <div className="ml-1 flex items-center gap-0.5 opacity-0 transition group-hover:opacity-100">
+              <div className="ml-1 flex items-center gap-0.5 transition md:opacity-0 md:group-hover:opacity-100">
                 <button
                   type="button"
                   onClick={() => startEdit(tag)}

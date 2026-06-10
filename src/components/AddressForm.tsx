@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Address } from '../types/envelope'
 import AddressAutocomplete from './AddressAutocomplete'
+import TagSelector from './TagSelector'
 import type { AddressSuggestion } from '../utils/addressSearch'
 import { useLanguage } from '../context/LanguageContext'
 
@@ -9,6 +10,8 @@ interface AddressFormProps {
   accent: 'amber' | 'sky'
   address: Address
   onChange: (field: keyof Address, value: string) => void
+  onTagsChange?: (tags: string[]) => void
+  showTags?: boolean
 }
 
 const accentMap = {
@@ -21,6 +24,8 @@ export default function AddressForm({
   accent,
   address,
   onChange,
+  onTagsChange,
+  showTags = true,
 }: AddressFormProps) {
   const [closeVersion, setCloseVersion] = useState(0)
   const [provinceConfirmed, setProvinceConfirmed] = useState(false)
@@ -175,6 +180,20 @@ export default function AddressForm({
             className={`rounded-lg border bg-stone-50 px-3 py-2.5 text-stone-800 outline-none transition focus:bg-white focus:ring-2 ${accentMap[accent]}`}
           />
         </label>
+
+        {showTags && onTagsChange && (
+          <div className="flex flex-col gap-1.5 text-sm sm:col-span-2">
+            <span className="font-medium text-stone-600">{t('tags.tags')}</span>
+            <div className="mt-1">
+              <TagSelector
+                addressId={title}
+                selectedTags={address.tags}
+                onChange={onTagsChange}
+                compact={false}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </section>
   )
