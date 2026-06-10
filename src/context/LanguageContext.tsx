@@ -64,6 +64,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   }, [language])
 
+  useEffect(() => {
+    const currentTranslations = translations[language]
+    if (typeof document !== 'undefined') {
+      document.title = currentTranslations.app.title
+      document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en'
+    }
+  }, [language])
+
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang)
   }, [])

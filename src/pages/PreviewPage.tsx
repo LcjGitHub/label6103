@@ -95,7 +95,7 @@ export default function PreviewPage() {
                         : 'bg-stone-50 text-stone-700 hover:bg-stone-100'
                     }`}
                   >
-                    <span className="font-medium">{s.label}</span>
+                    <span className="font-medium">{t(`preview.sizes.${s.id}`)}</span>
                     <span
                       className={`text-xs ${size.id === s.id ? 'text-stone-300' : 'text-stone-400'}`}
                     >
@@ -162,7 +162,7 @@ export default function PreviewPage() {
           <section className="flex flex-col items-center">
             <div className="mb-4 flex items-center gap-3 text-sm text-stone-500">
               <span>
-                {size.label} · {size.description}
+                {t(`preview.sizes.${size.id}`)} · {size.description}
               </span>
               <span className="text-stone-300">|</span>
               <span>{layout === 'chinese' ? t('preview.chineseStyle') : t('preview.britishStyle')}</span>

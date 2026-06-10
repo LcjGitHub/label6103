@@ -84,6 +84,11 @@ export interface Translations {
     exportPNG: string
     exporting: string
     exportFailed: string
+    sizes: {
+      small: string
+      medium: string
+      large: string
+    }
   }
   addressListPage: {
     title: string
@@ -107,6 +112,21 @@ export interface Translations {
     continueUpload: string
     uploadCsvOnly: string
     readFailed: string
+  }
+  envelope: {
+    chinese: {
+      senderLabel: string
+      senderPlaceholder: string
+      recipientPlaceholder: string
+      stampLabel: string
+      stampArea: string
+    }
+    british: {
+      returnAddress: string
+      senderPlaceholder: string
+      recipientPlaceholder: string
+      stamp: string
+    }
   }
 }
 
@@ -196,6 +216,11 @@ export const translations: Record<Language, Translations> = {
       exportPNG: '导出 PNG',
       exporting: '导出中…',
       exportFailed: '导出失败，请重试',
+      sizes: {
+        small: '小号 (5号)',
+        medium: '中号 (6号)',
+        large: '大号 (7号)',
+      },
     },
     addressListPage: {
       title: '地址列表管理',
@@ -219,6 +244,21 @@ export const translations: Record<Language, Translations> = {
       continueUpload: '继续上传',
       uploadCsvOnly: '请上传 CSV 格式的文件',
       readFailed: '文件读取失败，请重试',
+    },
+    envelope: {
+      chinese: {
+        senderLabel: '寄件人',
+        senderPlaceholder: '（寄件人地址）',
+        recipientPlaceholder: '（收件人地址）',
+        stampLabel: '邮戳',
+        stampArea: '贴邮票处',
+      },
+      british: {
+        returnAddress: 'Return Address',
+        senderPlaceholder: 'Sender address',
+        recipientPlaceholder: 'Recipient address',
+        stamp: 'Stamp',
+      },
     },
   },
   en: {
@@ -263,15 +303,15 @@ export const translations: Record<Language, Translations> = {
     },
     form: {
       placeholders: {
-        name: '张三 / John Smith',
-        phone: '13800138000',
-        province: '北京市 / England',
-        city: '北京市 / London',
+        name: 'John Smith',
+        phone: '+44 20 7946 0958',
+        province: 'England',
+        city: 'London',
         citySelect: 'Select a city',
-        district: 'Haidian District (optional)',
+        district: 'Westminster (optional)',
         districtSelect: 'Select a district',
-        street: 'Street, number, floor',
-        postcode: '100080 / SW1A 2AA',
+        street: '10 Downing Street',
+        postcode: 'SW1A 2AA',
       },
     },
     home: {
@@ -308,6 +348,11 @@ export const translations: Record<Language, Translations> = {
       exportPNG: 'Export PNG',
       exporting: 'Exporting…',
       exportFailed: 'Export failed, please try again',
+      sizes: {
+        small: 'Small (No.5)',
+        medium: 'Medium (No.6)',
+        large: 'Large (No.7)',
+      },
     },
     addressListPage: {
       title: 'Address List Management',
@@ -331,6 +376,21 @@ export const translations: Record<Language, Translations> = {
       continueUpload: 'Continue Upload',
       uploadCsvOnly: 'Please upload a CSV file',
       readFailed: 'Failed to read file, please try again',
+    },
+    envelope: {
+      chinese: {
+        senderLabel: 'Sender',
+        senderPlaceholder: '(Sender address)',
+        recipientPlaceholder: '(Recipient address)',
+        stampLabel: 'Postmark',
+        stampArea: 'Affix Stamp Here',
+      },
+      british: {
+        returnAddress: 'Return Address',
+        senderPlaceholder: 'Sender address',
+        recipientPlaceholder: 'Recipient address',
+        stamp: 'Stamp',
+      },
     },
   },
 }

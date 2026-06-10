@@ -1,5 +1,6 @@
 import type { Address } from '../types/envelope'
 import { formatChineseAddress } from '../types/envelope'
+import { useLanguage } from '../context/LanguageContext'
 
 interface EnvelopeChineseProps {
   side: 'front' | 'back'
@@ -29,6 +30,7 @@ export default function EnvelopeChinese({
   widthPx,
   heightPx,
 }: EnvelopeChineseProps) {
+  const { t } = useLanguage()
   const recipientLines = formatChineseAddress(recipient)
   const senderLines = formatChineseAddress(sender)
 
@@ -40,17 +42,17 @@ export default function EnvelopeChinese({
       >
         <div className="absolute inset-0 border border-stone-300/50" />
         <div className="absolute bottom-[8%] left-[6%] max-w-[55%] space-y-1 text-[clamp(10px,2.2vw,13px)] leading-relaxed">
-          <p className="text-[10px] tracking-widest text-stone-500">寄件人</p>
+          <p className="text-[10px] tracking-widest text-stone-500">{t('envelope.chinese.senderLabel')}</p>
           {senderLines.length > 0 ? (
             senderLines.map((line, i) => (
               <p key={i}>{line}</p>
             ))
           ) : (
-            <p className="text-stone-400">（寄件人地址）</p>
+            <p className="text-stone-400">{t('envelope.chinese.senderPlaceholder')}</p>
           )}
         </div>
         <div className="absolute right-[5%] top-[5%] stamp-area flex h-[14%] w-[18%] items-center justify-center text-[9px] text-stone-400">
-          邮戳
+          {t('envelope.chinese.stampLabel')}
         </div>
       </div>
     )
@@ -70,7 +72,7 @@ export default function EnvelopeChinese({
 
       {/* 邮票区 — 右上 */}
       <div className="absolute right-[5%] top-[5%] stamp-area flex h-[14%] w-[18%] flex-col items-center justify-center gap-0.5 text-[8px] text-stone-400">
-        <span>贴邮票处</span>
+        <span>{t('envelope.chinese.stampArea')}</span>
       </div>
 
       {/* 收件人 — 右侧居中偏下（中式标准） */}
@@ -83,7 +85,7 @@ export default function EnvelopeChinese({
               </p>
             ))
           ) : (
-            <p className="text-stone-400">（收件人地址）</p>
+            <p className="text-stone-400">{t('envelope.chinese.recipientPlaceholder')}</p>
           )}
         </div>
       </div>
