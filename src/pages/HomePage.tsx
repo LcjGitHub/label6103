@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom'
 import AddressForm from '../components/AddressForm'
+import CSVUploader from '../components/CSVUploader'
 import { useEnvelope } from '../context/EnvelopeContext'
 import { mockBritishData } from '../data/mockData'
 
 export default function HomePage() {
   const {
     data,
+    addressList,
     updateSender,
     updateRecipient,
     loadMockData,
@@ -61,7 +63,23 @@ export default function HomePage() {
           >
             清空表单
           </button>
+          <Link
+            to="/addresses"
+            className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-800 transition hover:bg-emerald-100"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+            地址列表
+            {addressList.length > 0 && (
+              <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-xs font-semibold text-white">
+                {addressList.length}
+              </span>
+            )}
+          </Link>
         </div>
+
+        <CSVUploader />
 
         <AddressForm
           title="寄件人"

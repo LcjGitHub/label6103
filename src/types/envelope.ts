@@ -50,6 +50,7 @@ export const ENVELOPE_SIZES: EnvelopeSize[] = [
 ]
 
 export const STORAGE_KEY = 'envelope-preview-data'
+export const ADDRESS_LIST_KEY = 'envelope-address-list'
 
 export function createEmptyAddress(): Address {
   return {
