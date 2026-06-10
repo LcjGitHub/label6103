@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Address } from '../types/envelope'
 import AddressAutocomplete from './AddressAutocomplete'
 import type { AddressSuggestion } from '../utils/addressSearch'
@@ -20,10 +21,31 @@ export default function AddressForm({
   address,
   onChange,
 }: AddressFormProps) {
-  function handleSuggestionSelect(suggestion: AddressSuggestion) {
+  const [closeVersion, setCloseVersion] = useState(0)
+
+  function closeAllDropdowns() {
+    setCloseVersion((v) => v + 1)
+  }
+
+  function handleProvinceSelect(suggestion: AddressSuggestion) {
+    if (suggestion.type !== 'province') return
     onChange('province', suggestion.province)
+    onChange('city', '')
+    onChange('district', '')
+    closeAllDropdowns()
+  }
+
+  function handleCitySelect(suggestion: AddressSuggestion) {
+    if (suggestion.type !== 'city') return
     onChange('city', suggestion.city)
+    onChange('district', '')
+    closeAllDropdowns()
+  }
+
+  function handleDistrictSelect(suggestion: AddressSuggestion) {
+    if (suggestion.type !== 'district') return
     onChange('district', suggestion.district)
+    closeAllDropdowns()
   }
 
   return (
@@ -60,11 +82,13 @@ export default function AddressForm({
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-stone-600">省/州</span>
           <AddressAutocomplete
+            fieldType="province"
             value={address.province}
             placeholder="北京市 / England"
             accent={accent}
             address={address}
-            onSelect={handleSuggestionSelect}
+            closeVersion={closeVersion}
+            onSelect={handleProvinceSelect}
             onChange={(val) => onChange('province', val)}
           />
         </label>
@@ -72,11 +96,13 @@ export default function AddressForm({
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-stone-600">城市</span>
           <AddressAutocomplete
+            fieldType="city"
             value={address.city}
-            placeholder="北京市 / London"
+            placeholder={address.province ? '请选择城市' : '请先选择省份'}
             accent={accent}
             address={address}
-            onSelect={handleSuggestionSelect}
+            closeVersion={closeVersion}
+            onSelect={handleCitySelect}
             onChange={(val) => onChange('city', val)}
           />
         </label>
@@ -84,11 +110,15 @@ export default function AddressForm({
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-stone-600">区/县</span>
           <AddressAutocomplete
+            fieldType="district"
             value={address.district}
-            placeholder="海淀区（可选）"
+            placeholder={
+              address.province && address.city ? '请选择区/县' : '请先选择省、市'
+            }
             accent={accent}
             address={address}
-            onSelect={handleSuggestionSelect}
+            closeVersion={closeVersion}
+            onSelect={handleDistrictSelect}
             onChange={(val) => onChange('district', val)}
           />
         </label>

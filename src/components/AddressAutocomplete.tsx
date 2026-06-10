@@ -1,12 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
-import { searchAddresses, type AddressSuggestion } from '../utils/addressSearch'
+import {
+  searchProvinces,
+  searchCities,
+  searchDistricts,
+  type AddressSuggestion,
+} from '../utils/addressSearch'
 import type { Address } from '../types/envelope'
 
 interface AddressAutocompleteProps {
+  fieldType: 'province' | 'city' | 'district'
   value: string
   placeholder: string
   accent: 'amber' | 'sky'
   address: Address
+  closeVersion: number
   onSelect: (suggestion: AddressSuggestion) => void
   onChange: (value: string) => void
 }
@@ -22,10 +29,12 @@ const activeAccentMap = {
 }
 
 export default function AddressAutocomplete({
+  fieldType,
   value,
   placeholder,
   accent,
   address,
+  closeVersion,
   onSelect,
   onChange,
 }: AddressAutocompleteProps) {
@@ -35,9 +44,23 @@ export default function AddressAutocomplete({
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (isOpen) {
+      setIsOpen(false)
+      setActiveIndex(-1)
+    }
+  }, [closeVersion])
+
+  useEffect(() => {
     const searchValue = value.trim()
     if (searchValue.length >= 1) {
-      const results = searchAddresses(searchValue)
+      let results: AddressSuggestion[] = []
+      if (fieldType === 'province') {
+        results = searchProvinces(searchValue)
+      } else if (fieldType === 'city') {
+        results = searchCities(searchValue, address.province)
+      } else if (fieldType === 'district') {
+        results = searchDistricts(searchValue, address.province, address.city)
+      }
       setSuggestions(results)
       setIsOpen(results.length > 0)
       setActiveIndex(-1)
@@ -46,7 +69,7 @@ export default function AddressAutocomplete({
       setIsOpen(false)
       setActiveIndex(-1)
     }
-  }, [value, address.province, address.city])
+  }, [value, address.province, address.city, fieldType])
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -66,7 +89,10 @@ export default function AddressAutocomplete({
       setActiveIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : prev))
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
-      setActiveIndex((prev) => (prev > 0 ? prev - 1 : prev))
+      setActiveIndex((prev) => {
+        if (prev <= 0) return -1
+        return prev - 1
+      })
     } else if (e.key === 'Enter') {
       e.preventDefault()
       if (activeIndex >= 0 && activeIndex < suggestions.length) {
@@ -74,6 +100,7 @@ export default function AddressAutocomplete({
       }
     } else if (e.key === 'Escape') {
       setIsOpen(false)
+      setActiveIndex(-1)
     }
   }
 
