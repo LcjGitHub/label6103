@@ -20,13 +20,101 @@
       0 1px 2px rgba(0, 0, 0, 0.06),
       0 8px 24px rgba(0, 0, 0, 0.12),
       inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .postcode-box {
     @apply inline-flex h-7 w-6 items-center justify-center border border-stone-400 bg-white text-sm font-mono font-semibold text-stone-800;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .stamp-area {
     @apply border-2 border-dashed border-stone-300 bg-stone-50/60;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print-page {
+    width: 210mm;
+    min-height: 297mm;
+    background: white;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  html,
+  body {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 210mm;
+    min-height: 297mm;
+    overflow: visible;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .print-container,
+  .print-container * {
+    visibility: visible;
+  }
+
+  .print-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    gap: 0;
+  }
+
+  .print-hide,
+  .print-hide * {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  .print-page {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    height: 297mm;
+    padding: 10mm !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+    page-break-inside: avoid;
+    page-break-after: always;
+    break-inside: avoid;
+    break-after: page;
+  }
+
+  .print-page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  .envelope-paper {
+    box-shadow: none !important;
+  }
+
+  .envelope-paper,
+  .postcode-box,
+  .stamp-area {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

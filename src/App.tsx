@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import PreviewPage from './pages/PreviewPage'
+import PrintPreviewPage from './pages/PrintPreviewPage'
 import AddressListPage from './pages/AddressListPage'
 
 export default function App() {
@@ -8,6 +9,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/preview" element={<PreviewPage />} />
+      <Route path="/print" element={<PrintPreviewPage />} />
       <Route path="/addresses" element={<AddressListPage />} />
     </Routes>
   )

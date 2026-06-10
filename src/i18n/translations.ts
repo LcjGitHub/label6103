@@ -139,6 +139,25 @@ export interface Translations {
     uploadCsvOnly: string
     readFailed: string
   }
+  printPreview: {
+    title: string
+    subtitle: string
+    backPreview: string
+    perPage: string
+    perPage1: string
+    perPage2: string
+    perPage4: string
+    perPage9: string
+    print: string
+    printing: string
+    printTip: string
+    noAddresses: string
+    noAddressesTip: string
+    page: string
+    useCurrentOnly: string
+    useAddressList: string
+    dataMode: string
+  }
   envelope: {
     chinese: {
       senderLabel: string
@@ -297,6 +316,25 @@ export const translations: Record<Language, Translations> = {
       uploadCsvOnly: '请上传 CSV 格式的文件',
       readFailed: '文件读取失败，请重试',
     },
+    printPreview: {
+      title: '打印预览',
+      subtitle: 'A4 纸张批量排版 · 选择每页信封数量',
+      backPreview: '返回预览',
+      perPage: '每页信封数',
+      perPage1: '1 个/页',
+      perPage2: '2 个/页',
+      perPage4: '4 个/页',
+      perPage9: '9 个/页',
+      print: '打印',
+      printing: '正在准备打印…',
+      printTip: '打印时将隐藏所有界面元素，仅输出信封内容。请在打印对话框中选择"A4"纸张，并取消"页眉页脚"选项以获得最佳效果。',
+      noAddresses: '无可用地址',
+      noAddressesTip: '地址列表为空，将使用当前编辑的收件人地址生成单封信封。如需批量打印，请先导入地址列表。',
+      page: '第 {current} / {total} 页',
+      useCurrentOnly: '仅当前收件人',
+      useAddressList: '使用地址列表',
+      dataMode: '数据来源',
+    },
     envelope: {
       chinese: {
         senderLabel: '寄件人',
@@ -454,6 +492,25 @@ export const translations: Record<Language, Translations> = {
       continueUpload: 'Continue Upload',
       uploadCsvOnly: 'Please upload a CSV file',
       readFailed: 'Failed to read file, please try again',
+    },
+    printPreview: {
+      title: 'Print Preview',
+      subtitle: 'A4 batch layout · Choose envelopes per page',
+      backPreview: 'Back to Preview',
+      perPage: 'Per Page',
+      perPage1: '1 / page',
+      perPage2: '2 / page',
+      perPage4: '4 / page',
+      perPage9: '9 / page',
+      print: 'Print',
+      printing: 'Preparing to print…',
+      printTip: 'All UI elements will be hidden during printing, only envelope content is output. Select "A4" paper and disable "Headers and footers" in the print dialog for best results.',
+      noAddresses: 'No Addresses',
+      noAddressesTip: 'The address list is empty. The current recipient will be used for a single envelope. Import addresses first for batch printing.',
+      page: 'Page {current} / {total}',
+      useCurrentOnly: 'Current Recipient Only',
+      useAddressList: 'Use Address List',
+      dataMode: 'Data Source',
     },
     envelope: {
       chinese: {
