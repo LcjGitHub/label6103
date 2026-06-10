@@ -4,6 +4,7 @@ import { useLanguage } from '../context/LanguageContext'
 import CSVUploader from '../components/CSVUploader'
 import AddressList from '../components/AddressList'
 import LanguageSwitcher from '../components/LanguageSwitcher'
+import TagManager from '../components/TagManager'
 
 export default function AddressListPage() {
   const { addressList } = useEnvelope()
@@ -34,6 +35,8 @@ export default function AddressListPage() {
 
       <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
         <CSVUploader />
+
+        <TagManager />
 
         <AddressList />
 

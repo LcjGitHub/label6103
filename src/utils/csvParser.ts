@@ -1,4 +1,11 @@
-import { createEmptyAddress, getAddressKey, type Address } from '../types/envelope'
+import {
+  createEmptyAddress,
+  DEFAULT_TAG_COLORS,
+  generateTagId,
+  getAddressKey,
+  type Address,
+  type Tag,
+} from '../types/envelope'
 
 export interface CsvParseResult {
   success: boolean
@@ -8,6 +15,7 @@ export interface CsvParseResult {
   duplicateCount: number
   addresses: Address[]
   errors: CsvParseError[]
+  autoCreatedTags: Tag[]
 }
 
 export interface CsvParseError {
@@ -15,7 +23,7 @@ export interface CsvParseError {
   message: string
 }
 
-const CSV_HEADERS_CN: Record<keyof Address, string> = {
+const CSV_HEADERS_CN: Record<string, string> = {
   name: '姓名',
   phone: '电话',
   province: '省/州',
@@ -23,9 +31,12 @@ const CSV_HEADERS_CN: Record<keyof Address, string> = {
   district: '区/县',
   street: '详细地址',
   postcode: '邮政编码',
+  tags: '标签',
 }
 
-const CSV_HEADER_ALIASES: Record<string, keyof Address> = {
+type CsvFieldKey = keyof Address | 'tags'
+
+const CSV_HEADER_ALIASES: Record<string, CsvFieldKey> = {
   name: 'name',
   姓名: 'name',
   phone: 'phone',
@@ -56,6 +67,15 @@ const CSV_HEADER_ALIASES: Record<string, keyof Address> = {
   'zip code': 'postcode',
   邮编: 'postcode',
   邮政编码: 'postcode',
+  tags: 'tags',
+  tag: 'tags',
+  标签: 'tags',
+  分组: 'tags',
+  分类: 'tags',
+  category: 'tags',
+  categories: 'tags',
+  groups: 'tags',
+  group: 'tags',
 }
 
 function stripBom(text: string): string {
@@ -106,7 +126,11 @@ function validateAddress(address: Address): string | null {
   return null
 }
 
-export function parseCsv(text: string, existingAddresses: Address[] = []): CsvParseResult {
+export function parseCsv(
+  text: string,
+  existingAddresses: Address[] = [],
+  existingTags: Tag[] = [],
+): CsvParseResult {
   const result: CsvParseResult = {
     success: false,
     total: 0,
@@ -115,6 +139,7 @@ export function parseCsv(text: string, existingAddresses: Address[] = []): CsvPa
     duplicateCount: 0,
     addresses: [],
     errors: [],
+    autoCreatedTags: [],
   }
 
   const cleanText = stripBom(text)
@@ -127,7 +152,7 @@ export function parseCsv(text: string, existingAddresses: Address[] = []): CsvPa
   }
 
   const headerLine = parseCsvLine(lines[0])
-  const headerMapping: Map<number, keyof Address> = new Map()
+  const headerMapping: Map<number, CsvFieldKey> = new Map()
 
   headerLine.forEach((header, index) => {
     const trimmed = header.trim()
@@ -150,6 +175,12 @@ export function parseCsv(text: string, existingAddresses: Address[] = []): CsvPa
   const existingKeys = new Set(existingAddresses.map((a) => getAddressKey(a)))
   const parsedKeys = new Set<string>()
 
+  const tagMap = new Map<string, Tag>()
+  existingTags.forEach((tag) => {
+    tagMap.set(tag.name.trim().toLowerCase(), tag)
+  })
+  let autoTagColorIndex = existingTags.length % DEFAULT_TAG_COLORS.length
+
   const dataLines = lines.slice(1)
   result.total = dataLines.length
 
@@ -157,11 +188,45 @@ export function parseCsv(text: string, existingAddresses: Address[] = []): CsvPa
     const lineNumber = idx + 2
     const values = parseCsvLine(line)
     const address = createEmptyAddress()
+    let rawTagsValue = ''
 
     headerMapping.forEach((fieldKey, colIndex) => {
       const value = values[colIndex] || ''
-      ;(address as unknown as Record<string, string>)[fieldKey] = value
+      if (fieldKey === 'tags') {
+        rawTagsValue = value
+      } else {
+        ;(address as unknown as Record<string, string>)[fieldKey] = value
+      }
     })
+
+    if (rawTagsValue.trim()) {
+      const tagNames = rawTagsValue
+        .split(/[;；,，|、\s]+/)
+        .map((n) => n.trim())
+        .filter(Boolean)
+      const tagIds: string[] = []
+
+      tagNames.forEach((name) => {
+        const nameLower = name.toLowerCase()
+        let tag = tagMap.get(nameLower)
+        if (!tag) {
+          const color = DEFAULT_TAG_COLORS[autoTagColorIndex % DEFAULT_TAG_COLORS.length]
+          autoTagColorIndex++
+          tag = {
+            id: generateTagId(),
+            name,
+            color,
+          }
+          tagMap.set(nameLower, tag)
+          result.autoCreatedTags.push(tag)
+        }
+        if (!tagIds.includes(tag.id)) {
+          tagIds.push(tag.id)
+        }
+      })
+
+      address.tags = tagIds
+    }
 
     const validationError = validateAddress(address)
     if (validationError) {
@@ -189,6 +254,7 @@ export function parseCsv(text: string, existingAddresses: Address[] = []): CsvPa
 export function readCsvFile(
   file: File,
   existingAddresses: Address[] = [],
+  existingTags: Tag[] = [],
   onProgress?: (percent: number) => void,
 ): Promise<CsvParseResult> {
   return new Promise((resolve, reject) => {
@@ -205,7 +271,7 @@ export function readCsvFile(
       try {
         const text = event.target?.result as string
         if (onProgress) onProgress(100)
-        resolve(parseCsv(text, existingAddresses))
+        resolve(parseCsv(text, existingAddresses, existingTags))
       } catch (error) {
         reject(error)
       }
@@ -220,7 +286,16 @@ export function readCsvFile(
 }
 
 export function generateCsvTemplate(): string {
-  const headers = ['姓名', '电话', '省/州', '城市', '区/县', '详细地址', '邮政编码']
-  const example = ['张三', '13800138000', '北京市', '北京市', '海淀区', '中关村大街1号', '100080']
+  const headers = ['姓名', '电话', '省/州', '城市', '区/县', '详细地址', '邮政编码', '标签']
+  const example = [
+    '张三',
+    '13800138000',
+    '北京市',
+    '北京市',
+    '海淀区',
+    '中关村大街1号',
+    '100080',
+    '家人;重要',
+  ]
   return [headers.join(','), example.join(',')].join('\n')
 }

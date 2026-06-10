@@ -1,3 +1,9 @@
+export interface Tag {
+  id: string
+  name: string
+  color: string
+}
+
 export interface Address {
   name: string
   phone: string
@@ -6,6 +12,7 @@ export interface Address {
   district: string
   street: string
   postcode: string
+  tags: string[]
 }
 
 export interface SavedAddress extends Address {
@@ -57,6 +64,28 @@ export const STORAGE_KEY = 'envelope-preview-data'
 export const ADDRESS_LIST_KEY = 'envelope-address-list'
 export const TEMPLATE_LIST_KEY = 'envelope-template-list'
 export const UI_SETTINGS_KEY = 'envelope-ui-settings'
+export const TAG_LIST_KEY = 'envelope-tag-list'
+
+export const DEFAULT_TAG_COLORS = [
+  '#ef4444',
+  '#f97316',
+  '#f59e0b',
+  '#eab308',
+  '#84cc16',
+  '#22c55e',
+  '#10b981',
+  '#14b8a6',
+  '#06b6d4',
+  '#0ea5e9',
+  '#3b82f6',
+  '#6366f1',
+  '#8b5cf6',
+  '#a855f7',
+  '#d946ef',
+  '#ec4899',
+  '#f43f5e',
+  '#64748b',
+]
 
 export interface EnvelopeUiSettings {
   layout: LayoutStyle
@@ -79,6 +108,10 @@ export function generateTemplateId(): string {
   return `tmpl_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
 }
 
+export function generateTagId(): string {
+  return `tag_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+}
+
 export function createEmptyAddress(): Address {
   return {
     name: '',
@@ -88,6 +121,7 @@ export function createEmptyAddress(): Address {
     district: '',
     street: '',
     postcode: '',
+    tags: [],
   }
 }
 

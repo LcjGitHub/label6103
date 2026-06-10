@@ -158,6 +158,25 @@ export interface Translations {
     useAddressList: string
     dataMode: string
   }
+  tags: {
+    title: string
+    addTag: string
+    createTag: string
+    editTag: string
+    tagName: string
+    tagNamePlaceholder: string
+    tagColor: string
+    tags: string
+    emptyNameError: string
+    duplicateNameError: string
+    deleteConfirm: string
+    noTags: string
+    noTagsHint: string
+    filterBy: string
+    clearFilter: string
+    manageTags: string
+    autoCreated: string
+  }
   envelope: {
     chinese: {
       senderLabel: string
@@ -335,6 +354,25 @@ export const translations: Record<Language, Translations> = {
       useAddressList: '使用地址列表',
       dataMode: '数据来源',
     },
+    tags: {
+      title: '标签管理',
+      addTag: '添加标签',
+      createTag: '创建新标签',
+      editTag: '编辑标签',
+      tagName: '标签名称',
+      tagNamePlaceholder: '如：家人、同事、客户',
+      tagColor: '标签颜色',
+      tags: '标签',
+      emptyNameError: '标签名称不能为空',
+      duplicateNameError: '该标签名称已存在',
+      deleteConfirm: '确定要删除此标签吗？所有地址中的此标签也将被移除。此操作不可撤销。',
+      noTags: '暂无标签，点击右上角「添加标签」按钮创建第一个标签',
+      noTagsHint: '请先在上方创建标签',
+      filterBy: '按标签筛选',
+      clearFilter: '清除筛选',
+      manageTags: '管理标签',
+      autoCreated: '自动创建标签',
+    },
     envelope: {
       chinese: {
         senderLabel: '寄件人',
@@ -511,6 +549,25 @@ export const translations: Record<Language, Translations> = {
       useCurrentOnly: 'Current Recipient Only',
       useAddressList: 'Use Address List',
       dataMode: 'Data Source',
+    },
+    tags: {
+      title: 'Tag Management',
+      addTag: 'Add Tag',
+      createTag: 'Create New Tag',
+      editTag: 'Edit Tag',
+      tagName: 'Tag Name',
+      tagNamePlaceholder: 'e.g. Family, Colleague, Client',
+      tagColor: 'Tag Color',
+      tags: 'Tags',
+      emptyNameError: 'Tag name cannot be empty',
+      duplicateNameError: 'Tag name already exists',
+      deleteConfirm: 'Are you sure you want to delete this tag? It will be removed from all addresses. This action cannot be undone.',
+      noTags: 'No tags yet. Click the "Add Tag" button in the top right to create your first tag.',
+      noTagsHint: 'Please create tags above first',
+      filterBy: 'Filter by tag',
+      clearFilter: 'Clear filter',
+      manageTags: 'Manage tags',
+      autoCreated: 'Auto-created tags',
     },
     envelope: {
       chinese: {

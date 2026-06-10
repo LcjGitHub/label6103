@@ -12,8 +12,10 @@ import {
   createEmptyAddress,
   ENVELOPE_SIZES,
   generateAddressId,
+  generateTagId,
   generateTemplateId,
   STORAGE_KEY,
+  TAG_LIST_KEY,
   TEMPLATE_LIST_KEY,
   UI_SETTINGS_KEY,
   toSavedAddress,
@@ -25,6 +27,7 @@ import {
   type EnvelopeUiSettings,
   type LayoutStyle,
   type SavedAddress,
+  type Tag,
 } from '../types/envelope'
 import { mockEnvelopeData } from '../data/mockData'
 
@@ -35,6 +38,7 @@ interface EnvelopeContextValue {
   side: EnvelopeSide
   addressList: SavedAddress[]
   templateList: EnvelopeTemplate[]
+  tagList: Tag[]
   setData: (data: EnvelopeData) => void
   updateSender: (field: keyof EnvelopeData['sender'], value: string) => void
   updateRecipient: (field: keyof EnvelopeData['recipient'], value: string) => void
@@ -49,11 +53,16 @@ interface EnvelopeContextValue {
   removeAddress: (id: string) => void
   clearAddressList: () => void
   setRecipientFromList: (id: string) => void
+  updateAddressTags: (id: string, tags: string[]) => void
   saveTemplate: (name: string) => EnvelopeTemplate
   updateTemplate: (id: string, name: string) => void
   deleteTemplate: (id: string) => void
   applyTemplate: (id: string) => void
   isTemplateNameDuplicate: (name: string, excludeId?: string) => boolean
+  addTag: (name: string, color: string) => Tag
+  updateTag: (id: string, name: string, color: string) => void
+  deleteTag: (id: string) => void
+  isTagNameDuplicate: (name: string, excludeId?: string) => boolean
 }
 
 const EnvelopeContext = createContext<EnvelopeContextValue | null>(null)
@@ -61,7 +70,13 @@ const EnvelopeContext = createContext<EnvelopeContextValue | null>(null)
 function loadFromStorage(): EnvelopeData {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return JSON.parse(raw) as EnvelopeData
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<EnvelopeData>
+      return {
+        sender: { ...createEmptyAddress(), ...(parsed.sender || {}) },
+        recipient: { ...createEmptyAddress(), ...(parsed.recipient || {}) },
+      }
+    }
   } catch {
     /* ignore */
   }
@@ -75,10 +90,15 @@ function loadAddressListFromStorage(): SavedAddress[] {
   try {
     const raw = localStorage.getItem(ADDRESS_LIST_KEY)
     if (raw) {
-      const parsed = JSON.parse(raw) as (Address & { id?: string })[]
+      const parsed = JSON.parse(raw) as (Partial<Address> & { id?: string })[]
       return parsed.map((addr) => {
-        if (addr.id) return addr as SavedAddress
-        return { ...addr, id: generateAddressId() }
+        const completeAddress: SavedAddress = {
+          ...createEmptyAddress(),
+          ...addr,
+          id: addr.id || generateAddressId(),
+          tags: addr.tags || [],
+        }
+        return completeAddress
       })
     }
   } catch {
@@ -91,7 +111,28 @@ function loadTemplateListFromStorage(): EnvelopeTemplate[] {
   try {
     const raw = localStorage.getItem(TEMPLATE_LIST_KEY)
     if (raw) {
-      return JSON.parse(raw) as EnvelopeTemplate[]
+      const parsed = JSON.parse(raw) as (EnvelopeTemplate & {
+        data?: { sender?: Partial<Address>; recipient?: Partial<Address> }
+      })[]
+      return parsed.map((template) => ({
+        ...template,
+        data: {
+          sender: { ...createEmptyAddress(), ...(template.data?.sender || {}) },
+          recipient: { ...createEmptyAddress(), ...(template.data?.recipient || {}) },
+        },
+      }))
+    }
+  } catch {
+    /* ignore */
+  }
+  return []
+}
+
+function loadTagListFromStorage(): Tag[] {
+  try {
+    const raw = localStorage.getItem(TAG_LIST_KEY)
+    if (raw) {
+      return JSON.parse(raw) as Tag[]
     }
   } catch {
     /* ignore */
@@ -138,6 +179,7 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
   const [side, setSide] = useState<EnvelopeSide>(initialUi.side)
   const [addressList, setAddressList] = useState<SavedAddress[]>(loadAddressListFromStorage)
   const [templateList, setTemplateList] = useState<EnvelopeTemplate[]>(loadTemplateListFromStorage)
+  const [tagList, setTagList] = useState<Tag[]>(loadTagListFromStorage)
 
   useEffect(() => {
     localStorage.setItem(ADDRESS_LIST_KEY, JSON.stringify(addressList))
@@ -146,6 +188,10 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorage.setItem(TEMPLATE_LIST_KEY, JSON.stringify(templateList))
   }, [templateList])
+
+  useEffect(() => {
+    localStorage.setItem(TAG_LIST_KEY, JSON.stringify(tagList))
+  }, [tagList])
 
   useEffect(() => {
     saveUiSettingsToStorage({ layout, sizeId, side })
@@ -211,6 +257,12 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
 
   const clearAddressList = useCallback(() => {
     setAddressList([])
+  }, [])
+
+  const updateAddressTags = useCallback((id: string, tags: string[]) => {
+    setAddressList((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, tags } : a)),
+    )
   }, [])
 
   const setRecipientFromList = useCallback((id: string) => {
@@ -283,6 +335,46 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  const isTagNameDuplicate = useCallback(
+    (name: string, excludeId?: string) => {
+      return tagList.some(
+        (t) => t.name.trim() === name.trim() && t.id !== excludeId,
+      )
+    },
+    [tagList],
+  )
+
+  const addTag = useCallback(
+    (name: string, color: string): Tag => {
+      const newTag: Tag = {
+        id: generateTagId(),
+        name: name.trim(),
+        color,
+      }
+      setTagList((prev) => [...prev, newTag])
+      return newTag
+    },
+    [],
+  )
+
+  const updateTag = useCallback((id: string, name: string, color: string) => {
+    setTagList((prev) =>
+      prev.map((t) =>
+        t.id === id ? { ...t, name: name.trim(), color } : t,
+      ),
+    )
+  }, [])
+
+  const deleteTag = useCallback((id: string) => {
+    setTagList((prev) => prev.filter((t) => t.id !== id))
+    setAddressList((prev) =>
+      prev.map((a) => ({
+        ...a,
+        tags: a.tags.filter((tagId) => tagId !== id),
+      })),
+    )
+  }, [])
+
   const value = useMemo(
     () => ({
       data,
@@ -291,6 +383,7 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       side,
       addressList,
       templateList,
+      tagList,
       setData,
       updateSender,
       updateRecipient,
@@ -305,11 +398,16 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       removeAddress,
       clearAddressList,
       setRecipientFromList,
+      updateAddressTags,
       saveTemplate,
       updateTemplate,
       deleteTemplate,
       applyTemplate,
       isTemplateNameDuplicate,
+      addTag,
+      updateTag,
+      deleteTag,
+      isTagNameDuplicate,
     }),
     [
       data,
@@ -318,6 +416,7 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       side,
       addressList,
       templateList,
+      tagList,
       setData,
       updateSender,
       updateRecipient,
@@ -329,11 +428,16 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       removeAddress,
       clearAddressList,
       setRecipientFromList,
+      updateAddressTags,
       saveTemplate,
       updateTemplate,
       deleteTemplate,
       applyTemplate,
       isTemplateNameDuplicate,
+      addTag,
+      updateTag,
+      deleteTag,
+      isTagNameDuplicate,
     ],
   )
 

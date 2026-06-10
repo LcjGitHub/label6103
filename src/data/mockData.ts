@@ -9,6 +9,7 @@ export const mockEnvelopeData: EnvelopeData = {
     district: '海淀区',
     street: '中关村大街1号科技大厦 1001室',
     postcode: '100080',
+    tags: [],
   },
   recipient: {
     name: '李四',
@@ -18,6 +19,7 @@ export const mockEnvelopeData: EnvelopeData = {
     district: '浦东新区',
     street: '世纪大道100号环球金融中心 28层',
     postcode: '200120',
+    tags: [],
   },
 }
 
@@ -30,6 +32,7 @@ export const mockBritishData: EnvelopeData = {
     district: '',
     street: '10 Downing Street',
     postcode: 'SW1A 2AA',
+    tags: [],
   },
   recipient: {
     name: 'Jane Doe',
@@ -39,5 +42,6 @@ export const mockBritishData: EnvelopeData = {
     district: '',
     street: '42 Baker Street',
     postcode: 'M1 1AE',
+    tags: [],
   },
 }

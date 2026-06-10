@@ -11,7 +11,7 @@ import {
 type UploadStatus = 'idle' | 'uploading' | 'success' | 'partial' | 'error'
 
 export default function CSVUploader() {
-  const { addressList, addAddresses } = useEnvelope()
+  const { addressList, addAddresses, tagList, addTag } = useEnvelope()
   const { t } = useLanguage()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useState<UploadStatus>('idle')
@@ -31,6 +31,7 @@ export default function CSVUploader() {
           duplicateCount: 0,
           addresses: [],
           errors: [{ line: 0, message: t('csvUploader.uploadCsvOnly') }],
+          autoCreatedTags: [],
         })
         return
       }
@@ -42,12 +43,19 @@ export default function CSVUploader() {
         const parseResult = await readCsvFile(
           file,
           addressList,
+          tagList,
           (percent) => {
             setProgress(percent)
           },
         )
 
         setResult(parseResult)
+
+        if (parseResult.autoCreatedTags.length > 0) {
+          parseResult.autoCreatedTags.forEach((tag) => {
+            addTag(tag.name, tag.color)
+          })
+        }
 
         if (parseResult.addresses.length > 0) {
           addAddresses(parseResult.addresses)
@@ -70,10 +78,11 @@ export default function CSVUploader() {
           duplicateCount: 0,
           addresses: [],
           errors: [{ line: 0, message: t('csvUploader.readFailed') }],
+          autoCreatedTags: [],
         })
       }
     },
-    [addAddresses, addressList, t],
+    [addAddresses, addTag, addressList, tagList, t],
   )
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

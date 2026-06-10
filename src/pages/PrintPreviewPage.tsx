@@ -76,6 +76,7 @@ export default function PrintPreviewPage() {
           district: addr.district,
           street: addr.street,
           postcode: addr.postcode,
+          tags: addr.tags,
         },
         sender: data.sender,
       }))
