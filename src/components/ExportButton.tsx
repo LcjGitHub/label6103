@@ -39,7 +39,7 @@ export default function ExportButton() {
         className="pointer-events-none fixed left-[-9999px] top-0"
       >
         <div ref={previewRef}>
-          <EnvelopePreview scale={1} />
+          <EnvelopePreview forceZoomPercent={100} />
         </div>
       </div>
       <button

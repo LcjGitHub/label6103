@@ -9,6 +9,7 @@ import { useEnvelope } from '../context/EnvelopeContext'
 import { useLanguage } from '../context/LanguageContext'
 import {
   clampSize,
+  clampZoom,
   CUSTOM_SIZE_ID,
   DEFAULT_ZOOM_PERCENT,
   ENVELOPE_SIZES,
@@ -63,11 +64,10 @@ export default function PreviewPage() {
 
   const handleWheelZoom = useCallback(
     (e: WheelEvent) => {
-      if (e.ctrlKey || e.metaKey) {
-        e.preventDefault()
-        const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP
-        setZoomPercent(zoomPercent + delta)
-      }
+      e.preventDefault()
+      const deltaPercent = -e.deltaY * 0.1
+      const next = clampZoom(zoomPercent + deltaPercent)
+      setZoomPercent(next)
     },
     [zoomPercent, setZoomPercent],
   )
@@ -78,8 +78,6 @@ export default function PreviewPage() {
     el.addEventListener('wheel', handleWheelZoom, { passive: false })
     return () => el.removeEventListener('wheel', handleWheelZoom)
   }, [handleWheelZoom])
-
-  const zoomScale = 1.15 * (zoomPercent / DEFAULT_ZOOM_PERCENT)
 
   return (
     <div className="min-h-screen">
@@ -112,6 +110,59 @@ export default function PreviewPage() {
               <p className="text-xs text-stone-500">{t('preview.subtitle')}</p>
             </div>
           </div>
+
+          <div className="flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-1.5 shadow-sm">
+            <button
+              type="button"
+              onClick={() => setZoomPercent(zoomPercent - ZOOM_STEP)}
+              disabled={zoomPercent <= MIN_ZOOM_PERCENT}
+              className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-stone-500 transition hover:bg-stone-100 hover:text-stone-700 disabled:cursor-not-allowed disabled:opacity-40"
+              title={t('zoom.zoomOut')}
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+              </svg>
+            </button>
+
+            <input
+              type="range"
+              min={MIN_ZOOM_PERCENT}
+              max={MAX_ZOOM_PERCENT}
+              step={1}
+              value={Math.round(zoomPercent)}
+              onChange={(e) => setZoomPercent(Number(e.target.value))}
+              className="h-1.5 w-28 cursor-pointer appearance-none rounded-full bg-stone-200 accent-stone-700"
+            />
+
+            <button
+              type="button"
+              onClick={() => setZoomPercent(zoomPercent + ZOOM_STEP)}
+              disabled={zoomPercent >= MAX_ZOOM_PERCENT}
+              className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-stone-500 transition hover:bg-stone-100 hover:text-stone-700 disabled:cursor-not-allowed disabled:opacity-40"
+              title={t('zoom.zoomIn')}
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
+
+            <span className="min-w-[3.5rem] text-center text-xs font-medium tabular-nums text-stone-600">
+              {t('zoom.zoomPercent').replace('{percent}', String(Math.round(zoomPercent)))}
+            </span>
+
+            <button
+              type="button"
+              onClick={() => setZoomPercent(DEFAULT_ZOOM_PERCENT)}
+              disabled={Math.abs(zoomPercent - DEFAULT_ZOOM_PERCENT) < 0.5}
+              className="inline-flex h-7 items-center justify-center rounded-lg px-2 text-xs font-medium text-stone-500 transition hover:bg-stone-100 hover:text-stone-700 disabled:cursor-not-allowed disabled:opacity-40"
+              title={t('zoom.zoomReset')}
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          </div>
+
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -140,9 +191,7 @@ export default function PreviewPage() {
 
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="grid gap-8 lg:grid-cols-[320px_1fr]">
-          {/* 控制面板 */}
           <aside className="space-y-5">
-            {/* 版式切换 */}
             <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
               <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500">
                 {t('preview.layout')}
@@ -178,7 +227,6 @@ export default function PreviewPage() {
               </p>
             </section>
 
-            {/* 尺寸模板 */}
             <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
               <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500">
                 {t('preview.sizeLabel')}
@@ -275,7 +323,6 @@ export default function PreviewPage() {
               </div>
             </section>
 
-            {/* 正反面 */}
             <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
               <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500">
                 {t('preview.sideLabel')}
@@ -306,7 +353,6 @@ export default function PreviewPage() {
               </div>
             </section>
 
-            {/* 地址摘要 */}
             <section className="rounded-2xl border border-stone-200 bg-stone-50 p-5 text-sm">
               <h2 className="mb-2 font-semibold text-stone-700">{t('preview.currentData')}</h2>
               <dl className="space-y-2 text-stone-600">
@@ -326,11 +372,9 @@ export default function PreviewPage() {
               )}
             </section>
 
-            {/* 模板列表 */}
             <TemplateList compact />
           </aside>
 
-          {/* 预览区 */}
           <section className="flex flex-col items-center">
             <div className="mb-4 flex items-center gap-3 text-sm text-stone-500">
               <span>
@@ -343,63 +387,11 @@ export default function PreviewPage() {
               <span>{side === 'front' ? t('preview.front') : t('preview.back')}</span>
             </div>
 
-            <div className="mb-3 flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-1.5 shadow-sm">
-              <button
-                type="button"
-                onClick={() => setZoomPercent(zoomPercent - ZOOM_STEP)}
-                disabled={zoomPercent <= MIN_ZOOM_PERCENT}
-                className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-stone-500 transition hover:bg-stone-100 hover:text-stone-700 disabled:cursor-not-allowed disabled:opacity-40"
-                title={t('zoom.zoomOut')}
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                </svg>
-              </button>
-
-              <input
-                type="range"
-                min={MIN_ZOOM_PERCENT}
-                max={MAX_ZOOM_PERCENT}
-                step={1}
-                value={zoomPercent}
-                onChange={(e) => setZoomPercent(Number(e.target.value))}
-                className="h-1.5 w-28 cursor-pointer appearance-none rounded-full bg-stone-200 accent-stone-700"
-              />
-
-              <button
-                type="button"
-                onClick={() => setZoomPercent(zoomPercent + ZOOM_STEP)}
-                disabled={zoomPercent >= MAX_ZOOM_PERCENT}
-                className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-stone-500 transition hover:bg-stone-100 hover:text-stone-700 disabled:cursor-not-allowed disabled:opacity-40"
-                title={t('zoom.zoomIn')}
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-              </button>
-
-              <span className="min-w-[3.5rem] text-center text-xs font-medium text-stone-600">
-                {t('zoom.zoomPercent').replace('{percent}', String(zoomPercent))}
-              </span>
-
-              <button
-                type="button"
-                onClick={() => setZoomPercent(DEFAULT_ZOOM_PERCENT)}
-                disabled={zoomPercent === DEFAULT_ZOOM_PERCENT}
-                className="inline-flex h-7 items-center justify-center rounded-lg px-2 text-xs font-medium text-stone-500 transition hover:bg-stone-100 hover:text-stone-700 disabled:cursor-not-allowed disabled:opacity-40"
-                title={t('zoom.zoomReset')}
-              >
-                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              </button>
-            </div>
-
             <div
               ref={previewAreaRef}
               className="flex min-h-[480px] w-full items-center justify-center overflow-auto rounded-2xl border border-dashed border-stone-300 bg-gradient-to-br from-stone-200/50 to-stone-100 p-8"
             >
-              <EnvelopePreview scale={zoomScale} />
+              <EnvelopePreview />
             </div>
 
             <p className="mt-4 max-w-md text-center text-xs text-stone-400">
