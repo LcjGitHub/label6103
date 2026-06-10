@@ -10,11 +10,13 @@ import {
 import {
   ADDRESS_LIST_KEY,
   clampSize,
+  clampZoom,
   createCustomSize,
   createEmptyAddress,
   CUSTOM_SIZE_ID,
   DEFAULT_CUSTOM_HEIGHT,
   DEFAULT_CUSTOM_WIDTH,
+  DEFAULT_ZOOM_PERCENT,
   ENVELOPE_SIZES,
   generateAddressId,
   generateTagId,
@@ -43,6 +45,7 @@ interface EnvelopeContextValue {
   size: EnvelopeSize
   side: EnvelopeSide
   customSize: CustomSizeSettings
+  zoomPercent: number
   addressList: SavedAddress[]
   templateList: EnvelopeTemplate[]
   tagList: Tag[]
@@ -55,6 +58,7 @@ interface EnvelopeContextValue {
   setSizeId: (id: string) => void
   setCustomSize: (size: Partial<CustomSizeSettings>) => void
   setSide: (side: EnvelopeSide) => void
+  setZoomPercent: (percent: number) => void
   loadMockData: () => void
   resetData: () => void
   persist: () => void
@@ -172,6 +176,7 @@ function loadUiSettingsFromStorage(): EnvelopeUiSettings {
           widthMm: parsed.customSize?.widthMm ?? DEFAULT_CUSTOM_WIDTH,
           heightMm: parsed.customSize?.heightMm ?? DEFAULT_CUSTOM_HEIGHT,
         },
+        zoomPercent: clampZoom(parsed.zoomPercent ?? DEFAULT_ZOOM_PERCENT),
       }
     }
   } catch {
@@ -185,6 +190,7 @@ function loadUiSettingsFromStorage(): EnvelopeUiSettings {
       widthMm: DEFAULT_CUSTOM_WIDTH,
       heightMm: DEFAULT_CUSTOM_HEIGHT,
     },
+    zoomPercent: DEFAULT_ZOOM_PERCENT,
   }
 }
 
@@ -199,6 +205,7 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
   const [sizeId, setSizeId] = useState<string>(initialUi.sizeId)
   const [side, setSide] = useState<EnvelopeSide>(initialUi.side)
   const [customSize, setCustomSizeState] = useState<CustomSizeSettings>(initialUi.customSize)
+  const [zoomPercent, setZoomPercentState] = useState<number>(initialUi.zoomPercent)
   const [addressList, setAddressList] = useState<SavedAddress[]>(loadAddressListFromStorage)
   const [templateList, setTemplateList] = useState<EnvelopeTemplate[]>(loadTemplateListFromStorage)
   const [tagList, setTagList] = useState<Tag[]>(loadTagListFromStorage)
@@ -216,11 +223,15 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
   }, [tagList])
 
   useEffect(() => {
-    saveUiSettingsToStorage({ layout, sizeId, side, customSize })
-  }, [layout, sizeId, side, customSize])
+    saveUiSettingsToStorage({ layout, sizeId, side, customSize, zoomPercent })
+  }, [layout, sizeId, side, customSize, zoomPercent])
 
   const setCustomSize = useCallback((next: Partial<CustomSizeSettings>) => {
     setCustomSizeState((prev) => ({ ...prev, ...next }))
+  }, [])
+
+  const setZoomPercent = useCallback((percent: number) => {
+    setZoomPercentState(clampZoom(percent))
   }, [])
 
   const size = useMemo(() => {
@@ -441,6 +452,7 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       size,
       side,
       customSize,
+      zoomPercent,
       addressList,
       templateList,
       tagList,
@@ -453,6 +465,7 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       setSizeId,
       setCustomSize,
       setSide,
+      setZoomPercent,
       loadMockData,
       resetData,
       persist,
@@ -479,6 +492,7 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       size,
       side,
       customSize,
+      zoomPercent,
       addressList,
       templateList,
       tagList,
@@ -486,6 +500,7 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       updateSender,
       updateRecipient,
       setCustomSize,
+      setZoomPercent,
       loadMockData,
       resetData,
       persist,

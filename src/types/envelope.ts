@@ -44,6 +44,10 @@ export const MAX_ENVELOPE_MM = 200
 
 export const DEFAULT_CUSTOM_WIDTH = 140
 export const DEFAULT_CUSTOM_HEIGHT = 200
+export const MIN_ZOOM_PERCENT = 50
+export const MAX_ZOOM_PERCENT = 200
+export const DEFAULT_ZOOM_PERCENT = 100
+export const ZOOM_STEP = 10
 
 export const MM_TO_PX = 3.78
 
@@ -68,6 +72,10 @@ export function isSizeInRange(value: number): boolean {
 
 export function clampSize(value: number): number {
   return Math.min(Math.max(value, MIN_ENVELOPE_MM), MAX_ENVELOPE_MM)
+}
+
+export function clampZoom(percent: number): number {
+  return Math.min(Math.max(percent, MIN_ZOOM_PERCENT), MAX_ZOOM_PERCENT)
 }
 
 export function getSizeDescription(widthMm: number, heightMm: number): string {
@@ -152,6 +160,7 @@ export interface EnvelopeUiSettings {
   sizeId: string
   side: EnvelopeSide
   customSize: CustomSizeSettings
+  zoomPercent: number
 }
 
 export interface EnvelopeTemplate {

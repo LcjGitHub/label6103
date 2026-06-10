@@ -14,6 +14,12 @@ export interface Translations {
     zh: string
     en: string
   }
+  zoom: {
+    zoomOut: string
+    zoomIn: string
+    zoomReset: string
+    zoomPercent: string
+  }
   common: {
     name: string
     phone: string
@@ -233,6 +239,12 @@ export const translations: Record<Language, Translations> = {
       zh: '中文',
       en: 'English',
     },
+    zoom: {
+      zoomOut: '缩小',
+      zoomIn: '放大',
+      zoomReset: '重置',
+      zoomPercent: '{percent}%',
+    },
     common: {
       name: '姓名',
       phone: '电话',
@@ -450,6 +462,12 @@ export const translations: Record<Language, Translations> = {
       switchLang: 'Switch Language',
       zh: '中文',
       en: 'English',
+    },
+    zoom: {
+      zoomOut: 'Zoom Out',
+      zoomIn: 'Zoom In',
+      zoomReset: 'Reset',
+      zoomPercent: '{percent}%',
     },
     common: {
       name: 'Name',

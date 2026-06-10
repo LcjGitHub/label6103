@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import EnvelopePreview from '../components/EnvelopePreview'
 import ExportButton from '../components/ExportButton'
@@ -10,14 +10,18 @@ import { useLanguage } from '../context/LanguageContext'
 import {
   clampSize,
   CUSTOM_SIZE_ID,
+  DEFAULT_ZOOM_PERCENT,
   ENVELOPE_SIZES,
   isSizeInRange,
   MAX_ENVELOPE_MM,
+  MAX_ZOOM_PERCENT,
   MIN_ENVELOPE_MM,
+  MIN_ZOOM_PERCENT,
+  ZOOM_STEP,
 } from '../types/envelope'
 
 export default function PreviewPage() {
-  const { data, layout, size, side, customSize, setLayout, setSizeId, setCustomSize, setSide } =
+  const { data, layout, size, side, customSize, zoomPercent, setLayout, setSizeId, setCustomSize, setSide, setZoomPercent } =
     useEnvelope()
   const { t } = useLanguage()
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
@@ -54,6 +58,28 @@ export default function PreviewPage() {
   }
 
   const hasRecipient = Boolean(data.recipient.name || data.recipient.street)
+
+  const previewAreaRef = useRef<HTMLDivElement>(null)
+
+  const handleWheelZoom = useCallback(
+    (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault()
+        const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP
+        setZoomPercent(zoomPercent + delta)
+      }
+    },
+    [zoomPercent, setZoomPercent],
+  )
+
+  useEffect(() => {
+    const el = previewAreaRef.current
+    if (!el) return
+    el.addEventListener('wheel', handleWheelZoom, { passive: false })
+    return () => el.removeEventListener('wheel', handleWheelZoom)
+  }, [handleWheelZoom])
+
+  const zoomScale = 1.15 * (zoomPercent / DEFAULT_ZOOM_PERCENT)
 
   return (
     <div className="min-h-screen">
@@ -317,8 +343,63 @@ export default function PreviewPage() {
               <span>{side === 'front' ? t('preview.front') : t('preview.back')}</span>
             </div>
 
-            <div className="flex min-h-[480px] w-full items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-gradient-to-br from-stone-200/50 to-stone-100 p-8">
-              <EnvelopePreview scale={1.15} />
+            <div className="mb-3 flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-1.5 shadow-sm">
+              <button
+                type="button"
+                onClick={() => setZoomPercent(zoomPercent - ZOOM_STEP)}
+                disabled={zoomPercent <= MIN_ZOOM_PERCENT}
+                className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-stone-500 transition hover:bg-stone-100 hover:text-stone-700 disabled:cursor-not-allowed disabled:opacity-40"
+                title={t('zoom.zoomOut')}
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                </svg>
+              </button>
+
+              <input
+                type="range"
+                min={MIN_ZOOM_PERCENT}
+                max={MAX_ZOOM_PERCENT}
+                step={1}
+                value={zoomPercent}
+                onChange={(e) => setZoomPercent(Number(e.target.value))}
+                className="h-1.5 w-28 cursor-pointer appearance-none rounded-full bg-stone-200 accent-stone-700"
+              />
+
+              <button
+                type="button"
+                onClick={() => setZoomPercent(zoomPercent + ZOOM_STEP)}
+                disabled={zoomPercent >= MAX_ZOOM_PERCENT}
+                className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-stone-500 transition hover:bg-stone-100 hover:text-stone-700 disabled:cursor-not-allowed disabled:opacity-40"
+                title={t('zoom.zoomIn')}
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+
+              <span className="min-w-[3.5rem] text-center text-xs font-medium text-stone-600">
+                {t('zoom.zoomPercent').replace('{percent}', String(zoomPercent))}
+              </span>
+
+              <button
+                type="button"
+                onClick={() => setZoomPercent(DEFAULT_ZOOM_PERCENT)}
+                disabled={zoomPercent === DEFAULT_ZOOM_PERCENT}
+                className="inline-flex h-7 items-center justify-center rounded-lg px-2 text-xs font-medium text-stone-500 transition hover:bg-stone-100 hover:text-stone-700 disabled:cursor-not-allowed disabled:opacity-40"
+                title={t('zoom.zoomReset')}
+              >
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
+            </div>
+
+            <div
+              ref={previewAreaRef}
+              className="flex min-h-[480px] w-full items-center justify-center overflow-auto rounded-2xl border border-dashed border-stone-300 bg-gradient-to-br from-stone-200/50 to-stone-100 p-8"
+            >
+              <EnvelopePreview scale={zoomScale} />
             </div>
 
             <p className="mt-4 max-w-md text-center text-xs text-stone-400">
