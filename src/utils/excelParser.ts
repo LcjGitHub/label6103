@@ -1,12 +1,16 @@
 import * as XLSX from 'xlsx'
 import {
-  createEmptyAddress,
-  DEFAULT_TAG_COLORS,
-  generateTagId,
-  getAddressKey,
   type Address,
   type Tag,
 } from '../types/envelope'
+import {
+  AddressProcessor,
+  FIELD_LABELS_CN,
+  parseTagsValue,
+  resolveFieldKey,
+  resolveTagNames,
+  type ProcessAddressContext,
+} from './addressUtils'
 
 export interface ExcelParseResult {
   success: boolean
@@ -24,72 +28,23 @@ export interface ExcelParseError {
   message: string
 }
 
-const EXCEL_HEADERS_CN: Record<string, string> = {
-  name: '姓名',
-  phone: '电话',
-  province: '省/州',
-  city: '城市',
-  district: '区/县',
-  street: '详细地址',
-  postcode: '邮政编码',
-  tags: '标签',
+export interface ExportField {
+  key: keyof Address | 'tags'
+  label: string
 }
+
+export const DEFAULT_EXPORT_FIELDS: ExportField[] = [
+  { key: 'name', label: FIELD_LABELS_CN.name },
+  { key: 'phone', label: FIELD_LABELS_CN.phone },
+  { key: 'province', label: FIELD_LABELS_CN.province },
+  { key: 'city', label: FIELD_LABELS_CN.city },
+  { key: 'district', label: FIELD_LABELS_CN.district },
+  { key: 'street', label: FIELD_LABELS_CN.street },
+  { key: 'postcode', label: FIELD_LABELS_CN.postcode },
+  { key: 'tags', label: FIELD_LABELS_CN.tags },
+]
 
 type ExcelFieldKey = keyof Address | 'tags'
-
-const EXCEL_HEADER_ALIASES: Record<string, ExcelFieldKey> = {
-  name: 'name',
-  姓名: 'name',
-  phone: 'phone',
-  tel: 'phone',
-  telephone: 'phone',
-  电话: 'phone',
-  手机: 'phone',
-  联系电话: 'phone',
-  province: 'province',
-  省: 'province',
-  省份: 'province',
-  '省/州': 'province',
-  city: 'city',
-  市: 'city',
-  城市: 'city',
-  district: 'district',
-  区: 'district',
-  区县: 'district',
-  '区/县': 'district',
-  street: 'street',
-  address: 'street',
-  地址: 'street',
-  详细地址: 'street',
-  postcode: 'postcode',
-  'post code': 'postcode',
-  'postal code': 'postcode',
-  zip: 'postcode',
-  'zip code': 'postcode',
-  邮编: 'postcode',
-  邮政编码: 'postcode',
-  tags: 'tags',
-  tag: 'tags',
-  标签: 'tags',
-  分组: 'tags',
-  分类: 'tags',
-  category: 'tags',
-  categories: 'tags',
-  groups: 'tags',
-  group: 'tags',
-}
-
-function validateAddress(address: Address): string | null {
-  if (!address.name.trim()) return '姓名不能为空'
-  if (!address.province.trim() && !address.city.trim() && !address.street.trim()) {
-    return '地址信息不完整（至少需要省、城市或详细地址之一）'
-  }
-  return null
-}
-
-function normalizeHeader(header: string): string {
-  return String(header || '').trim().toLowerCase()
-}
 
 export function parseExcelWorkbook(
   workbook: XLSX.WorkBook,
@@ -128,16 +83,14 @@ export function parseExcelWorkbook(
   const headerMapping: Map<string, ExcelFieldKey> = new Map()
 
   Object.keys(firstRow).forEach((header) => {
-    const trimmed = String(header).trim()
-    const normalized = normalizeHeader(header)
-    const fieldKey = EXCEL_HEADER_ALIASES[trimmed] || EXCEL_HEADER_ALIASES[normalized]
+    const fieldKey = resolveFieldKey(header)
     if (fieldKey) {
       headerMapping.set(header, fieldKey)
     }
   })
 
   if (headerMapping.size === 0) {
-    const supportedHeaders = Object.values(EXCEL_HEADERS_CN).join('、')
+    const supportedHeaders = Object.values(FIELD_LABELS_CN).join('、')
     result.errors.push({
       row: 1,
       message: `未识别到有效表头。支持的表头包括：${supportedHeaders}`,
@@ -145,20 +98,14 @@ export function parseExcelWorkbook(
     return result
   }
 
-  const existingKeys = new Set(existingAddresses.map((a) => getAddressKey(a)))
-  const parsedKeys = new Set<string>()
-
-  const tagMap = new Map<string, Tag>()
-  existingTags.forEach((tag) => {
-    tagMap.set(tag.name.trim().toLowerCase(), tag)
-  })
-  let autoTagColorIndex = existingTags.length % DEFAULT_TAG_COLORS.length
+  const ctx: ProcessAddressContext = { existingAddresses, existingTags }
+  const processor = new AddressProcessor(ctx)
 
   result.total = jsonData.length
 
   jsonData.forEach((row, idx) => {
     const rowNumber = idx + 2
-    const address = createEmptyAddress()
+    const fieldValues: Partial<Record<keyof Address, string>> = {}
     let rawTagsValue = ''
 
     headerMapping.forEach((fieldKey, headerKey) => {
@@ -166,58 +113,31 @@ export function parseExcelWorkbook(
       if (fieldKey === 'tags') {
         rawTagsValue = value
       } else {
-        ;(address as unknown as Record<string, string>)[fieldKey] = value
+        fieldValues[fieldKey as keyof Address] = value
       }
     })
 
-    if (rawTagsValue.trim()) {
-      const tagNames = rawTagsValue
-        .split(/[;；,，|、\s]+/)
-        .map((n) => n.trim())
-        .filter(Boolean)
-      const tagIds: string[] = []
+    const rawTagNames = parseTagsValue(rawTagsValue)
 
-      tagNames.forEach((name) => {
-        const nameLower = name.toLowerCase()
-        let tag = tagMap.get(nameLower)
-        if (!tag) {
-          const color = DEFAULT_TAG_COLORS[autoTagColorIndex % DEFAULT_TAG_COLORS.length]
-          autoTagColorIndex++
-          tag = {
-            id: generateTagId(),
-            name,
-            color,
-          }
-          tagMap.set(nameLower, tag)
-          result.autoCreatedTags.push(tag)
-        }
-        if (!tagIds.includes(tag.id)) {
-          tagIds.push(tag.id)
-        }
-      })
+    const processed = processor.process(rawTagNames, fieldValues)
 
-      address.tags = tagIds
-    }
-
-    const validationError = validateAddress(address)
-    if (validationError) {
-      result.failCount++
-      result.errors.push({ row: rowNumber, message: validationError })
-      return
-    }
-
-    const key = getAddressKey(address)
-    if (existingKeys.has(key) || parsedKeys.has(key)) {
+    if (processed.isDuplicate) {
       result.duplicateCount++
-      result.errors.push({ row: rowNumber, message: '该地址已存在，已跳过' })
+      result.errors.push({ row: rowNumber, message: processed.error! })
       return
     }
 
-    parsedKeys.add(key)
+    if (processed.error) {
+      result.failCount++
+      result.errors.push({ row: rowNumber, message: processed.error })
+      return
+    }
+
     result.successCount++
-    result.addresses.push(address)
+    result.addresses.push(processed.address!)
   })
 
+  result.autoCreatedTags = processor.getAutoCreatedTags()
   result.success = result.failCount === 0
   return result
 }
@@ -260,29 +180,6 @@ export function readExcelFile(
   })
 }
 
-export interface ExportField {
-  key: keyof Address | 'tags'
-  label: string
-}
-
-export const DEFAULT_EXPORT_FIELDS: ExportField[] = [
-  { key: 'name', label: '姓名' },
-  { key: 'phone', label: '电话' },
-  { key: 'province', label: '省/州' },
-  { key: 'city', label: '城市' },
-  { key: 'district', label: '区/县' },
-  { key: 'street', label: '详细地址' },
-  { key: 'postcode', label: '邮政编码' },
-  { key: 'tags', label: '标签' },
-]
-
-function resolveTagNames(address: Address, tagList: Tag[]): string {
-  return address.tags
-    .map((tagId) => tagList.find((t) => t.id === tagId)?.name)
-    .filter(Boolean)
-    .join(';')
-}
-
 export function generateExcelWorkbook(
   addresses: Address[],
   fields: ExportField[] = DEFAULT_EXPORT_FIELDS,
@@ -315,4 +212,20 @@ export function downloadExcelFile(
 ): void {
   const workbook = generateExcelWorkbook(addresses, fields, tagList)
   XLSX.writeFile(workbook, filename)
+}
+
+export function generateExcelTemplate(): void {
+  const exampleData: Address[] = [
+    {
+      name: '张三',
+      phone: '13800138000',
+      province: '北京市',
+      city: '北京市',
+      district: '海淀区',
+      street: '中关村大街1号',
+      postcode: '100080',
+      tags: [],
+    },
+  ]
+  downloadExcelFile(exampleData, DEFAULT_EXPORT_FIELDS, [], 'address_template.xlsx')
 }

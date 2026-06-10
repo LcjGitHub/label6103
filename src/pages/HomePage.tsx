@@ -6,6 +6,7 @@ import CSVUploader from '../components/CSVUploader'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import SaveTemplateDialog from '../components/SaveTemplateDialog'
 import TemplateList from '../components/TemplateList'
+import AddressExporter from '../components/AddressExporter'
 import { useEnvelope } from '../context/EnvelopeContext'
 import { useLanguage } from '../context/LanguageContext'
 import { mockBritishData } from '../data/mockData'
@@ -144,7 +145,15 @@ export default function HomePage() {
 
         <CSVUploader />
 
-        {addressList.length > 0 && <AddressList compact showClearButton={false} />}
+        {addressList.length > 0 && (
+          <AddressList
+            compact
+            showClearButton={false}
+            showSearch={false}
+            showTagFilter={false}
+            rightActions={<AddressExporter variant="compact" />}
+          />
+        )}
 
         <AddressForm
           ref={senderFormRef}

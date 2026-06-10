@@ -169,6 +169,9 @@ export interface Translations {
     uploadCsvOnly: string
     uploadSupportedOnly: string
     readFailed: string
+    formatCsv: string
+    formatJson: string
+    formatExcel: string
   }
   addressExporter: {
     exportAll: string
@@ -179,6 +182,19 @@ export interface Translations {
     selectAll: string
     clearAll: string
     confirmExport: string
+    formatCsv: string
+    formatJson: string
+    formatExcel: string
+  }
+  exportFields: {
+    name: string
+    phone: string
+    province: string
+    city: string
+    district: string
+    street: string
+    postcode: string
+    tags: string
   }
   printPreview: {
     title: string
@@ -407,6 +423,9 @@ export const translations: Record<Language, Translations> = {
       uploadCsvOnly: '请上传 CSV 格式的文件',
       uploadSupportedOnly: '请上传 CSV、JSON 或 Excel 格式的文件',
       readFailed: '文件读取失败，请重试',
+      formatCsv: '逗号分隔表',
+      formatJson: 'JSON',
+      formatExcel: '电子表格',
     },
     addressExporter: {
       exportAll: '导出全部地址',
@@ -417,6 +436,19 @@ export const translations: Record<Language, Translations> = {
       selectAll: '全选',
       clearAll: '清空',
       confirmExport: '确认导出',
+      formatCsv: '逗号分隔表',
+      formatJson: 'JSON',
+      formatExcel: '电子表格',
+    },
+    exportFields: {
+      name: '姓名',
+      phone: '电话',
+      province: '省/州',
+      city: '城市',
+      district: '区/县',
+      street: '详细地址',
+      postcode: '邮政编码',
+      tags: '标签',
     },
     printPreview: {
       title: '打印预览',
@@ -645,6 +677,9 @@ export const translations: Record<Language, Translations> = {
       uploadCsvOnly: 'Please upload a CSV file',
       uploadSupportedOnly: 'Please upload a CSV, JSON, or Excel file',
       readFailed: 'Failed to read file, please try again',
+      formatCsv: 'CSV',
+      formatJson: 'JSON',
+      formatExcel: 'Spreadsheet',
     },
     addressExporter: {
       exportAll: 'Export All Addresses',
@@ -655,6 +690,19 @@ export const translations: Record<Language, Translations> = {
       selectAll: 'Select All',
       clearAll: 'Clear All',
       confirmExport: 'Export',
+      formatCsv: 'CSV',
+      formatJson: 'JSON',
+      formatExcel: 'Spreadsheet',
+    },
+    exportFields: {
+      name: 'Name',
+      phone: 'Phone',
+      province: 'Province/State',
+      city: 'City',
+      district: 'District',
+      street: 'Street Address',
+      postcode: 'Postcode',
+      tags: 'Tags',
     },
     printPreview: {
       title: 'Print Preview',

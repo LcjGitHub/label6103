@@ -1,8 +1,7 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useEnvelope } from '../context/EnvelopeContext'
 import { useLanguage } from '../context/LanguageContext'
 import {
-  DEFAULT_EXPORT_FIELDS,
   downloadCsvFile,
   downloadJsonFile,
   type ExportField,
@@ -12,27 +11,76 @@ import type { Address } from '../types/envelope'
 
 type ExportFormat = 'csv' | 'json' | 'xlsx'
 
-export default function AddressExporter() {
+const FIELD_KEYS: (keyof Address | 'tags')[] = [
+  'name',
+  'phone',
+  'province',
+  'city',
+  'district',
+  'street',
+  'postcode',
+  'tags',
+]
+
+export default function AddressExporter({ variant = 'primary' }: { variant?: 'primary' | 'compact' }) {
   const { addressList, tagList } = useEnvelope()
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
   const [format, setFormat] = useState<ExportFormat>('csv')
-  const [selectedFields, setSelectedFields] = useState<string[]>(
-    DEFAULT_EXPORT_FIELDS.map((f) => f.key),
+  const [selectedFields, setSelectedFields] = useState<(keyof Address | 'tags')[]>([
+    'name',
+    'phone',
+    'province',
+    'city',
+    'district',
+    'street',
+    'postcode',
+    'tags',
+  ])
+
+  const allFields: ExportField[] = useMemo(
+    () =>
+      FIELD_KEYS.map((key) => ({
+        key,
+        label: t(`exportFields.${key}` as const),
+      })),
+    [t],
   )
 
-  const allFields: ExportField[] = [
-    { key: 'name', label: language === 'zh' ? '姓名' : 'Name' },
-    { key: 'phone', label: language === 'zh' ? '电话' : 'Phone' },
-    { key: 'province', label: language === 'zh' ? '省/州' : 'Province/State' },
-    { key: 'city', label: language === 'zh' ? '城市' : 'City' },
-    { key: 'district', label: language === 'zh' ? '区/县' : 'District' },
-    { key: 'street', label: language === 'zh' ? '详细地址' : 'Street Address' },
-    { key: 'postcode', label: language === 'zh' ? '邮政编码' : 'Postcode' },
-    { key: 'tags', label: language === 'zh' ? '标签' : 'Tags' },
-  ]
+  const formatOptions = useMemo(
+    (): { key: ExportFormat; label: string; icon: JSX.Element }[] => [
+      {
+        key: 'csv',
+        label: t('addressExporter.formatCsv'),
+        icon: (
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        ),
+      },
+      {
+        key: 'json',
+        label: t('addressExporter.formatJson'),
+        icon: (
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          </svg>
+        ),
+      },
+      {
+        key: 'xlsx',
+        label: t('addressExporter.formatExcel'),
+        icon: (
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+        ),
+      },
+    ],
+    [t],
+  )
 
-  const toggleField = (key: string) => {
+  const toggleField = (key: keyof Address | 'tags') => {
     setSelectedFields((prev) => {
       if (prev.includes(key)) {
         return prev.filter((f) => f !== key)
@@ -42,7 +90,7 @@ export default function AddressExporter() {
   }
 
   const selectAllFields = () => {
-    setSelectedFields(allFields.map((f) => f.key))
+    setSelectedFields([...FIELD_KEYS])
   }
 
   const clearFields = () => {
@@ -69,44 +117,21 @@ export default function AddressExporter() {
     setIsOpen(false)
   }
 
-  const formatOptions: { key: ExportFormat; label: string; icon: JSX.Element }[] = [
-    {
-      key: 'csv',
-      label: 'CSV',
-      icon: (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      ),
-    },
-    {
-      key: 'json',
-      label: 'JSON',
-      icon: (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-        </svg>
-      ),
-    },
-    {
-      key: 'xlsx',
-      label: 'Excel',
-      icon: (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-        </svg>
-      ),
-    },
-  ]
-
   if (addressList.length === 0) return null
+
+  const btnBase =
+    'inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium shadow-sm transition'
+  const btnStyle =
+    variant === 'primary'
+      ? 'bg-sky-600 text-white hover:bg-sky-700'
+      : 'border border-sky-200 bg-sky-50 text-sky-800 hover:bg-sky-100'
 
   return (
     <>
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-sky-700"
+        className={`${btnBase} ${btnStyle}`}
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path

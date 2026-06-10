@@ -1,11 +1,16 @@
 import {
-  createEmptyAddress,
-  DEFAULT_TAG_COLORS,
-  generateTagId,
-  getAddressKey,
   type Address,
   type Tag,
 } from '../types/envelope'
+import {
+  AddressProcessor,
+  FIELD_LABELS_CN,
+  parseTagsValue,
+  resolveFieldKey,
+  resolveTagNames,
+  resolveTagNamesArray,
+  type ProcessAddressContext,
+} from './addressUtils'
 
 export interface ParseResult {
   success: boolean
@@ -47,70 +52,17 @@ export interface ExportField {
 }
 
 export const DEFAULT_EXPORT_FIELDS: ExportField[] = [
-  { key: 'name', label: '姓名' },
-  { key: 'phone', label: '电话' },
-  { key: 'province', label: '省/州' },
-  { key: 'city', label: '城市' },
-  { key: 'district', label: '区/县' },
-  { key: 'street', label: '详细地址' },
-  { key: 'postcode', label: '邮政编码' },
-  { key: 'tags', label: '标签' },
+  { key: 'name', label: FIELD_LABELS_CN.name },
+  { key: 'phone', label: FIELD_LABELS_CN.phone },
+  { key: 'province', label: FIELD_LABELS_CN.province },
+  { key: 'city', label: FIELD_LABELS_CN.city },
+  { key: 'district', label: FIELD_LABELS_CN.district },
+  { key: 'street', label: FIELD_LABELS_CN.street },
+  { key: 'postcode', label: FIELD_LABELS_CN.postcode },
+  { key: 'tags', label: FIELD_LABELS_CN.tags },
 ]
 
-const CSV_HEADERS_CN: Record<string, string> = {
-  name: '姓名',
-  phone: '电话',
-  province: '省/州',
-  city: '城市',
-  district: '区/县',
-  street: '详细地址',
-  postcode: '邮政编码',
-  tags: '标签',
-}
-
 type CsvFieldKey = keyof Address | 'tags'
-
-const CSV_HEADER_ALIASES: Record<string, CsvFieldKey> = {
-  name: 'name',
-  姓名: 'name',
-  phone: 'phone',
-  tel: 'phone',
-  telephone: 'phone',
-  电话: 'phone',
-  手机: 'phone',
-  联系电话: 'phone',
-  province: 'province',
-  省: 'province',
-  省份: 'province',
-  '省/州': 'province',
-  city: 'city',
-  市: 'city',
-  城市: 'city',
-  district: 'district',
-  区: 'district',
-  区县: 'district',
-  '区/县': 'district',
-  street: 'street',
-  address: 'street',
-  地址: 'street',
-  详细地址: 'street',
-  postcode: 'postcode',
-  'post code': 'postcode',
-  'postal code': 'postcode',
-  zip: 'postcode',
-  'zip code': 'postcode',
-  邮编: 'postcode',
-  邮政编码: 'postcode',
-  tags: 'tags',
-  tag: 'tags',
-  标签: 'tags',
-  分组: 'tags',
-  分类: 'tags',
-  category: 'tags',
-  categories: 'tags',
-  groups: 'tags',
-  group: 'tags',
-}
 
 function stripBom(text: string): string {
   if (text.charCodeAt(0) === 0xfeff) {
@@ -152,14 +104,6 @@ function parseCsvLine(line: string): string[] {
   return result
 }
 
-function validateAddress(address: Address): string | null {
-  if (!address.name.trim()) return '姓名不能为空'
-  if (!address.province.trim() && !address.city.trim() && !address.street.trim()) {
-    return '地址信息不完整（至少需要省、城市或详细地址之一）'
-  }
-  return null
-}
-
 export function parseCsv(
   text: string,
   existingAddresses: Address[] = [],
@@ -189,16 +133,14 @@ export function parseCsv(
   const headerMapping: Map<number, CsvFieldKey> = new Map()
 
   headerLine.forEach((header, index) => {
-    const trimmed = header.trim()
-    const normalizedHeader = trimmed.toLowerCase()
-    const fieldKey = CSV_HEADER_ALIASES[trimmed] || CSV_HEADER_ALIASES[normalizedHeader]
+    const fieldKey = resolveFieldKey(header)
     if (fieldKey) {
       headerMapping.set(index, fieldKey)
     }
   })
 
   if (headerMapping.size === 0) {
-    const supportedHeaders = Object.values(CSV_HEADERS_CN).join('、')
+    const supportedHeaders = Object.values(FIELD_LABELS_CN).join('、')
     result.errors.push({
       line: 1,
       message: `未识别到有效表头。支持的表头包括：${supportedHeaders}`,
@@ -206,14 +148,8 @@ export function parseCsv(
     return result
   }
 
-  const existingKeys = new Set(existingAddresses.map((a) => getAddressKey(a)))
-  const parsedKeys = new Set<string>()
-
-  const tagMap = new Map<string, Tag>()
-  existingTags.forEach((tag) => {
-    tagMap.set(tag.name.trim().toLowerCase(), tag)
-  })
-  let autoTagColorIndex = existingTags.length % DEFAULT_TAG_COLORS.length
+  const ctx: ProcessAddressContext = { existingAddresses, existingTags }
+  const processor = new AddressProcessor(ctx)
 
   const dataLines = lines.slice(1)
   result.total = dataLines.length
@@ -221,7 +157,7 @@ export function parseCsv(
   dataLines.forEach((line, idx) => {
     const lineNumber = idx + 2
     const values = parseCsvLine(line)
-    const address = createEmptyAddress()
+    const fieldValues: Partial<Record<keyof Address, string>> = {}
     let rawTagsValue = ''
 
     headerMapping.forEach((fieldKey, colIndex) => {
@@ -229,58 +165,31 @@ export function parseCsv(
       if (fieldKey === 'tags') {
         rawTagsValue = value
       } else {
-        ;(address as unknown as Record<string, string>)[fieldKey] = value
+        fieldValues[fieldKey as keyof Address] = value
       }
     })
 
-    if (rawTagsValue.trim()) {
-      const tagNames = rawTagsValue
-        .split(/[;；,，|、\s]+/)
-        .map((n) => n.trim())
-        .filter(Boolean)
-      const tagIds: string[] = []
+    const rawTagNames = parseTagsValue(rawTagsValue)
 
-      tagNames.forEach((name) => {
-        const nameLower = name.toLowerCase()
-        let tag = tagMap.get(nameLower)
-        if (!tag) {
-          const color = DEFAULT_TAG_COLORS[autoTagColorIndex % DEFAULT_TAG_COLORS.length]
-          autoTagColorIndex++
-          tag = {
-            id: generateTagId(),
-            name,
-            color,
-          }
-          tagMap.set(nameLower, tag)
-          result.autoCreatedTags.push(tag)
-        }
-        if (!tagIds.includes(tag.id)) {
-          tagIds.push(tag.id)
-        }
-      })
+    const processed = processor.process(rawTagNames, fieldValues)
 
-      address.tags = tagIds
-    }
-
-    const validationError = validateAddress(address)
-    if (validationError) {
-      result.failCount++
-      result.errors.push({ line: lineNumber, message: validationError })
-      return
-    }
-
-    const key = getAddressKey(address)
-    if (existingKeys.has(key) || parsedKeys.has(key)) {
+    if (processed.isDuplicate) {
       result.duplicateCount++
-      result.errors.push({ line: lineNumber, message: '该地址已存在，已跳过' })
+      result.errors.push({ line: lineNumber, message: processed.error! })
       return
     }
 
-    parsedKeys.add(key)
+    if (processed.error) {
+      result.failCount++
+      result.errors.push({ line: lineNumber, message: processed.error })
+      return
+    }
+
     result.successCount++
-    result.addresses.push(address)
+    result.addresses.push(processed.address!)
   })
 
+  result.autoCreatedTags = processor.getAutoCreatedTags()
   result.success = result.failCount === 0
   return result
 }
@@ -320,7 +229,7 @@ export function readCsvFile(
 }
 
 export function generateCsvTemplate(): string {
-  const headers = ['姓名', '电话', '省/州', '城市', '区/县', '详细地址', '邮政编码', '标签']
+  const headers = Object.values(FIELD_LABELS_CN)
   const example = [
     '张三',
     '13800138000',
@@ -332,61 +241,6 @@ export function generateCsvTemplate(): string {
     '家人;重要',
   ]
   return [headers.join(','), example.join(',')].join('\n')
-}
-
-const JSON_FIELD_ALIASES: Record<string, keyof Address | 'tags'> = {
-  name: 'name',
-  姓名: 'name',
-  phone: 'phone',
-  tel: 'phone',
-  telephone: 'phone',
-  电话: 'phone',
-  手机: 'phone',
-  联系电话: 'phone',
-  province: 'province',
-  省: 'province',
-  省份: 'province',
-  '省/州': 'province',
-  city: 'city',
-  市: 'city',
-  城市: 'city',
-  district: 'district',
-  区: 'district',
-  区县: 'district',
-  '区/县': 'district',
-  street: 'street',
-  address: 'street',
-  地址: 'street',
-  详细地址: 'street',
-  postcode: 'postcode',
-  'post code': 'postcode',
-  'postal code': 'postcode',
-  zip: 'postcode',
-  'zip code': 'postcode',
-  邮编: 'postcode',
-  邮政编码: 'postcode',
-  tags: 'tags',
-  tag: 'tags',
-  标签: 'tags',
-  分组: 'tags',
-  分类: 'tags',
-  category: 'tags',
-  categories: 'tags',
-  groups: 'tags',
-  group: 'tags',
-}
-
-function parseTagsValue(value: unknown): string[] {
-  if (Array.isArray(value)) {
-    return value.map((v) => String(v).trim()).filter(Boolean)
-  }
-  if (typeof value === 'string' && value.trim()) {
-    return value
-      .split(/[;；,，|、\s]+/)
-      .map((n) => n.trim())
-      .filter(Boolean)
-  }
-  return []
 }
 
 export function parseJson(
@@ -442,14 +296,8 @@ export function parseJson(
     return result
   }
 
-  const existingKeys = new Set(existingAddresses.map((a) => getAddressKey(a)))
-  const parsedKeys = new Set<string>()
-
-  const tagMap = new Map<string, Tag>()
-  existingTags.forEach((tag) => {
-    tagMap.set(tag.name.trim().toLowerCase(), tag)
-  })
-  let autoTagColorIndex = existingTags.length % DEFAULT_TAG_COLORS.length
+  const ctx: ProcessAddressContext = { existingAddresses, existingTags }
+  const processor = new AddressProcessor(ctx)
 
   result.total = records.length
 
@@ -462,65 +310,39 @@ export function parseJson(
     }
 
     const recordObj = record as Record<string, unknown>
-    const address = createEmptyAddress()
+    const fieldValues: Partial<Record<keyof Address, string>> = {}
     const rawTagNames: string[] = []
 
     Object.entries(recordObj).forEach(([key, value]) => {
-      const trimmedKey = key.trim()
-      const normalizedKey = trimmedKey.toLowerCase()
-      const fieldKey = JSON_FIELD_ALIASES[trimmedKey] || JSON_FIELD_ALIASES[normalizedKey]
-
+      const fieldKey = resolveFieldKey(key)
       if (fieldKey) {
         if (fieldKey === 'tags') {
           rawTagNames.push(...parseTagsValue(value))
         } else {
-          ;(address as unknown as Record<string, string>)[fieldKey] = String(value ?? '').trim()
+          fieldValues[fieldKey as keyof Address] = String(value ?? '').trim()
         }
       }
     })
 
-    if (rawTagNames.length > 0) {
-      const tagIds: string[] = []
-      rawTagNames.forEach((name) => {
-        const nameLower = name.toLowerCase()
-        let tag = tagMap.get(nameLower)
-        if (!tag) {
-          const color = DEFAULT_TAG_COLORS[autoTagColorIndex % DEFAULT_TAG_COLORS.length]
-          autoTagColorIndex++
-          tag = {
-            id: generateTagId(),
-            name,
-            color,
-          }
-          tagMap.set(nameLower, tag)
-          result.autoCreatedTags.push(tag)
-        }
-        if (!tagIds.includes(tag.id)) {
-          tagIds.push(tag.id)
-        }
-      })
-      address.tags = tagIds
-    }
+    const processed = processor.process(rawTagNames, fieldValues)
 
-    const validationError = validateAddress(address)
-    if (validationError) {
-      result.failCount++
-      result.errors.push({ index, message: validationError })
-      return
-    }
-
-    const key = getAddressKey(address)
-    if (existingKeys.has(key) || parsedKeys.has(key)) {
+    if (processed.isDuplicate) {
       result.duplicateCount++
-      result.errors.push({ index, message: '该地址已存在，已跳过' })
+      result.errors.push({ index, message: processed.error! })
       return
     }
 
-    parsedKeys.add(key)
+    if (processed.error) {
+      result.failCount++
+      result.errors.push({ index, message: processed.error })
+      return
+    }
+
     result.successCount++
-    result.addresses.push(address)
+    result.addresses.push(processed.address!)
   })
 
+  result.autoCreatedTags = processor.getAutoCreatedTags()
   result.success = result.failCount === 0
   return result
 }
@@ -578,13 +400,6 @@ export function generateJsonTemplate(): string {
   )
 }
 
-function resolveTagNames(address: Address, tagList: Tag[]): string {
-  return address.tags
-    .map((tagId) => tagList.find((t) => t.id === tagId)?.name)
-    .filter(Boolean)
-    .join(';')
-}
-
 function escapeCsvValue(value: string): string {
   if (value.includes(',') || value.includes('"') || value.includes('\n') || value.includes('\r')) {
     return `"${value.replace(/"/g, '""')}"`
@@ -639,9 +454,7 @@ export function generateJsonContent(
     const obj: Record<string, unknown> = {}
     fields.forEach((field) => {
       if (field.key === 'tags') {
-        obj[field.label] = addr.tags
-          .map((tagId) => tagList.find((t) => t.id === tagId)?.name)
-          .filter(Boolean)
+        obj[field.label] = resolveTagNamesArray(addr, tagList)
       } else {
         obj[field.label] = addr[field.key as keyof Address]
       }

@@ -9,6 +9,7 @@ interface AddressListProps {
   showClearButton?: boolean
   showSearch?: boolean
   showTagFilter?: boolean
+  rightActions?: React.ReactNode
 }
 
 function formatAddressSummary(addr: SavedAddress, noInfoText: string): string {
@@ -21,6 +22,7 @@ export default function AddressList({
   showClearButton = true,
   showSearch = true,
   showTagFilter = true,
+  rightActions,
 }: AddressListProps) {
   const { addressList, removeAddress, clearAddressList, setRecipientFromList, updateAddressTags, tagList } = useEnvelope()
   const { t } = useLanguage()
@@ -113,7 +115,7 @@ export default function AddressList({
   if (compact) {
     return (
       <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-800">
             <span className="h-2 w-2 rounded-full bg-sky-500" />
             {t('home.addressList')}
@@ -121,30 +123,31 @@ export default function AddressList({
               {addressList.length}
             </span>
           </h2>
-          {showSearch && addressList.length > 0 && (
-            <div className="relative">
-              <svg
-                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          {rightActions ??
+            (showSearch && addressList.length > 0 && (
+              <div className="relative">
+                <svg
+                  className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t('common.searchPlaceholderCompact')}
+                  className="w-48 rounded-lg border border-stone-300 bg-stone-50 py-1.5 pl-9 pr-3 text-sm text-stone-800 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-2 focus:ring-sky-400/30"
                 />
-              </svg>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('common.searchPlaceholderCompact')}
-                className="w-48 rounded-lg border border-stone-300 bg-stone-50 py-1.5 pl-9 pr-3 text-sm text-stone-800 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-2 focus:ring-sky-400/30"
-              />
-            </div>
-          )}
+              </div>
+            ))}
         </div>
 
         {showTagFilter && tagList.length > 0 && (

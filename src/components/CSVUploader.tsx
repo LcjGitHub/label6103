@@ -9,7 +9,7 @@ import {
   type ParseError,
   type ParseResult,
 } from '../utils/csvParser'
-import { readExcelFile } from '../utils/excelParser'
+import { generateExcelTemplate, readExcelFile } from '../utils/excelParser'
 
 type FileFormat = 'csv' | 'json' | 'xlsx'
 type UploadStatus = 'idle' | 'uploading' | 'success' | 'partial' | 'error'
@@ -25,6 +25,13 @@ const FORMAT_EXTENSIONS: Record<FileFormat, string[]> = {
   json: ['.json'],
   xlsx: ['.xlsx', '.xls'],
 }
+
+const FORMAT_LABEL_KEYS: Record<FileFormat, 'csvUploader.formatCsv' | 'csvUploader.formatJson' | 'csvUploader.formatExcel'> = {
+  csv: 'csvUploader.formatCsv',
+  json: 'csvUploader.formatJson',
+  xlsx: 'csvUploader.formatExcel',
+}
+const FORMAT_LABEL_KV = FORMAT_LABEL_KEYS
 
 function detectFileFormat(file: File): FileFormat | null {
   const name = file.name.toLowerCase()
@@ -155,31 +162,27 @@ export default function CSVUploader() {
   }
 
   const downloadTemplate = () => {
-    let content: string
-    let filename: string
-    let mimeType: string
-
     if (format === 'csv') {
-      content = generateCsvTemplate()
-      filename = 'address_template.csv'
-      mimeType = 'text/csv;charset=utf-8;'
+      const content = generateCsvTemplate()
+      const blob = new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'address_template.csv'
+      link.click()
+      URL.revokeObjectURL(url)
     } else if (format === 'json') {
-      content = generateJsonTemplate()
-      filename = 'address_template.json'
-      mimeType = 'application/json;charset=utf-8;'
+      const content = generateJsonTemplate()
+      const blob = new Blob([content], { type: 'application/json;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'address_template.json'
+      link.click()
+      URL.revokeObjectURL(url)
     } else {
-      content = generateCsvTemplate()
-      filename = 'address_template.csv'
-      mimeType = 'text/csv;charset=utf-8;'
+      generateExcelTemplate()
     }
-
-    const blob = new Blob([format === 'csv' ? '\ufeff' + content : content], { type: mimeType })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = filename
-    link.click()
-    URL.revokeObjectURL(url)
   }
 
   const resetState = () => {
@@ -196,10 +199,10 @@ export default function CSVUploader() {
     error: { bg: 'bg-rose-50', border: 'border-rose-300', text: 'text-rose-700' },
   }[status]
 
-  const formatTabs: { key: FileFormat; label: string; icon: JSX.Element }[] = [
+  const formatTabs: { key: FileFormat; labelKey: 'csvUploader.formatCsv' | 'csvUploader.formatJson' | 'csvUploader.formatExcel'; icon: JSX.Element }[] = [
     {
       key: 'csv',
-      label: 'CSV',
+      labelKey: 'csvUploader.formatCsv',
       icon: (
         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -208,7 +211,7 @@ export default function CSVUploader() {
     },
     {
       key: 'json',
-      label: 'JSON',
+      labelKey: 'csvUploader.formatJson',
       icon: (
         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
@@ -217,7 +220,7 @@ export default function CSVUploader() {
     },
     {
       key: 'xlsx',
-      label: 'Excel',
+      labelKey: 'csvUploader.formatExcel',
       icon: (
         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -251,7 +254,7 @@ export default function CSVUploader() {
                 } disabled:cursor-not-allowed disabled:opacity-50`}
               >
                 {tab.icon}
-                {tab.label}
+                {t(`csvUploader.${tab.labelKey}`)}
               </button>
             ))}
           </div>
@@ -287,7 +290,7 @@ export default function CSVUploader() {
             />
           </svg>
           <p className="text-sm font-medium text-stone-700">
-            {t('csvUploader.uploadHintFormat', { format: format.toUpperCase() })}
+            {t('csvUploader.uploadHintFormat', { format: t(FORMAT_LABEL_KV[format]) })}
           </p>
           <p className="mt-1 text-xs text-stone-500">{t('csvUploader.uploadHintSub')}</p>
           <input
