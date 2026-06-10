@@ -45,8 +45,29 @@ export const MAX_ENVELOPE_MM = 200
 export const DEFAULT_CUSTOM_WIDTH = 140
 export const DEFAULT_CUSTOM_HEIGHT = 200
 
+export const MM_TO_PX = 3.78
+
+export function mmToPx(mm: number, scale = 1): number {
+  return Math.round(mm * MM_TO_PX * scale)
+}
+
+export function getEnvelopePixelSize(
+  widthMm: number,
+  heightMm: number,
+  scale = 1,
+): { width: number; height: number } {
+  return {
+    width: mmToPx(widthMm, scale),
+    height: mmToPx(heightMm, scale),
+  }
+}
+
 export function isSizeInRange(value: number): boolean {
   return value >= MIN_ENVELOPE_MM && value <= MAX_ENVELOPE_MM
+}
+
+export function clampSize(value: number): number {
+  return Math.min(Math.max(value, MIN_ENVELOPE_MM), MAX_ENVELOPE_MM)
 }
 
 export function getSizeDescription(widthMm: number, heightMm: number): string {

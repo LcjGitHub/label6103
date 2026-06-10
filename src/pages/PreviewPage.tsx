@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import EnvelopePreview from '../components/EnvelopePreview'
 import ExportButton from '../components/ExportButton'
@@ -8,6 +8,7 @@ import TemplateList from '../components/TemplateList'
 import { useEnvelope } from '../context/EnvelopeContext'
 import { useLanguage } from '../context/LanguageContext'
 import {
+  clampSize,
   CUSTOM_SIZE_ID,
   ENVELOPE_SIZES,
   isSizeInRange,
@@ -21,6 +22,31 @@ export default function PreviewPage() {
   const { t } = useLanguage()
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [customWidthInput, setCustomWidthInput] = useState<string>(String(customSize.widthMm))
+  const [customHeightInput, setCustomHeightInput] = useState<string>(String(customSize.heightMm))
+
+  useEffect(() => {
+    setCustomWidthInput(String(customSize.widthMm))
+    setCustomHeightInput(String(customSize.heightMm))
+  }, [customSize.widthMm, customSize.heightMm])
+
+  const handleWidthBlur = () => {
+    const num = Number(customWidthInput)
+    if (Number.isNaN(num) || customWidthInput.trim() === '') {
+      setCustomSize({ widthMm: MIN_ENVELOPE_MM })
+    } else {
+      setCustomSize({ widthMm: clampSize(num) })
+    }
+  }
+
+  const handleHeightBlur = () => {
+    const num = Number(customHeightInput)
+    if (Number.isNaN(num) || customHeightInput.trim() === '') {
+      setCustomSize({ heightMm: MIN_ENVELOPE_MM })
+    } else {
+      setCustomSize({ heightMm: clampSize(num) })
+    }
+  }
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -172,19 +198,15 @@ export default function PreviewPage() {
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="mb-1 block text-xs font-medium text-stone-500">
-                          {t('preview.sizes.width')} (mm)
+                          {t('preview.sizes.width')}
+                          <span className="ml-1 text-stone-400">({t('preview.sizes.mmUnit')})</span>
                         </label>
                         <input
-                          type="number"
-                          min={MIN_ENVELOPE_MM}
-                          max={MAX_ENVELOPE_MM}
-                          value={customSize.widthMm}
-                          onChange={(e) => {
-                            const val = Number(e.target.value)
-                            if (!Number.isNaN(val) && val > 0) {
-                              setCustomSize({ widthMm: val })
-                            }
-                          }}
+                          type="text"
+                          inputMode="numeric"
+                          value={customWidthInput}
+                          onChange={(e) => setCustomWidthInput(e.target.value)}
+                          onBlur={handleWidthBlur}
                           className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 ${
                             isSizeInRange(customSize.widthMm)
                               ? 'border-stone-300 bg-white focus:border-stone-500 focus:ring-stone-200'
@@ -194,19 +216,15 @@ export default function PreviewPage() {
                       </div>
                       <div>
                         <label className="mb-1 block text-xs font-medium text-stone-500">
-                          {t('preview.sizes.height')} (mm)
+                          {t('preview.sizes.height')}
+                          <span className="ml-1 text-stone-400">({t('preview.sizes.mmUnit')})</span>
                         </label>
                         <input
-                          type="number"
-                          min={MIN_ENVELOPE_MM}
-                          max={MAX_ENVELOPE_MM}
-                          value={customSize.heightMm}
-                          onChange={(e) => {
-                            const val = Number(e.target.value)
-                            if (!Number.isNaN(val) && val > 0) {
-                              setCustomSize({ heightMm: val })
-                            }
-                          }}
+                          type="text"
+                          inputMode="numeric"
+                          value={customHeightInput}
+                          onChange={(e) => setCustomHeightInput(e.target.value)}
+                          onBlur={handleHeightBlur}
                           className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 ${
                             isSizeInRange(customSize.heightMm)
                               ? 'border-stone-300 bg-white focus:border-stone-500 focus:ring-stone-200'

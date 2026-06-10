@@ -9,6 +9,7 @@ import {
 } from 'react'
 import {
   ADDRESS_LIST_KEY,
+  clampSize,
   createCustomSize,
   createEmptyAddress,
   CUSTOM_SIZE_ID,
@@ -224,7 +225,9 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
 
   const size = useMemo(() => {
     if (sizeId === CUSTOM_SIZE_ID) {
-      return createCustomSize(customSize.widthMm, customSize.heightMm)
+      const clampedWidth = clampSize(customSize.widthMm)
+      const clampedHeight = clampSize(customSize.heightMm)
+      return createCustomSize(clampedWidth, clampedHeight)
     }
     return ENVELOPE_SIZES.find((s) => s.id === sizeId) ?? ENVELOPE_SIZES[1]
   }, [sizeId, customSize])

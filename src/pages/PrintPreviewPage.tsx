@@ -5,12 +5,10 @@ import EnvelopeBritish from '../components/EnvelopeBritish'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import { useEnvelope } from '../context/EnvelopeContext'
 import { useLanguage } from '../context/LanguageContext'
-import type { Address } from '../types/envelope'
+import { mmToPx, type Address } from '../types/envelope'
 
 type PerPageOption = 1 | 2 | 4 | 9
 type DataMode = 'current' | 'list'
-
-const MM_TO_PX = 3.78
 
 const A4_WIDTH_MM = 210
 const A4_HEIGHT_MM = 297
@@ -93,8 +91,8 @@ export default function PrintPreviewPage() {
   }, [envelopeItems, perPage])
 
   const scale = getEnvelopeScale(perPage, size.widthMm, size.heightMm)
-  const widthPx = Math.round(size.widthMm * MM_TO_PX * scale)
-  const heightPx = Math.round(size.heightMm * MM_TO_PX * scale)
+  const widthPx = mmToPx(size.widthMm, scale)
+  const heightPx = mmToPx(size.heightMm, scale)
   const { cols, rows } = getGridConfig(perPage)
   const gapMm = perPage === 1 ? 0 : perPage === 2 ? 4 : 3
 
