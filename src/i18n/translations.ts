@@ -114,6 +114,14 @@ export interface Translations {
       small: string
       medium: string
       large: string
+      custom: string
+      width: string
+      height: string
+      mmUnit: string
+      sizeRangeTip: string
+      sizeOutOfRange: string
+      minSize: string
+      maxSize: string
     }
   }
   addressListPage: {
@@ -311,6 +319,14 @@ export const translations: Record<Language, Translations> = {
         small: '小号 (5号)',
         medium: '中号 (6号)',
         large: '大号 (7号)',
+        custom: '自定义',
+        width: '宽度',
+        height: '高度',
+        mmUnit: '毫米 (mm)',
+        sizeRangeTip: '尺寸范围：90mm - 200mm',
+        sizeOutOfRange: '尺寸超出常见范围',
+        minSize: '最小值',
+        maxSize: '最大值',
       },
     },
     addressListPage: {
@@ -508,6 +524,14 @@ export const translations: Record<Language, Translations> = {
         small: 'Small (No.5)',
         medium: 'Medium (No.6)',
         large: 'Large (No.7)',
+        custom: 'Custom',
+        width: 'Width',
+        height: 'Height',
+        mmUnit: 'millimeters (mm)',
+        sizeRangeTip: 'Size range: 90mm - 200mm',
+        sizeOutOfRange: 'Size is outside the common range',
+        minSize: 'Min',
+        maxSize: 'Max',
       },
     },
     addressListPage: {

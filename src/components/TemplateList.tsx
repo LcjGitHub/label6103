@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useEnvelope } from '../context/EnvelopeContext'
 import { useLanguage } from '../context/LanguageContext'
-import type { EnvelopeTemplate } from '../types/envelope'
+import { CUSTOM_SIZE_ID, getSizeDescription, type EnvelopeTemplate } from '../types/envelope'
 
 interface TemplateListProps {
   compact?: boolean
@@ -142,7 +142,10 @@ export default function TemplateList({ compact = false, onApplied }: TemplateLis
               const isDeleting = deletingId === tmpl.id
               const layoutLabel =
                 tmpl.layout === 'chinese' ? t('preview.chineseStyle') : t('preview.britishStyle')
-              const sizeLabel = t(`preview.sizes.${tmpl.sizeId}` as never) || tmpl.sizeId
+              const sizeLabel =
+                tmpl.sizeId === CUSTOM_SIZE_ID && tmpl.customSize
+                  ? `${t('preview.sizes.custom')} (${getSizeDescription(tmpl.customSize.widthMm, tmpl.customSize.heightMm)})`
+                  : (t(`preview.sizes.${tmpl.sizeId}` as never) || tmpl.sizeId)
               const sideLabel = tmpl.side === 'front' ? t('preview.front') : t('preview.back')
 
               return (

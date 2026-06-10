@@ -34,6 +34,34 @@ export interface EnvelopeSize {
   widthMm: number
   heightMm: number
   description: string
+  isCustom?: boolean
+}
+
+export const CUSTOM_SIZE_ID = 'custom'
+
+export const MIN_ENVELOPE_MM = 90
+export const MAX_ENVELOPE_MM = 200
+
+export const DEFAULT_CUSTOM_WIDTH = 140
+export const DEFAULT_CUSTOM_HEIGHT = 200
+
+export function isSizeInRange(value: number): boolean {
+  return value >= MIN_ENVELOPE_MM && value <= MAX_ENVELOPE_MM
+}
+
+export function getSizeDescription(widthMm: number, heightMm: number): string {
+  return `${widthMm} × ${heightMm} mm`
+}
+
+export function createCustomSize(widthMm: number, heightMm: number): EnvelopeSize {
+  return {
+    id: CUSTOM_SIZE_ID,
+    label: '自定义',
+    widthMm,
+    heightMm,
+    description: getSizeDescription(widthMm, heightMm),
+    isCustom: true,
+  }
 }
 
 export const ENVELOPE_SIZES: EnvelopeSize[] = [
@@ -58,6 +86,7 @@ export const ENVELOPE_SIZES: EnvelopeSize[] = [
     heightMm: 230,
     description: '160 × 230 mm',
   },
+  createCustomSize(DEFAULT_CUSTOM_WIDTH, DEFAULT_CUSTOM_HEIGHT),
 ]
 
 export const STORAGE_KEY = 'envelope-preview-data'
@@ -87,10 +116,16 @@ export const DEFAULT_TAG_COLORS = [
   '#64748b',
 ]
 
+export interface CustomSizeSettings {
+  widthMm: number
+  heightMm: number
+}
+
 export interface EnvelopeUiSettings {
   layout: LayoutStyle
   sizeId: string
   side: EnvelopeSide
+  customSize: CustomSizeSettings
 }
 
 export interface EnvelopeTemplate {
@@ -102,6 +137,7 @@ export interface EnvelopeTemplate {
   layout: LayoutStyle
   sizeId: string
   side: EnvelopeSide
+  customSize?: CustomSizeSettings
 }
 
 export function generateTemplateId(): string {

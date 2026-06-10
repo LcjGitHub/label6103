@@ -7,10 +7,17 @@ import SaveTemplateDialog from '../components/SaveTemplateDialog'
 import TemplateList from '../components/TemplateList'
 import { useEnvelope } from '../context/EnvelopeContext'
 import { useLanguage } from '../context/LanguageContext'
-import { ENVELOPE_SIZES } from '../types/envelope'
+import {
+  CUSTOM_SIZE_ID,
+  ENVELOPE_SIZES,
+  isSizeInRange,
+  MAX_ENVELOPE_MM,
+  MIN_ENVELOPE_MM,
+} from '../types/envelope'
 
 export default function PreviewPage() {
-  const { data, layout, size, side, setLayout, setSizeId, setSide } = useEnvelope()
+  const { data, layout, size, side, customSize, setLayout, setSizeId, setCustomSize, setSide } =
+    useEnvelope()
   const { t } = useLanguage()
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
@@ -125,7 +132,7 @@ export default function PreviewPage() {
                 {t('preview.sizeLabel')}
               </h2>
               <div className="space-y-2">
-                {ENVELOPE_SIZES.map((s) => (
+                {ENVELOPE_SIZES.filter((s) => !s.isCustom).map((s) => (
                   <button
                     key={s.id}
                     type="button"
@@ -144,6 +151,83 @@ export default function PreviewPage() {
                     </span>
                   </button>
                 ))}
+                <button
+                  type="button"
+                  onClick={() => setSizeId(CUSTOM_SIZE_ID)}
+                  className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm transition ${
+                    size.id === CUSTOM_SIZE_ID
+                      ? 'bg-stone-900 text-white ring-2 ring-stone-700'
+                      : 'bg-stone-50 text-stone-700 hover:bg-stone-100'
+                  }`}
+                >
+                  <span className="font-medium">{t('preview.sizes.custom')}</span>
+                  {size.id === CUSTOM_SIZE_ID && (
+                    <span className="text-xs text-stone-300">
+                      {size.description}
+                    </span>
+                  )}
+                </button>
+                {size.id === CUSTOM_SIZE_ID && (
+                  <div className="mt-3 space-y-3 rounded-xl border border-stone-200 bg-stone-50 p-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-stone-500">
+                          {t('preview.sizes.width')} (mm)
+                        </label>
+                        <input
+                          type="number"
+                          min={MIN_ENVELOPE_MM}
+                          max={MAX_ENVELOPE_MM}
+                          value={customSize.widthMm}
+                          onChange={(e) => {
+                            const val = Number(e.target.value)
+                            if (!Number.isNaN(val) && val > 0) {
+                              setCustomSize({ widthMm: val })
+                            }
+                          }}
+                          className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 ${
+                            isSizeInRange(customSize.widthMm)
+                              ? 'border-stone-300 bg-white focus:border-stone-500 focus:ring-stone-200'
+                              : 'border-amber-400 bg-amber-50 focus:border-amber-500 focus:ring-amber-200'
+                          }`}
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-stone-500">
+                          {t('preview.sizes.height')} (mm)
+                        </label>
+                        <input
+                          type="number"
+                          min={MIN_ENVELOPE_MM}
+                          max={MAX_ENVELOPE_MM}
+                          value={customSize.heightMm}
+                          onChange={(e) => {
+                            const val = Number(e.target.value)
+                            if (!Number.isNaN(val) && val > 0) {
+                              setCustomSize({ heightMm: val })
+                            }
+                          }}
+                          className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 ${
+                            isSizeInRange(customSize.heightMm)
+                              ? 'border-stone-300 bg-white focus:border-stone-500 focus:ring-stone-200'
+                              : 'border-amber-400 bg-amber-50 focus:border-amber-500 focus:ring-amber-200'
+                          }`}
+                        />
+                      </div>
+                    </div>
+                    <p className="text-xs text-stone-500">{t('preview.sizes.sizeRangeTip')}</p>
+                    {(!isSizeInRange(customSize.widthMm) ||
+                      !isSizeInRange(customSize.heightMm)) && (
+                      <div className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                        <p className="font-medium">{t('preview.sizes.sizeOutOfRange')}</p>
+                        <p className="mt-0.5 text-amber-600">
+                          {t('preview.sizes.minSize')}: {MIN_ENVELOPE_MM}mm · {t('preview.sizes.maxSize')}:{' '}
+                          {MAX_ENVELOPE_MM}mm
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </section>
 
@@ -206,7 +290,8 @@ export default function PreviewPage() {
           <section className="flex flex-col items-center">
             <div className="mb-4 flex items-center gap-3 text-sm text-stone-500">
               <span>
-                {t(`preview.sizes.${size.id}`)} · {size.description}
+                {size.isCustom ? t('preview.sizes.custom') : t(`preview.sizes.${size.id}`)} ·{' '}
+                {size.description}
               </span>
               <span className="text-stone-300">|</span>
               <span>{layout === 'chinese' ? t('preview.chineseStyle') : t('preview.britishStyle')}</span>

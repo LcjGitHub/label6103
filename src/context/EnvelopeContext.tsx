@@ -9,7 +9,11 @@ import {
 } from 'react'
 import {
   ADDRESS_LIST_KEY,
+  createCustomSize,
   createEmptyAddress,
+  CUSTOM_SIZE_ID,
+  DEFAULT_CUSTOM_HEIGHT,
+  DEFAULT_CUSTOM_WIDTH,
   ENVELOPE_SIZES,
   generateAddressId,
   generateTagId,
@@ -20,6 +24,7 @@ import {
   UI_SETTINGS_KEY,
   toSavedAddress,
   type Address,
+  type CustomSizeSettings,
   type EnvelopeData,
   type EnvelopeSide,
   type EnvelopeSize,
@@ -36,6 +41,7 @@ interface EnvelopeContextValue {
   layout: LayoutStyle
   size: EnvelopeSize
   side: EnvelopeSide
+  customSize: CustomSizeSettings
   addressList: SavedAddress[]
   templateList: EnvelopeTemplate[]
   tagList: Tag[]
@@ -46,6 +52,7 @@ interface EnvelopeContextValue {
   updateRecipientTags: (tags: string[]) => void
   setLayout: (layout: LayoutStyle) => void
   setSizeId: (id: string) => void
+  setCustomSize: (size: Partial<CustomSizeSettings>) => void
   setSide: (side: EnvelopeSide) => void
   loadMockData: () => void
   resetData: () => void
@@ -152,12 +159,18 @@ function loadUiSettingsFromStorage(): EnvelopeUiSettings {
     const raw = localStorage.getItem(UI_SETTINGS_KEY)
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<EnvelopeUiSettings>
+      const validSizeIds = ENVELOPE_SIZES.map((s) => s.id)
+      const sizeId = validSizeIds.includes(parsed.sizeId ?? '')
+        ? parsed.sizeId!
+        : ENVELOPE_SIZES[1].id
       return {
         layout: parsed.layout === 'british' ? 'british' : 'chinese',
-        sizeId: ENVELOPE_SIZES.some((s) => s.id === parsed.sizeId)
-          ? parsed.sizeId!
-          : ENVELOPE_SIZES[1].id,
+        sizeId,
         side: parsed.side === 'back' ? 'back' : 'front',
+        customSize: {
+          widthMm: parsed.customSize?.widthMm ?? DEFAULT_CUSTOM_WIDTH,
+          heightMm: parsed.customSize?.heightMm ?? DEFAULT_CUSTOM_HEIGHT,
+        },
       }
     }
   } catch {
@@ -167,6 +180,10 @@ function loadUiSettingsFromStorage(): EnvelopeUiSettings {
     layout: 'chinese',
     sizeId: ENVELOPE_SIZES[1].id,
     side: 'front',
+    customSize: {
+      widthMm: DEFAULT_CUSTOM_WIDTH,
+      heightMm: DEFAULT_CUSTOM_HEIGHT,
+    },
   }
 }
 
@@ -180,6 +197,7 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
   const [layout, setLayout] = useState<LayoutStyle>(initialUi.layout)
   const [sizeId, setSizeId] = useState<string>(initialUi.sizeId)
   const [side, setSide] = useState<EnvelopeSide>(initialUi.side)
+  const [customSize, setCustomSizeState] = useState<CustomSizeSettings>(initialUi.customSize)
   const [addressList, setAddressList] = useState<SavedAddress[]>(loadAddressListFromStorage)
   const [templateList, setTemplateList] = useState<EnvelopeTemplate[]>(loadTemplateListFromStorage)
   const [tagList, setTagList] = useState<Tag[]>(loadTagListFromStorage)
@@ -197,13 +215,19 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
   }, [tagList])
 
   useEffect(() => {
-    saveUiSettingsToStorage({ layout, sizeId, side })
-  }, [layout, sizeId, side])
+    saveUiSettingsToStorage({ layout, sizeId, side, customSize })
+  }, [layout, sizeId, side, customSize])
 
-  const size = useMemo(
-    () => ENVELOPE_SIZES.find((s) => s.id === sizeId) ?? ENVELOPE_SIZES[1],
-    [sizeId],
-  )
+  const setCustomSize = useCallback((next: Partial<CustomSizeSettings>) => {
+    setCustomSizeState((prev) => ({ ...prev, ...next }))
+  }, [])
+
+  const size = useMemo(() => {
+    if (sizeId === CUSTOM_SIZE_ID) {
+      return createCustomSize(customSize.widthMm, customSize.heightMm)
+    }
+    return ENVELOPE_SIZES.find((s) => s.id === sizeId) ?? ENVELOPE_SIZES[1]
+  }, [sizeId, customSize])
 
   const setData = useCallback((next: EnvelopeData) => {
     setDataState(next)
@@ -319,11 +343,12 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
         layout,
         sizeId,
         side,
+        customSize: sizeId === CUSTOM_SIZE_ID ? { ...customSize } : undefined,
       }
       setTemplateList((prev) => [...prev, newTemplate])
       return newTemplate
     },
-    [data, layout, sizeId, side],
+    [data, layout, sizeId, side, customSize],
   )
 
   const updateTemplate = useCallback((id: string, name: string) => {
@@ -347,6 +372,9 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
         setLayout(template.layout)
         setSizeId(template.sizeId)
         setSide(template.side)
+        if (template.customSize) {
+          setCustomSizeState(template.customSize)
+        }
       }
       return prev
     })
@@ -409,6 +437,7 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       layout,
       size,
       side,
+      customSize,
       addressList,
       templateList,
       tagList,
@@ -419,6 +448,7 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       updateRecipientTags,
       setLayout,
       setSizeId,
+      setCustomSize,
       setSide,
       loadMockData,
       resetData,
@@ -445,12 +475,14 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
       layout,
       size,
       side,
+      customSize,
       addressList,
       templateList,
       tagList,
       setData,
       updateSender,
       updateRecipient,
+      setCustomSize,
       loadMockData,
       resetData,
       persist,
