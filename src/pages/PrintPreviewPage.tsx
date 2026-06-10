@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import EnvelopeChinese from '../components/EnvelopeChinese'
 import EnvelopeBritish from '../components/EnvelopeBritish'
+import LanguageSwitcher from '../components/LanguageSwitcher'
 import { useEnvelope } from '../context/EnvelopeContext'
 import { useLanguage } from '../context/LanguageContext'
 import type { Address } from '../types/envelope'
@@ -57,6 +58,9 @@ export default function PrintPreviewPage() {
   const [perPage, setPerPage] = useState<PerPageOption>(4)
   const [dataMode, setDataMode] = useState<DataMode>('list')
   const [printing, setPrinting] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const pageRefs = useRef<(HTMLDivElement | null)[]>([])
 
   const envelopeItems: EnvelopeItem[] = useMemo(() => {
     if (dataMode === 'current') {
@@ -110,6 +114,41 @@ export default function PrintPreviewPage() {
     }, 300)
   }
 
+  const setPageRef = useCallback(
+    (idx: number) => (el: HTMLDivElement | null) => {
+      pageRefs.current[idx] = el
+    },
+    [],
+  )
+
+  useEffect(() => {
+    if (pages.length === 0) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const idx = pageRefs.current.indexOf(entry.target as HTMLDivElement)
+            if (idx !== -1) {
+              setCurrentPage(idx + 1)
+            }
+          }
+        }
+      },
+      {
+        root: null,
+        rootMargin: '-40% 0px -40% 0px',
+        threshold: 0,
+      },
+    )
+
+    pageRefs.current.forEach((el) => {
+      if (el) observer.observe(el)
+    })
+
+    return () => observer.disconnect()
+  }, [pages.length])
+
   return (
     <div className="min-h-screen">
       <header className="print-hide border-b border-stone-200 bg-white/80 backdrop-blur">
@@ -130,6 +169,7 @@ export default function PrintPreviewPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <button
               type="button"
               onClick={handlePrint}
@@ -219,7 +259,7 @@ export default function PrintPreviewPage() {
           </section>
 
           <section className="flex items-center gap-4 rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm text-stone-600">
-            <span>{t('printPreview.page', { current: pages.length, total: pages.length })}</span>
+            <span>{t('printPreview.page', { current: currentPage, total: pages.length })}</span>
             <span className="text-stone-300">|</span>
             <span>
               {envelopeItems.length} {dataMode === 'list' ? t('common.recipient') : ''}
@@ -241,6 +281,7 @@ export default function PrintPreviewPage() {
         {pages.map((pageEnvelopes, pageIdx) => (
           <div
             key={pageIdx}
+            ref={setPageRef(pageIdx)}
             className="print-page bg-white shadow-lg print:shadow-none"
             style={{
               width: `${A4_WIDTH_MM}mm`,
