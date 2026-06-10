@@ -2,42 +2,27 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useState,
   type ReactNode,
 } from 'react'
 import {
-  ADDRESS_LIST_KEY,
-  clampSize,
-  clampZoom,
-  createCustomSize,
-  createEmptyAddress,
   CUSTOM_SIZE_ID,
-  DEFAULT_CUSTOM_HEIGHT,
-  DEFAULT_CUSTOM_WIDTH,
-  DEFAULT_ZOOM_PERCENT,
-  ENVELOPE_SIZES,
-  generateAddressId,
-  generateTagId,
   generateTemplateId,
-  STORAGE_KEY,
-  TAG_LIST_KEY,
-  TEMPLATE_LIST_KEY,
-  UI_SETTINGS_KEY,
-  toSavedAddress,
   type Address,
   type CustomSizeSettings,
   type EnvelopeData,
   type EnvelopeSide,
   type EnvelopeSize,
   type EnvelopeTemplate,
-  type EnvelopeUiSettings,
   type LayoutStyle,
   type SavedAddress,
   type Tag,
 } from '../types/envelope'
-import { mockEnvelopeData } from '../data/mockData'
+import { useEnvelopeData } from '../hooks/useEnvelopeData'
+import { useAddressList } from '../hooks/useAddressList'
+import { useTagList } from '../hooks/useTagList'
+import { useTemplateList } from '../hooks/useTemplateList'
+import { useUiSettings } from '../hooks/useUiSettings'
 
 interface EnvelopeContextValue {
   data: EnvelopeData
@@ -82,267 +67,25 @@ interface EnvelopeContextValue {
 
 const EnvelopeContext = createContext<EnvelopeContextValue | null>(null)
 
-function loadFromStorage(): EnvelopeData {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) {
-      const parsed = JSON.parse(raw) as Partial<EnvelopeData>
-      return {
-        sender: { ...createEmptyAddress(), ...(parsed.sender || {}) },
-        recipient: { ...createEmptyAddress(), ...(parsed.recipient || {}) },
-      }
-    }
-  } catch {
-    /* ignore */
-  }
-  return {
-    sender: createEmptyAddress(),
-    recipient: createEmptyAddress(),
-  }
-}
-
-function loadAddressListFromStorage(): SavedAddress[] {
-  try {
-    const raw = localStorage.getItem(ADDRESS_LIST_KEY)
-    if (raw) {
-      const parsed = JSON.parse(raw) as (Partial<Address> & { id?: string })[]
-      return parsed.map((addr) => {
-        const completeAddress: SavedAddress = {
-          ...createEmptyAddress(),
-          ...addr,
-          id: addr.id || generateAddressId(),
-          tags: addr.tags || [],
-        }
-        return completeAddress
-      })
-    }
-  } catch {
-    /* ignore */
-  }
-  return []
-}
-
-function loadTemplateListFromStorage(): EnvelopeTemplate[] {
-  try {
-    const raw = localStorage.getItem(TEMPLATE_LIST_KEY)
-    if (raw) {
-      const parsed = JSON.parse(raw) as (EnvelopeTemplate & {
-        data?: { sender?: Partial<Address>; recipient?: Partial<Address> }
-      })[]
-      return parsed.map((template) => ({
-        ...template,
-        data: {
-          sender: { ...createEmptyAddress(), ...(template.data?.sender || {}) },
-          recipient: { ...createEmptyAddress(), ...(template.data?.recipient || {}) },
-        },
-      }))
-    }
-  } catch {
-    /* ignore */
-  }
-  return []
-}
-
-function loadTagListFromStorage(): Tag[] {
-  try {
-    const raw = localStorage.getItem(TAG_LIST_KEY)
-    if (raw) {
-      return JSON.parse(raw) as Tag[]
-    }
-  } catch {
-    /* ignore */
-  }
-  return []
-}
-
-function saveToStorage(data: EnvelopeData) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-}
-
-function loadUiSettingsFromStorage(): EnvelopeUiSettings {
-  try {
-    const raw = localStorage.getItem(UI_SETTINGS_KEY)
-    if (raw) {
-      const parsed = JSON.parse(raw) as Partial<EnvelopeUiSettings>
-      const validSizeIds = ENVELOPE_SIZES.map((s) => s.id)
-      const sizeId = validSizeIds.includes(parsed.sizeId ?? '')
-        ? parsed.sizeId!
-        : ENVELOPE_SIZES[1].id
-      return {
-        layout: parsed.layout === 'british' ? 'british' : 'chinese',
-        sizeId,
-        side: parsed.side === 'back' ? 'back' : 'front',
-        customSize: {
-          widthMm: parsed.customSize?.widthMm ?? DEFAULT_CUSTOM_WIDTH,
-          heightMm: parsed.customSize?.heightMm ?? DEFAULT_CUSTOM_HEIGHT,
-        },
-        zoomPercent: clampZoom(parsed.zoomPercent ?? DEFAULT_ZOOM_PERCENT),
-      }
-    }
-  } catch {
-    /* ignore */
-  }
-  return {
-    layout: 'chinese',
-    sizeId: ENVELOPE_SIZES[1].id,
-    side: 'front',
-    customSize: {
-      widthMm: DEFAULT_CUSTOM_WIDTH,
-      heightMm: DEFAULT_CUSTOM_HEIGHT,
-    },
-    zoomPercent: DEFAULT_ZOOM_PERCENT,
-  }
-}
-
-function saveUiSettingsToStorage(settings: EnvelopeUiSettings) {
-  localStorage.setItem(UI_SETTINGS_KEY, JSON.stringify(settings))
-}
-
 export function EnvelopeProvider({ children }: { children: ReactNode }) {
-  const initialUi = loadUiSettingsFromStorage()
-  const [data, setDataState] = useState<EnvelopeData>(loadFromStorage)
-  const [layout, setLayout] = useState<LayoutStyle>(initialUi.layout)
-  const [sizeId, setSizeId] = useState<string>(initialUi.sizeId)
-  const [side, setSide] = useState<EnvelopeSide>(initialUi.side)
-  const [customSize, setCustomSizeState] = useState<CustomSizeSettings>(initialUi.customSize)
-  const [zoomPercent, setZoomPercentState] = useState<number>(initialUi.zoomPercent)
-  const [addressList, setAddressList] = useState<SavedAddress[]>(loadAddressListFromStorage)
-  const [templateList, setTemplateList] = useState<EnvelopeTemplate[]>(loadTemplateListFromStorage)
-  const [tagList, setTagList] = useState<Tag[]>(loadTagListFromStorage)
+  const envelopeData = useEnvelopeData()
+  const addressListHook = useAddressList()
+  const tagListHook = useTagList()
+  const templateListHook = useTemplateList()
+  const uiSettings = useUiSettings()
 
-  useEffect(() => {
-    localStorage.setItem(ADDRESS_LIST_KEY, JSON.stringify(addressList))
-  }, [addressList])
-
-  useEffect(() => {
-    localStorage.setItem(TEMPLATE_LIST_KEY, JSON.stringify(templateList))
-  }, [templateList])
-
-  useEffect(() => {
-    localStorage.setItem(TAG_LIST_KEY, JSON.stringify(tagList))
-  }, [tagList])
-
-  useEffect(() => {
-    saveUiSettingsToStorage({ layout, sizeId, side, customSize, zoomPercent })
-  }, [layout, sizeId, side, customSize, zoomPercent])
-
-  const setCustomSize = useCallback((next: Partial<CustomSizeSettings>) => {
-    setCustomSizeState((prev) => ({ ...prev, ...next }))
-  }, [])
-
-  const setZoomPercent = useCallback((percent: number) => {
-    setZoomPercentState(clampZoom(percent))
-  }, [])
-
-  const size = useMemo(() => {
-    if (sizeId === CUSTOM_SIZE_ID) {
-      const clampedWidth = clampSize(customSize.widthMm)
-      const clampedHeight = clampSize(customSize.heightMm)
-      return createCustomSize(clampedWidth, clampedHeight)
-    }
-    return ENVELOPE_SIZES.find((s) => s.id === sizeId) ?? ENVELOPE_SIZES[1]
-  }, [sizeId, customSize])
-
-  const setData = useCallback((next: EnvelopeData) => {
-    setDataState(next)
-  }, [])
-
-  const updateSender = useCallback(
-    (field: keyof EnvelopeData['sender'], value: string) => {
-      setDataState((prev) => ({
-        ...prev,
-        sender: { ...prev.sender, [field]: value },
-      }))
-    },
-    [],
-  )
-
-  const updateRecipient = useCallback(
-    (field: keyof EnvelopeData['recipient'], value: string) => {
-      setDataState((prev) => ({
-        ...prev,
-        recipient: { ...prev.recipient, [field]: value },
-      }))
-    },
-    [],
-  )
-
-  const updateSenderTags = useCallback((tags: string[]) => {
-    setDataState((prev) => ({
-      ...prev,
-      sender: { ...prev.sender, tags },
-    }))
-  }, [])
-
-  const updateRecipientTags = useCallback((tags: string[]) => {
-    setDataState((prev) => ({
-      ...prev,
-      recipient: { ...prev.recipient, tags },
-    }))
-  }, [])
-
-  const loadMockData = useCallback(() => {
-    setDataState(mockEnvelopeData)
-  }, [])
-
-  const resetData = useCallback(() => {
-    const empty = {
-      sender: createEmptyAddress(),
-      recipient: createEmptyAddress(),
-    }
-    setDataState(empty)
-    saveToStorage(empty)
-  }, [])
-
-  const persist = useCallback(() => {
-    saveToStorage(data)
-  }, [data])
-
-  const addAddress = useCallback((address: Address) => {
-    setAddressList((prev) => [...prev, toSavedAddress(address)])
-  }, [])
-
-  const addAddresses = useCallback((addresses: Address[]) => {
-    setAddressList((prev) => [...prev, ...addresses.map((a) => toSavedAddress(a))])
-  }, [])
-
-  const removeAddress = useCallback((id: string) => {
-    setAddressList((prev) => prev.filter((a) => a.id !== id))
-  }, [])
-
-  const clearAddressList = useCallback(() => {
-    setAddressList([])
-  }, [])
-
-  const updateAddressTags = useCallback((id: string, tags: string[]) => {
-    setAddressList((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, tags } : a)),
-    )
-  }, [])
-
-  const setRecipientFromList = useCallback((id: string) => {
-    setAddressList((prev) => {
-      const address = prev.find((a) => a.id === id)
+  const setRecipientFromList = useCallback(
+    (id: string) => {
+      const address = addressListHook.addressList.find((a) => a.id === id)
       if (address) {
         const { id: _id, ...recipientData } = address
-        const nextData = {
-          ...data,
+        envelopeData.setDataAndPersist({
+          ...envelopeData.data,
           recipient: recipientData,
-        }
-        setDataState(nextData)
-        saveToStorage(nextData)
+        })
       }
-      return prev
-    })
-  }, [data])
-
-  const isTemplateNameDuplicate = useCallback(
-    (name: string, excludeId?: string) => {
-      return templateList.some(
-        (t) => t.name.trim() === name.trim() && t.id !== excludeId,
-      )
     },
-    [templateList],
+    [addressListHook.addressList, envelopeData.data, envelopeData.setDataAndPersist],
   )
 
   const saveTemplate = useCallback(
@@ -353,173 +96,121 @@ export function EnvelopeProvider({ children }: { children: ReactNode }) {
         name: name.trim(),
         createdAt: now,
         updatedAt: now,
-        data: JSON.parse(JSON.stringify(data)),
-        layout,
-        sizeId,
-        side,
-        customSize: sizeId === CUSTOM_SIZE_ID ? { ...customSize } : undefined,
+        data: JSON.parse(JSON.stringify(envelopeData.data)),
+        layout: uiSettings.layout,
+        sizeId: uiSettings.sizeId,
+        side: uiSettings.side,
+        customSize: uiSettings.sizeId === CUSTOM_SIZE_ID ? { ...uiSettings.customSize } : undefined,
       }
-      setTemplateList((prev) => [...prev, newTemplate])
+      templateListHook.addTemplate(newTemplate)
       return newTemplate
     },
-    [data, layout, sizeId, side, customSize],
+    [envelopeData.data, uiSettings.layout, uiSettings.sizeId, uiSettings.side, uiSettings.customSize, templateListHook.addTemplate],
   )
 
-  const updateTemplate = useCallback((id: string, name: string) => {
-    setTemplateList((prev) =>
-      prev.map((t) =>
-        t.id === id ? { ...t, name: name.trim(), updatedAt: Date.now() } : t,
-      ),
-    )
-  }, [])
-
-  const deleteTemplate = useCallback((id: string) => {
-    setTemplateList((prev) => prev.filter((t) => t.id !== id))
-  }, [])
-
-  const applyTemplate = useCallback((id: string) => {
-    setTemplateList((prev) => {
-      const template = prev.find((t) => t.id === id)
+  const applyTemplate = useCallback(
+    (id: string) => {
+      const template = templateListHook.findTemplate(id)
       if (template) {
-        setDataState(template.data)
-        saveToStorage(template.data)
-        setLayout(template.layout)
-        setSizeId(template.sizeId)
-        setSide(template.side)
-        if (template.customSize) {
-          setCustomSizeState(template.customSize)
-        }
+        envelopeData.setDataAndPersist(template.data)
+        uiSettings.applyUiFromTemplate(template)
       }
-      return prev
-    })
-  }, [])
-
-  const isTagNameDuplicate = useCallback(
-    (name: string, excludeId?: string) => {
-      return tagList.some(
-        (t) => t.name.trim() === name.trim() && t.id !== excludeId,
-      )
     },
-    [tagList],
+    [templateListHook.findTemplate, envelopeData.setDataAndPersist, uiSettings.applyUiFromTemplate],
   )
 
-  const addTag = useCallback(
-    (name: string, color: string): Tag => {
-      const newTag: Tag = {
-        id: generateTagId(),
-        name: name.trim(),
-        color,
-      }
-      setTagList((prev) => [...prev, newTag])
-      return newTag
+  const deleteTag = useCallback(
+    (id: string) => {
+      tagListHook.removeTag(id)
+      addressListHook.removeTagFromAddresses(id)
     },
-    [],
+    [tagListHook.removeTag, addressListHook.removeTagFromAddresses],
   )
-
-  const importTags = useCallback((tags: Tag[]) => {
-    setTagList((prev) => {
-      const existingIds = new Set(prev.map((t) => t.id))
-      const existingNames = new Set(prev.map((t) => t.name.trim().toLowerCase()))
-      const newTags = tags.filter(
-        (t) => !existingIds.has(t.id) && !existingNames.has(t.name.trim().toLowerCase()),
-      )
-      return [...prev, ...newTags]
-    })
-  }, [])
-
-  const updateTag = useCallback((id: string, name: string, color: string) => {
-    setTagList((prev) =>
-      prev.map((t) =>
-        t.id === id ? { ...t, name: name.trim(), color } : t,
-      ),
-    )
-  }, [])
-
-  const deleteTag = useCallback((id: string) => {
-    setTagList((prev) => prev.filter((t) => t.id !== id))
-    setAddressList((prev) =>
-      prev.map((a) => ({
-        ...a,
-        tags: a.tags.filter((tagId) => tagId !== id),
-      })),
-    )
-  }, [])
 
   const value = useMemo(
     () => ({
-      data,
-      layout,
-      size,
-      side,
-      customSize,
-      zoomPercent,
-      addressList,
-      templateList,
-      tagList,
-      setData,
-      updateSender,
-      updateRecipient,
-      updateSenderTags,
-      updateRecipientTags,
-      setLayout,
-      setSizeId,
-      setCustomSize,
-      setSide,
-      setZoomPercent,
-      loadMockData,
-      resetData,
-      persist,
-      addAddress,
-      addAddresses,
-      removeAddress,
-      clearAddressList,
+      data: envelopeData.data,
+      layout: uiSettings.layout,
+      size: uiSettings.size,
+      side: uiSettings.side,
+      customSize: uiSettings.customSize,
+      zoomPercent: uiSettings.zoomPercent,
+      addressList: addressListHook.addressList,
+      templateList: templateListHook.templateList,
+      tagList: tagListHook.tagList,
+      setData: envelopeData.setData,
+      updateSender: envelopeData.updateSender,
+      updateRecipient: envelopeData.updateRecipient,
+      updateSenderTags: envelopeData.updateSenderTags,
+      updateRecipientTags: envelopeData.updateRecipientTags,
+      setLayout: uiSettings.setLayout,
+      setSizeId: uiSettings.setSizeId,
+      setCustomSize: uiSettings.setCustomSize,
+      setSide: uiSettings.setSide,
+      setZoomPercent: uiSettings.setZoomPercent,
+      loadMockData: envelopeData.loadMockData,
+      resetData: envelopeData.resetData,
+      persist: envelopeData.persist,
+      addAddress: addressListHook.addAddress,
+      addAddresses: addressListHook.addAddresses,
+      removeAddress: addressListHook.removeAddress,
+      clearAddressList: addressListHook.clearAddressList,
       setRecipientFromList,
-      updateAddressTags,
+      updateAddressTags: addressListHook.updateAddressTags,
       saveTemplate,
-      updateTemplate,
-      deleteTemplate,
+      updateTemplate: templateListHook.updateTemplate,
+      deleteTemplate: templateListHook.deleteTemplate,
       applyTemplate,
-      isTemplateNameDuplicate,
-      addTag,
-      importTags,
-      updateTag,
+      isTemplateNameDuplicate: templateListHook.isTemplateNameDuplicate,
+      addTag: tagListHook.addTag,
+      importTags: tagListHook.importTags,
+      updateTag: tagListHook.updateTag,
       deleteTag,
-      isTagNameDuplicate,
+      isTagNameDuplicate: tagListHook.isTagNameDuplicate,
     }),
     [
-      data,
-      layout,
-      size,
-      side,
-      customSize,
-      zoomPercent,
-      addressList,
-      templateList,
-      tagList,
-      setData,
-      updateSender,
-      updateRecipient,
-      setCustomSize,
-      setZoomPercent,
-      loadMockData,
-      resetData,
-      persist,
-      addAddress,
-      addAddresses,
-      removeAddress,
-      clearAddressList,
+      envelopeData.data,
+      envelopeData.setData,
+      envelopeData.updateSender,
+      envelopeData.updateRecipient,
+      envelopeData.updateSenderTags,
+      envelopeData.updateRecipientTags,
+      envelopeData.loadMockData,
+      envelopeData.resetData,
+      envelopeData.persist,
+      uiSettings.layout,
+      uiSettings.size,
+      uiSettings.side,
+      uiSettings.customSize,
+      uiSettings.zoomPercent,
+      uiSettings.setLayout,
+      uiSettings.setSizeId,
+      uiSettings.setCustomSize,
+      uiSettings.setSide,
+      uiSettings.setZoomPercent,
+      addressListHook.addressList,
+      addressListHook.addAddress,
+      addressListHook.addAddresses,
+      addressListHook.removeAddress,
+      addressListHook.clearAddressList,
+      addressListHook.updateAddressTags,
+      addressListHook.removeTagFromAddresses,
+      templateListHook.templateList,
+      templateListHook.addTemplate,
+      templateListHook.updateTemplate,
+      templateListHook.deleteTemplate,
+      templateListHook.isTemplateNameDuplicate,
+      templateListHook.findTemplate,
+      tagListHook.tagList,
+      tagListHook.addTag,
+      tagListHook.importTags,
+      tagListHook.updateTag,
+      tagListHook.removeTag,
+      tagListHook.isTagNameDuplicate,
       setRecipientFromList,
-      updateAddressTags,
       saveTemplate,
-      updateTemplate,
-      deleteTemplate,
       applyTemplate,
-      isTemplateNameDuplicate,
-      addTag,
-      importTags,
-      updateTag,
       deleteTag,
-      isTagNameDuplicate,
     ],
   )
 
