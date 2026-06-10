@@ -155,6 +155,7 @@ export interface Translations {
     title: string
     downloadTemplate: string
     uploadHint: string
+    uploadHintFormat: string
     uploadHintSub: string
     parsingFile: string
     total: string
@@ -166,7 +167,18 @@ export interface Translations {
     moreErrors: string
     continueUpload: string
     uploadCsvOnly: string
+    uploadSupportedOnly: string
     readFailed: string
+  }
+  addressExporter: {
+    exportAll: string
+    title: string
+    subtitle: string
+    selectFormat: string
+    selectFields: string
+    selectAll: string
+    clearAll: string
+    confirmExport: string
   }
   printPreview: {
     title: string
@@ -379,9 +391,10 @@ export const translations: Record<Language, Translations> = {
     },
     csvUploader: {
       title: '批量导入地址',
-      downloadTemplate: '下载CSV模板',
-      uploadHint: '点击或拖拽 CSV 文件到此处上传',
-      uploadHintSub: '支持中英文表头，详见模板文件',
+      downloadTemplate: '下载模板',
+      uploadHint: '点击或拖拽文件到此处上传',
+      uploadHintFormat: '点击或拖拽 {format} 文件到此处上传',
+      uploadHintSub: '支持中英文表头，自动识别格式',
       parsingFile: '正在解析文件...',
       total: '总数',
       success: '成功',
@@ -392,7 +405,18 @@ export const translations: Record<Language, Translations> = {
       moreErrors: '... 还有 {count} 条错误',
       continueUpload: '继续上传',
       uploadCsvOnly: '请上传 CSV 格式的文件',
+      uploadSupportedOnly: '请上传 CSV、JSON 或 Excel 格式的文件',
       readFailed: '文件读取失败，请重试',
+    },
+    addressExporter: {
+      exportAll: '导出全部地址',
+      title: '导出地址',
+      subtitle: '共 {count} 条地址，选择导出格式和字段',
+      selectFormat: '导出格式',
+      selectFields: '导出字段',
+      selectAll: '全选',
+      clearAll: '清空',
+      confirmExport: '确认导出',
     },
     printPreview: {
       title: '打印预览',
@@ -605,9 +629,10 @@ export const translations: Record<Language, Translations> = {
     },
     csvUploader: {
       title: 'Batch Import Addresses',
-      downloadTemplate: 'Download CSV Template',
-      uploadHint: 'Click or drag a CSV file here to upload',
-      uploadHintSub: 'Supports Chinese and English headers, see template file',
+      downloadTemplate: 'Download Template',
+      uploadHint: 'Click or drag a file here to upload',
+      uploadHintFormat: 'Click or drag a {format} file here to upload',
+      uploadHintSub: 'Supports Chinese and English headers, auto-detects format',
       parsingFile: 'Parsing file...',
       total: 'Total',
       success: 'Success',
@@ -618,7 +643,18 @@ export const translations: Record<Language, Translations> = {
       moreErrors: '... {count} more errors',
       continueUpload: 'Continue Upload',
       uploadCsvOnly: 'Please upload a CSV file',
+      uploadSupportedOnly: 'Please upload a CSV, JSON, or Excel file',
       readFailed: 'Failed to read file, please try again',
+    },
+    addressExporter: {
+      exportAll: 'Export All Addresses',
+      title: 'Export Addresses',
+      subtitle: '{count} addresses total, select format and fields',
+      selectFormat: 'Export Format',
+      selectFields: 'Export Fields',
+      selectAll: 'Select All',
+      clearAll: 'Clear All',
+      confirmExport: 'Export',
     },
     printPreview: {
       title: 'Print Preview',

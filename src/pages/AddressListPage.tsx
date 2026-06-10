@@ -5,6 +5,7 @@ import CSVUploader from '../components/CSVUploader'
 import AddressList from '../components/AddressList'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import TagManager from '../components/TagManager'
+import AddressExporter from '../components/AddressExporter'
 
 export default function AddressListPage() {
   const { addressList } = useEnvelope()
@@ -37,6 +38,13 @@ export default function AddressListPage() {
         <CSVUploader />
 
         <TagManager />
+
+        {addressList.length > 0 && (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-stone-500">{t('common.totalItems', { count: addressList.length })}</p>
+            <AddressExporter />
+          </div>
+        )}
 
         <AddressList />
 

@@ -3,25 +3,60 @@ import { useEnvelope } from '../context/EnvelopeContext'
 import { useLanguage } from '../context/LanguageContext'
 import {
   generateCsvTemplate,
+  generateJsonTemplate,
   readCsvFile,
-  type CsvParseError,
-  type CsvParseResult,
+  readJsonFile,
+  type ParseError,
+  type ParseResult,
 } from '../utils/csvParser'
+import { readExcelFile } from '../utils/excelParser'
 
+type FileFormat = 'csv' | 'json' | 'xlsx'
 type UploadStatus = 'idle' | 'uploading' | 'success' | 'partial' | 'error'
+
+const FORMAT_ACCEPT: Record<FileFormat, string> = {
+  csv: '.csv',
+  json: '.json',
+  xlsx: '.xlsx,.xls',
+}
+
+const FORMAT_EXTENSIONS: Record<FileFormat, string[]> = {
+  csv: ['.csv'],
+  json: ['.json'],
+  xlsx: ['.xlsx', '.xls'],
+}
+
+function detectFileFormat(file: File): FileFormat | null {
+  const name = file.name.toLowerCase()
+  for (const [format, exts] of Object.entries(FORMAT_EXTENSIONS) as [FileFormat, string[]][]) {
+    if (exts.some((ext) => name.endsWith(ext))) {
+      return format
+    }
+  }
+  return null
+}
+
+function getErrorLocation(err: ParseError): string {
+  if (err.line !== undefined) return `第${err.line}行`
+  if (err.row !== undefined) return `第${err.row}行`
+  if (err.index !== undefined) return `第${err.index}项`
+  return ''
+}
 
 export default function CSVUploader() {
   const { addressList, addAddresses, tagList, importTags } = useEnvelope()
   const { t } = useLanguage()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [format, setFormat] = useState<FileFormat>('csv')
   const [status, setStatus] = useState<UploadStatus>('idle')
   const [progress, setProgress] = useState(0)
-  const [result, setResult] = useState<CsvParseResult | null>(null)
+  const [result, setResult] = useState<ParseResult | null>(null)
   const [isDragging, setIsDragging] = useState(false)
 
   const handleFile = useCallback(
     async (file: File) => {
-      if (!file.name.toLowerCase().endsWith('.csv')) {
+      const detectedFormat = detectFileFormat(file)
+      if (!detectedFormat) {
         setStatus('error')
         setResult({
           success: false,
@@ -30,24 +65,31 @@ export default function CSVUploader() {
           failCount: 1,
           duplicateCount: 0,
           addresses: [],
-          errors: [{ line: 0, message: t('csvUploader.uploadCsvOnly') }],
+          errors: [{ message: t('csvUploader.uploadSupportedOnly') }],
           autoCreatedTags: [],
         })
         return
       }
 
+      setFormat(detectedFormat)
       setStatus('uploading')
       setProgress(0)
 
       try {
-        const parseResult = await readCsvFile(
-          file,
-          addressList,
-          tagList,
-          (percent) => {
+        let parseResult: ParseResult
+        if (detectedFormat === 'csv') {
+          parseResult = await readCsvFile(file, addressList, tagList, (percent) => {
             setProgress(percent)
-          },
-        )
+          })
+        } else if (detectedFormat === 'json') {
+          parseResult = await readJsonFile(file, addressList, tagList, (percent) => {
+            setProgress(percent)
+          })
+        } else {
+          parseResult = await readExcelFile(file, addressList, tagList, (percent) => {
+            setProgress(percent)
+          })
+        }
 
         setResult(parseResult)
 
@@ -75,7 +117,7 @@ export default function CSVUploader() {
           failCount: 1,
           duplicateCount: 0,
           addresses: [],
-          errors: [{ line: 0, message: t('csvUploader.readFailed') }],
+          errors: [{ message: t('csvUploader.readFailed') }],
           autoCreatedTags: [],
         })
       }
@@ -113,12 +155,29 @@ export default function CSVUploader() {
   }
 
   const downloadTemplate = () => {
-    const template = generateCsvTemplate()
-    const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' })
+    let content: string
+    let filename: string
+    let mimeType: string
+
+    if (format === 'csv') {
+      content = generateCsvTemplate()
+      filename = 'address_template.csv'
+      mimeType = 'text/csv;charset=utf-8;'
+    } else if (format === 'json') {
+      content = generateJsonTemplate()
+      filename = 'address_template.json'
+      mimeType = 'application/json;charset=utf-8;'
+    } else {
+      content = generateCsvTemplate()
+      filename = 'address_template.csv'
+      mimeType = 'text/csv;charset=utf-8;'
+    }
+
+    const blob = new Blob([format === 'csv' ? '\ufeff' + content : content], { type: mimeType })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = 'address_template.csv'
+    link.download = filename
     link.click()
     URL.revokeObjectURL(url)
   }
@@ -137,20 +196,76 @@ export default function CSVUploader() {
     error: { bg: 'bg-rose-50', border: 'border-rose-300', text: 'text-rose-700' },
   }[status]
 
+  const formatTabs: { key: FileFormat; label: string; icon: JSX.Element }[] = [
+    {
+      key: 'csv',
+      label: 'CSV',
+      icon: (
+        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      ),
+    },
+    {
+      key: 'json',
+      label: 'JSON',
+      icon: (
+        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+        </svg>
+      ),
+    },
+    {
+      key: 'xlsx',
+      label: 'Excel',
+      icon: (
+        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+      ),
+    },
+  ]
+
   return (
     <section className={`rounded-2xl border ${statusConfig.border} ${statusConfig.bg} p-6 shadow-sm transition-colors`}>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-800">
           <span className="h-2 w-2 rounded-full bg-emerald-500" />
           {t('csvUploader.title')}
         </h2>
-        <button
-          type="button"
-          onClick={downloadTemplate}
-          className="text-sm font-medium text-stone-500 transition hover:text-stone-700"
-        >
-          {t('csvUploader.downloadTemplate')}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="inline-flex rounded-lg bg-stone-100 p-0.5">
+            {formatTabs.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => {
+                  setFormat(tab.key)
+                  if (status !== 'uploading') resetState()
+                }}
+                disabled={status === 'uploading'}
+                className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition ${
+                  format === tab.key
+                    ? 'bg-white text-stone-900 shadow-sm'
+                    : 'text-stone-500 hover:text-stone-700'
+                } disabled:cursor-not-allowed disabled:opacity-50`}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={downloadTemplate}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-medium text-stone-600 transition hover:bg-stone-50 hover:text-stone-800"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            {t('csvUploader.downloadTemplate')}
+          </button>
+        </div>
       </div>
 
       {status === 'idle' && (
@@ -171,12 +286,14 @@ export default function CSVUploader() {
               d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
             />
           </svg>
-          <p className="text-sm font-medium text-stone-700">{t('csvUploader.uploadHint')}</p>
+          <p className="text-sm font-medium text-stone-700">
+            {t('csvUploader.uploadHintFormat', { format: format.toUpperCase() })}
+          </p>
           <p className="mt-1 text-xs text-stone-500">{t('csvUploader.uploadHintSub')}</p>
           <input
             ref={fileInputRef}
             type="file"
-            accept=".csv"
+            accept={FORMAT_ACCEPT[format]}
             onChange={handleInputChange}
             className="hidden"
           />
@@ -223,12 +340,15 @@ export default function CSVUploader() {
             <div className="max-h-40 overflow-y-auto rounded-lg bg-white p-4">
               <p className="mb-2 text-sm font-medium text-stone-700">{t('csvUploader.errorDetails')}</p>
               <ul className="space-y-1 text-sm">
-                {result.errors.slice(0, 10).map((err: CsvParseError, idx: number) => (
-                  <li key={idx} className="flex gap-2 text-stone-600">
-                    <span className="shrink-0 text-rose-500">{t('csvUploader.lineN', { line: err.line })}</span>
-                    <span>{err.message}</span>
-                  </li>
-                ))}
+                {result.errors.slice(0, 10).map((err: ParseError, idx: number) => {
+                  const location = getErrorLocation(err)
+                  return (
+                    <li key={idx} className="flex gap-2 text-stone-600">
+                      {location && <span className="shrink-0 text-rose-500">{location}:</span>}
+                      <span>{err.message}</span>
+                    </li>
+                  )
+                })}
                 {result.errors.length > 10 && (
                   <li className="text-stone-400">{t('csvUploader.moreErrors', { count: result.errors.length - 10 })}</li>
                 )}
