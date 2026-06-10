@@ -2,13 +2,17 @@ import { useEffect, useRef, useState } from 'react'
 import { useLanguage } from '../context/LanguageContext'
 import {
   clearAddressHistory,
+  formatAddressDisplay,
   formatLastUsed,
   loadAddressHistory,
+  markHistoryUsed,
   removeAddressFromHistory,
+  subscribeHistoryChange,
 } from '../utils/addressHistory'
-import type { Address, AddressHistoryItem } from '../types/envelope'
+import type { Address, AddressHistoryItem, AddressSide } from '../types/envelope'
 
 interface AddressHistoryDropdownProps {
+  side: AddressSide
   accent: 'amber' | 'sky'
   onSelect: (address: Address) => void
 }
@@ -23,12 +27,18 @@ const accentTextMap = {
   sky: 'text-sky-700',
 }
 
+const accentBgMap = {
+  amber: 'bg-amber-50',
+  sky: 'bg-sky-50',
+}
+
 const accentHoverBgMap = {
   amber: 'hover:bg-amber-50',
   sky: 'hover:bg-sky-50',
 }
 
 export default function AddressHistoryDropdown({
+  side,
   accent,
   onSelect,
 }: AddressHistoryDropdownProps) {
@@ -38,8 +48,17 @@ export default function AddressHistoryDropdown({
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    setHistory(loadAddressHistory())
-  }, [])
+    setHistory(loadAddressHistory(side))
+  }, [side])
+
+  useEffect(() => {
+    const unsubscribe = subscribeHistoryChange((changedSide) => {
+      if (changedSide === side) {
+        setHistory(loadAddressHistory(side))
+      }
+    })
+    return unsubscribe
+  }, [side])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -52,27 +71,43 @@ export default function AddressHistoryDropdown({
   }, [])
 
   function handleSelect(item: AddressHistoryItem) {
+    const updated = markHistoryUsed(side, item.id)
+    setHistory(updated)
     onSelect(item.address)
     setIsOpen(false)
   }
 
   function handleDelete(id: string, e: React.MouseEvent) {
     e.stopPropagation()
-    const updated = removeAddressFromHistory(id)
+    const updated = removeAddressFromHistory(side, id)
     setHistory(updated)
   }
 
   function handleClearAll(e: React.MouseEvent) {
     e.stopPropagation()
     if (window.confirm(t('common.historyClearConfirm'))) {
-      const updated = clearAddressHistory()
+      const updated = clearAddressHistory(side)
       setHistory(updated)
     }
   }
 
-  function formatAddressDisplay(addr: Address): string {
-    const parts = [addr.name, addr.province, addr.city, addr.district, addr.street].filter(Boolean)
-    return parts.join(' · ') || t('common.noAddressInfo')
+  const timeParams = {
+    justNow: t('time.justNow'),
+    minutesAgo: (count: number) =>
+      t('time.minutesAgo').replace('{count}', String(count)),
+    hoursAgo: (count: number) =>
+      t('time.hoursAgo')
+        .replace('{count}', String(count))
+        .replace('{plural}', language === 'en' && count > 1 ? 's' : ''),
+    daysAgo: (count: number) =>
+      t('time.daysAgo')
+        .replace('{count}', String(count))
+        .replace('{plural}', language === 'en' && count > 1 ? 's' : ''),
+    dateFormat: (y: string, m: string, d: string) =>
+      t('time.dateFormat')
+        .replace('{year}', y)
+        .replace('{month}', m)
+        .replace('{day}', d),
   }
 
   return (
@@ -133,7 +168,7 @@ export default function AddressHistoryDropdown({
                 {history.map((item) => (
                   <li
                     key={item.id}
-                    className={`group flex cursor-pointer items-start gap-3 px-4 py-3 transition ${accentHoverBgMap[accent]}`}
+                    className={`flex cursor-pointer items-start gap-3 px-4 py-3 transition ${accentHoverBgMap[accent]}`}
                     onClick={() => handleSelect(item)}
                   >
                     <div className="flex-1 min-w-0">
@@ -141,7 +176,7 @@ export default function AddressHistoryDropdown({
                         {item.address.name || t('common.noAddressInfo')}
                       </div>
                       <div className="mt-0.5 truncate text-xs text-stone-500">
-                        {formatAddressDisplay(item.address)}
+                        {formatAddressDisplay(item.address, t('common.noAddressInfo'))}
                       </div>
                       {item.address.phone && (
                         <div className="mt-0.5 text-xs text-stone-400">
@@ -149,13 +184,13 @@ export default function AddressHistoryDropdown({
                         </div>
                       )}
                       <div className="mt-1 text-xs text-stone-400">
-                        {t('common.historyLastUsed')}: {formatLastUsed(item.lastUsedAt, language as 'zh' | 'en')}
+                        {t('common.historyLastUsed')}: {formatLastUsed(item.lastUsedAt, timeParams)}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        className={`rounded px-2 py-1 text-xs font-medium opacity-0 transition group-hover:opacity-100 ${accentTextMap[accent]} ${accentHoverBgMap[accent]}`}
+                        className={`rounded px-2 py-1 text-xs font-medium ${accentTextMap[accent]} ${accentBgMap[accent]}`}
                         onClick={(e) => {
                           e.stopPropagation()
                           handleSelect(item)
@@ -166,7 +201,7 @@ export default function AddressHistoryDropdown({
                       <button
                         type="button"
                         onClick={(e) => handleDelete(item.id, e)}
-                        className="rounded p-1 text-stone-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
+                        className="rounded p-1 text-stone-400 transition hover:bg-red-50 hover:text-red-600"
                         title={t('common.historyDelete')}
                       >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

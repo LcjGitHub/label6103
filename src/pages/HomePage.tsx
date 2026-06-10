@@ -45,14 +45,17 @@ export default function HomePage() {
     recipientFormRef.current?.saveToHistory()
   }
 
-  const handleGoPreview = () => {
+  const persistWithHistory = () => {
     saveAddressHistory()
     persist()
   }
 
+  const handleGoPreview = () => {
+    persistWithHistory()
+  }
+
   const handleGoPrint = () => {
-    saveAddressHistory()
-    persist()
+    persistWithHistory()
   }
 
   return (
@@ -146,6 +149,7 @@ export default function HomePage() {
         <AddressForm
           ref={senderFormRef}
           title={t('common.sender')}
+          side="sender"
           accent="amber"
           address={data.sender}
           onChange={updateSender}
@@ -155,6 +159,7 @@ export default function HomePage() {
         <AddressForm
           ref={recipientFormRef}
           title={t('common.recipient')}
+          side="recipient"
           accent="sky"
           address={data.recipient}
           onChange={updateRecipient}

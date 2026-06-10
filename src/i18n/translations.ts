@@ -52,6 +52,13 @@ export interface Translations {
     historyClearAll: string
     historyClearConfirm: string
   }
+  time: {
+    justNow: string
+    minutesAgo: string
+    hoursAgo: string
+    daysAgo: string
+    dateFormat: string
+  }
   template: {
     title: string
     subtitle: string
@@ -264,6 +271,13 @@ export const translations: Record<Language, Translations> = {
       historyClearAll: '清空全部',
       historyClearConfirm: '确定要清空所有历史记录吗？此操作不可撤销。',
     },
+    time: {
+      justNow: '刚刚',
+      minutesAgo: '{count} 分钟前',
+      hoursAgo: '{count} 小时前',
+      daysAgo: '{count} 天前',
+      dateFormat: '{year}-{month}-{day}',
+    },
     template: {
       title: '信封模板',
       subtitle: '收藏和管理常用的信封样式模板',
@@ -474,6 +488,13 @@ export const translations: Record<Language, Translations> = {
       historyDelete: 'Delete',
       historyClearAll: 'Clear All',
       historyClearConfirm: 'Are you sure you want to clear all history? This cannot be undone.',
+    },
+    time: {
+      justNow: 'Just now',
+      minutesAgo: '{count} min ago',
+      hoursAgo: '{count} hour{plural} ago',
+      daysAgo: '{count} day{plural} ago',
+      dateFormat: '{month}/{day}/{year}',
     },
     template: {
       title: 'Envelope Templates',

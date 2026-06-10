@@ -1,5 +1,5 @@
 import { useState, useImperativeHandle, forwardRef } from 'react'
-import type { Address } from '../types/envelope'
+import type { Address, AddressSide } from '../types/envelope'
 import AddressAutocomplete from './AddressAutocomplete'
 import TagSelector from './TagSelector'
 import AddressHistoryDropdown from './AddressHistoryDropdown'
@@ -9,6 +9,7 @@ import { addAddressToHistory, isAddressEmpty } from '../utils/addressHistory'
 
 interface AddressFormProps {
   title: string
+  side: AddressSide
   accent: 'amber' | 'sky'
   address: Address
   onChange: (field: keyof Address, value: string) => void
@@ -28,6 +29,7 @@ const accentMap = {
 const AddressForm = forwardRef<AddressFormRef, AddressFormProps>(function AddressForm(
   {
     title,
+    side,
     accent,
     address,
     onChange,
@@ -44,7 +46,7 @@ const AddressForm = forwardRef<AddressFormRef, AddressFormProps>(function Addres
   useImperativeHandle(ref, () => ({
     saveToHistory: () => {
       if (!isAddressEmpty(address)) {
-        addAddressToHistory(address)
+        addAddressToHistory(side, address)
       }
     },
   }))
@@ -125,7 +127,7 @@ const AddressForm = forwardRef<AddressFormRef, AddressFormProps>(function Addres
           />
           {title}
         </h2>
-        <AddressHistoryDropdown accent={accent} onSelect={handleHistorySelect} />
+        <AddressHistoryDropdown side={side} accent={accent} onSelect={handleHistorySelect} />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5 text-sm">

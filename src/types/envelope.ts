@@ -115,8 +115,11 @@ export const ADDRESS_LIST_KEY = 'envelope-address-list'
 export const TEMPLATE_LIST_KEY = 'envelope-template-list'
 export const UI_SETTINGS_KEY = 'envelope-ui-settings'
 export const TAG_LIST_KEY = 'envelope-tag-list'
-export const ADDRESS_HISTORY_KEY = 'envelope-address-history'
+export const SENDER_HISTORY_KEY = 'envelope-sender-history'
+export const RECIPIENT_HISTORY_KEY = 'envelope-recipient-history'
 export const MAX_HISTORY_ITEMS = 20
+
+export type AddressSide = 'sender' | 'recipient'
 
 export const DEFAULT_TAG_COLORS = [
   '#ef4444',
