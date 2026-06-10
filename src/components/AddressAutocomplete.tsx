@@ -16,6 +16,7 @@ interface AddressAutocompleteProps {
   closeVersion: number
   onSelect: (suggestion: AddressSuggestion) => void
   onChange: (value: string) => void
+  onManualInput?: () => void
 }
 
 const accentMap = {
@@ -37,17 +38,17 @@ export default function AddressAutocomplete({
   closeVersion,
   onSelect,
   onChange,
+  onManualInput,
 }: AddressAutocompleteProps) {
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
   const [activeIndex, setActiveIndex] = useState(-1)
   const [isOpen, setIsOpen] = useState(false)
+  const lastSelectedValueRef = useRef<string>('')
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (isOpen) {
-      setIsOpen(false)
-      setActiveIndex(-1)
-    }
+    setIsOpen(false)
+    setActiveIndex(-1)
   }, [closeVersion])
 
   useEffect(() => {
@@ -62,12 +63,15 @@ export default function AddressAutocomplete({
         results = searchDistricts(searchValue, address.province, address.city)
       }
       setSuggestions(results)
-      setIsOpen(results.length > 0)
+      const isSameAsLastSelected =
+        lastSelectedValueRef.current && searchValue === lastSelectedValueRef.current
+      setIsOpen(results.length > 0 && !isSameAsLastSelected)
       setActiveIndex(-1)
     } else {
       setSuggestions([])
       setIsOpen(false)
       setActiveIndex(-1)
+      lastSelectedValueRef.current = ''
     }
   }, [value, address.province, address.city, fieldType])
 
@@ -105,9 +109,26 @@ export default function AddressAutocomplete({
   }
 
   function handleSelect(suggestion: AddressSuggestion) {
+    const selectedValue =
+      suggestion.type === 'province'
+        ? suggestion.province
+        : suggestion.type === 'city'
+          ? suggestion.city
+          : suggestion.district
+    lastSelectedValueRef.current = selectedValue
     onSelect(suggestion)
     setIsOpen(false)
     setActiveIndex(-1)
+  }
+
+  function handleInputChange(val: string) {
+    if (lastSelectedValueRef.current && val !== lastSelectedValueRef.current) {
+      lastSelectedValueRef.current = ''
+      onManualInput?.()
+    } else if (!lastSelectedValueRef.current) {
+      onManualInput?.()
+    }
+    onChange(val)
   }
 
   function highlightMatch(text: string, keyword: string) {
@@ -128,10 +149,15 @@ export default function AddressAutocomplete({
       <input
         type="text"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => handleInputChange(e.target.value)}
         onKeyDown={handleKeyDown}
         onFocus={() => {
-          if (suggestions.length > 0) setIsOpen(true)
+          if (
+            suggestions.length > 0 &&
+            value.trim() !== lastSelectedValueRef.current
+          ) {
+            setIsOpen(true)
+          }
         }}
         placeholder={placeholder}
         autoComplete="off"

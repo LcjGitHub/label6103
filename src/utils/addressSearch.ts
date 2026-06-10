@@ -45,22 +45,28 @@ export function searchProvinces(keyword: string): ProvinceSuggestion[] {
 
 export function searchCities(keyword: string, provinceName: string): CitySuggestion[] {
   const trimmed = keyword.trim()
-  if (!trimmed || !provinceName) return []
+  const trimmedProvince = provinceName.trim()
+  if (!trimmed || !trimmedProvince) return []
   const lowerKeyword = trimmed.toLowerCase()
+  const lowerProvince = trimmedProvince.toLowerCase()
 
-  const province = CHINA_REGIONS.find((p) => p.name === provinceName)
-  if (!province) return []
+  const results: CitySuggestion[] = []
 
-  return province.cities
-    .filter((c) => c.name.toLowerCase().includes(lowerKeyword))
-    .map((c) => ({
-      type: 'city' as const,
-      province: province.name,
-      city: c.name,
-      district: '',
-      label: c.name,
-    }))
-    .slice(0, 20)
+  for (const province of CHINA_REGIONS) {
+    if (!province.name.toLowerCase().includes(lowerProvince)) continue
+    for (const city of province.cities) {
+      if (!city.name.toLowerCase().includes(lowerKeyword)) continue
+      results.push({
+        type: 'city' as const,
+        province: province.name,
+        city: city.name,
+        district: '',
+        label: city.name,
+      })
+    }
+  }
+
+  return results.slice(0, 20)
 }
 
 export function searchDistricts(
@@ -69,23 +75,33 @@ export function searchDistricts(
   cityName: string,
 ): DistrictSuggestion[] {
   const trimmed = keyword.trim()
-  if (!trimmed || !provinceName || !cityName) return []
+  const trimmedProvince = provinceName.trim()
+  const trimmedCity = cityName.trim()
+  if (!trimmed || !trimmedProvince || !trimmedCity) return []
   const lowerKeyword = trimmed.toLowerCase()
+  const lowerProvince = trimmedProvince.toLowerCase()
+  const lowerCity = trimmedCity.toLowerCase()
 
-  const province = CHINA_REGIONS.find((p) => p.name === provinceName)
-  const city = province?.cities.find((c) => c.name === cityName)
-  if (!city) return []
+  const results: DistrictSuggestion[] = []
 
-  return city.districts
-    .filter((d) => d.name.toLowerCase().includes(lowerKeyword))
-    .map((d) => ({
-      type: 'district' as const,
-      province: province!.name,
-      city: city.name,
-      district: d.name,
-      label: d.name,
-    }))
-    .slice(0, 20)
+  for (const province of CHINA_REGIONS) {
+    if (!province.name.toLowerCase().includes(lowerProvince)) continue
+    for (const city of province.cities) {
+      if (!city.name.toLowerCase().includes(lowerCity)) continue
+      for (const district of city.districts) {
+        if (!district.name.toLowerCase().includes(lowerKeyword)) continue
+        results.push({
+          type: 'district' as const,
+          province: province.name,
+          city: city.name,
+          district: district.name,
+          label: district.name,
+        })
+      }
+    }
+  }
+
+  return results.slice(0, 20)
 }
 
 export function getCitiesByProvince(provinceName: string): City[] {

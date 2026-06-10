@@ -22,6 +22,8 @@ export default function AddressForm({
   onChange,
 }: AddressFormProps) {
   const [closeVersion, setCloseVersion] = useState(0)
+  const [provinceConfirmed, setProvinceConfirmed] = useState(false)
+  const [cityConfirmed, setCityConfirmed] = useState(false)
 
   function closeAllDropdowns() {
     setCloseVersion((v) => v + 1)
@@ -32,6 +34,8 @@ export default function AddressForm({
     onChange('province', suggestion.province)
     onChange('city', '')
     onChange('district', '')
+    setProvinceConfirmed(true)
+    setCityConfirmed(false)
     closeAllDropdowns()
   }
 
@@ -39,6 +43,7 @@ export default function AddressForm({
     if (suggestion.type !== 'city') return
     onChange('city', suggestion.city)
     onChange('district', '')
+    setCityConfirmed(true)
     closeAllDropdowns()
   }
 
@@ -47,6 +52,30 @@ export default function AddressForm({
     onChange('district', suggestion.district)
     closeAllDropdowns()
   }
+
+  function handleProvinceManualInput() {
+    if (provinceConfirmed || address.city || address.district) {
+      setProvinceConfirmed(false)
+      setCityConfirmed(false)
+      onChange('city', '')
+      onChange('district', '')
+    }
+  }
+
+  function handleCityManualInput() {
+    if (cityConfirmed || address.district) {
+      setCityConfirmed(false)
+      onChange('district', '')
+    }
+  }
+
+  const cityPlaceholder = provinceConfirmed
+    ? '请选择城市'
+    : '北京市 / London'
+  const districtPlaceholder =
+    provinceConfirmed && cityConfirmed
+      ? '请选择区/县'
+      : '海淀区（可选）'
 
   return (
     <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
@@ -90,6 +119,7 @@ export default function AddressForm({
             closeVersion={closeVersion}
             onSelect={handleProvinceSelect}
             onChange={(val) => onChange('province', val)}
+            onManualInput={handleProvinceManualInput}
           />
         </label>
 
@@ -98,12 +128,13 @@ export default function AddressForm({
           <AddressAutocomplete
             fieldType="city"
             value={address.city}
-            placeholder={address.province ? '请选择城市' : '请先选择省份'}
+            placeholder={cityPlaceholder}
             accent={accent}
             address={address}
             closeVersion={closeVersion}
             onSelect={handleCitySelect}
             onChange={(val) => onChange('city', val)}
+            onManualInput={handleCityManualInput}
           />
         </label>
 
@@ -112,9 +143,7 @@ export default function AddressForm({
           <AddressAutocomplete
             fieldType="district"
             value={address.district}
-            placeholder={
-              address.province && address.city ? '请选择区/县' : '请先选择省、市'
-            }
+            placeholder={districtPlaceholder}
             accent={accent}
             address={address}
             closeVersion={closeVersion}
